@@ -29,7 +29,7 @@ export default function Dashboard() {
             <div>
               <h5> CS5678 Express JS </h5>
               <p className="wd-dashboard-course-title">
-                Full Stack software developer{" "}
+                Full Stack software developer 2{" "}
               </p>
               <button> Go </button>
             </div>
@@ -44,7 +44,7 @@ export default function Dashboard() {
             <div>
               <h5> CS91011 Node JS </h5>
               <p className="wd-dashboard-course-title">
-                Full Stack software developer{" "}
+                Full Stack software developer 3{" "}
               </p>
               <button> Go </button>
             </div>
@@ -59,7 +59,7 @@ export default function Dashboard() {
             <div>
               <h5> CS121314 Mongo DB </h5>
               <p className="wd-dashboard-course-title">
-                Full Stack software developer{" "}
+                Full Stack software developer 4{" "}
               </p>
               <button> Go </button>
             </div>
@@ -74,7 +74,7 @@ export default function Dashboard() {
             <div>
               <h5> CS5004 Object-oriented design </h5>
               <p className="wd-dashboard-course-title">
-                Full Stack software developer{" "}
+                Object-Oriented Design{" "}
               </p>
               <button> Go </button>
             </div>
@@ -88,9 +88,7 @@ export default function Dashboard() {
             <img src="/images/algorithms.jpg" width={200} />
             <div>
               <h5> CS5800 Algorithms </h5>
-              <p className="wd-dashboard-course-title">
-                Full Stack software developer{" "}
-              </p>
+              <p className="wd-dashboard-course-title">Algorithms </p>
               <button> Go </button>
             </div>
           </Link>
