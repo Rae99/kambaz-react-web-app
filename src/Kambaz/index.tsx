@@ -1,7 +1,7 @@
 import { Routes, Route, Navigate } from "react-router";
 import Account from "./Account";
 import Dashboard from "./Dashboard";
-import KambazNavigation from "./Account/Navigation";
+import KambazNavigation from "./Navigation";
 import Courses from "./Courses";
 
 export default function Kambaz() {

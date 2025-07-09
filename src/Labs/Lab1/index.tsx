@@ -218,7 +218,16 @@ export default function Lab1() {
             id="wd-all-good"
           >
             Hello World!
-          </button>
+          </button>{" "}
+          <br />
+          <label htmlFor="wd-file-upload-button">Upload a file:</label>
+          <br />
+          <input
+            type="file"
+            id="wd-file-upload-button"
+            accept=".txt, .pdf, .docx, .xlsx"
+          />
+          <br />
           <h5 id="wd-radio-buttons">Radio buttons</h5>
           <label>Favorite movie genre:</label>
           <br />
@@ -311,7 +320,7 @@ export default function Lab1() {
       </a>
       to get dummy text
       <br />
-      <a href="https://github.com/Rae99/cs5610-web-dev" id="wd-github">
+      <a href="https://github.com/Rae99/kambaz-react-web-app" id="wd-github">
         Click here
       </a>
       to see the github repository
