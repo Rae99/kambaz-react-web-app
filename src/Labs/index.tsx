@@ -8,6 +8,8 @@ export default function Labs() {
     <div>
       <h1>Labs</h1>
       <p>Junrui Ding</p>
+      <p>CS5610 Web Development summer - 2 2025.</p>
+
       <a id="wd-github" href="https://github.com/Rae99/kambaz-react-web-app">
         GitHub Repository
       </a>
