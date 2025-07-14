@@ -5,6 +5,7 @@ import { FaCheckCircle } from "react-icons/fa";
 import Header from "./Header";
 import { FaRegEdit } from "react-icons/fa";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { Link } from "react-router-dom";
 
 export default function Assignments() {
   return (
@@ -17,14 +18,22 @@ export default function Assignments() {
 
       <Header />
 
-      <ListGroup className="wd-assignments rounded-0 flex" id="wd-assignments-list">
+      <ListGroup
+        className="wd-assignments rounded-0 flex"
+        id="wd-assignments-list"
+      >
         <ListGroup.Item className="wd-assignment py-3 px-3">
           <div className="d-flex justify-content-between align-items-center">
             <div className="d-flex align-items-center">
               <BsGripVertical className="me-2 fs-3" />
               <FaRegEdit className="me-2 fs-3 text-success" />
               <div className="ms-2 d-flex flex-column">
-                <div className="fw-bold fs-4">A1</div>
+                <Link
+                  to="/Kambaz/Courses/1234/Assignments/A1"
+                  className="fw-bold fs-4 text-decoration-none text-dark"
+                >
+                  A1
+                </Link>
                 <small className="text-muted fs-5">
                   <span className="text-danger">Multiple Modules </span> |{" "}
                   <span className="fw-bold">Not available until </span>May 6 at
@@ -45,7 +54,12 @@ export default function Assignments() {
               <BsGripVertical className="me-2 fs-3" />
               <FaRegEdit className="me-2 fs-3 text-success" />
               <div className="ms-2 d-flex flex-column">
-                <div className="fw-bold fs-4">A2</div>
+                <Link
+                  to="/Kambaz/Courses/1234/Assignments/A2"
+                  className="fw-bold fs-4 text-decoration-none text-dark"
+                >
+                  A2
+                </Link>
                 <small className="text-muted fs-5">
                   <span className="text-danger">Multiple Modules </span> |{" "}
                   <span className="fw-bold">Not available until </span>May 16 at
@@ -66,7 +80,12 @@ export default function Assignments() {
               <BsGripVertical className="me-2 fs-3" />
               <FaRegEdit className="me-2 fs-3 text-success" />
               <div className="ms-2 d-flex flex-column">
-                <div className="fw-bold fs-4">A3</div>
+                <Link
+                  to="/Kambaz/Courses/1234/Assignments/A2"
+                  className="fw-bold fs-4 text-decoration-none text-dark"
+                >
+                  A3
+                </Link>
                 <small className="text-muted fs-5">
                   <span className="text-danger">Multiple Modules </span> |{" "}
                   <span className="fw-bold">Not available until </span>May 26 at
