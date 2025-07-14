@@ -1,0 +1,89 @@
+body {
+  margin: 0;
+  padding: 0;
+}
+body * {
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+@media (min-width: 768px) {
+  #wd-kambaz .wd-main-content-offset {
+    padding-left: 140px !important;
+  }
+}
+
+/* 1️⃣ body { margin: 0; padding: 0; }
+
+Removes all default margin and padding from the entire page, letting you control spacing precisely.
+
+⸻
+
+2️⃣ body * { font-family: Arial, Helvetica, sans-serif; }
+
+Applies the Arial, Helvetica, sans-serif font stack to all elements on the page for consistent typography.
+
+⸻
+
+3️⃣ @media (min-width: 768px) { ... }
+
+This media query applies styles only on screens ≥ 768px wide (i.e., tablets, desktops).
+What is a media query?
+
+A media query is a CSS feature that applies styles only when certain conditions are true about the environment (media) the page is displayed on.
+
+#wd-kambaz .wd-main-content-offset {
+  padding-left: 140px !important;
+}
+
+✅ What it does:
+	•	Targets:
+	•	An element with id="wd-kambaz"
+	•	Inside it, any child with class="wd-main-content-offset"
+	•	Adds padding-left: 140px with !important to force the left padding.
+
+    */
+
+/*.wd-dashboard-course {
+  margin-bottom: 40px;
+}*/
+
+.list-group.wd > .list-group-item.active {
+  color: black;
+  background-color: white;
+  border-left: 3px solid black !important;
+}
+
+/* 
+4️⃣ .list-group.wd > .list-group-item.active { ... }
+✅ What it means:
+	1.	.list-group.wd
+➤ This targets any element with both classes list-group and wd.
+(So <div class="list-group wd">)
+    btw .list-group.wd = .wd.list-group, the order of classes doesn't matter.
+	
+    2.	>
+➤ This means “direct child” selector. It only applies to items that are directly inside .list-group.wd.
+	
+    3.	.list-group-item.active
+➤ This selects any child that has both list-group-item and active classes.
+(So: <a class="list-group-item active">Home</a>)
+*/
+
+.btn-secondary {
+  --bs-btn-color: #000 !important;
+  --bs-btn-bg: #c7cdd1 !important;
+  --bs-btn-border-color: #c7cdd1 !important;
+  --bs-btn-hover-color: #fff !important;
+}
+
+/*  overriding Bootstrap’s built-in .btn-secondary*/
+
+.bg-secondary {
+  --bs-secondary-rgb: 199, 205, 209;
+}
+.list-group-item {
+  --bs-list-group-border-color: gray;
+}
+.wd-lesson {
+  border-left: 3px solid green !important;
+}

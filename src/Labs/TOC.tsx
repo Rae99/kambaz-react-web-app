@@ -5,7 +5,7 @@ export default function TOC() {
     <Nav variant="pills">
       <Nav.Item>
         <Nav.Link to="/Labs" as={Link}>
-          Lab 1
+          Labs
         </Nav.Link>
       </Nav.Item>
       <Nav.Item>
