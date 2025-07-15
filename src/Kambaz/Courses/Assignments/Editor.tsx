@@ -165,7 +165,10 @@ export default function AssignmentEditor() {
             </div>
             <div className="row">
               <div className="col">
-                <label htmlFor="wd-available-from" className="form-label fw-bold">
+                <label
+                  htmlFor="wd-available-from"
+                  className="form-label fw-bold"
+                >
                   Available from
                 </label>
                 <input
@@ -175,7 +178,10 @@ export default function AssignmentEditor() {
                 />
               </div>
               <div className="col">
-                <label htmlFor="wd-available-until" className="form-label">
+                <label
+                  htmlFor="wd-available-until"
+                  className="form-label fw-bold"
+                >
                   Until
                 </label>
                 <input
