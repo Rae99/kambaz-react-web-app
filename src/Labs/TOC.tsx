@@ -2,7 +2,7 @@ import Nav from "react-bootstrap/Nav";
 import { Link } from "react-router-dom";
 export default function TOC() {
   return (
-    <Nav variant="pills">
+    <Nav variant="pills" id="wd-toc">
       <Nav.Item>
         <Nav.Link to="/Labs" as={Link}>
           Labs
