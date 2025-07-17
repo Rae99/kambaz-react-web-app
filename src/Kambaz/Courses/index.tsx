@@ -9,13 +9,19 @@ import PeopleTable from "./People/Table";
 import Piazza from "./Piazza";
 import Zoom from "./Zoom";
 import Quizzes from "./Quizzes";
+import Grades from "./Grades";
+import { courses } from "../Database";
+import { useParams as useReactRouterParams } from "react-router-dom";
 
 export default function Courses() {
+  const { cid } = useParams();
+  const course = courses.find((course) => course._id === cid);
+
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
         <FaAlignJustify className="me-4 fs-4 mb-1" />
-        Course 1234{" "}
+        {course && course.name}
       </h2>
       <hr />
       <hr />
@@ -34,6 +40,7 @@ export default function Courses() {
             <Route path="/Piazza" element={<Piazza />} />
             <Route path="Zoom" element={<Zoom />} />
             <Route path="Quizzes" element={<Quizzes />} />
+            <Route path="Grades" element={<Grades />} />
           </Routes>
         </div>
       </div>
@@ -41,21 +48,10 @@ export default function Courses() {
   );
 }
 
-/*
-2️⃣ <FaAlignJustify />
-	•	An icon component imported from react-icons/fa.
-	•	Displays a justify-align icon.
-
-3️⃣ className="me-4 fs-4 mb-1"
-
-Applied to the icon:
-	•	me-4: (margin-end 4)
-	•	Adds right margin for spacing from following text.
-	•	fs-4: (font-size 4)
-	•	Sets larger icon size.
-	•	mb-1: (margin-bottom 1)
-	•	Adds a small bottom margin to align better with the baseline of adjacent text.
-*/
+function useParams(): { cid: any } {
+  const params = useReactRouterParams();
+  return { cid: params.cid };
+}
 
 /* 2️⃣ Why mb-1 for aligning icons with text?
 	•	Icons often sit slightly below text baseline because their bounding box includes whitespace.

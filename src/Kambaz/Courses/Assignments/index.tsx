@@ -6,8 +6,11 @@ import Header from "./Header";
 import { FaRegEdit } from "react-icons/fa";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { Link } from "react-router-dom";
+// import { useParams as useReactRouterParams } from "react-router-dom";
 
 export default function Assignments() {
+  // const { AssignmentId } = useParams();
+
   return (
     <div id="wd-assignments">
       <AssignmentsControls />
