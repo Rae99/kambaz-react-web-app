@@ -11,17 +11,21 @@ import Zoom from "./Zoom";
 import Quizzes from "./Quizzes";
 import Grades from "./Grades";
 import { courses } from "../Database";
-import { useParams as useReactRouterParams } from "react-router-dom";
+import { useParams, useLocation } from "react-router-dom";
 
 export default function Courses() {
   const { cid } = useParams();
   const course = courses.find((course) => course._id === cid);
+  const { pathname } = useLocation();
 
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
         <FaAlignJustify className="me-4 fs-4 mb-1" />
-        {course && course.name}
+        {course && course.name} &gt; {pathname.split("/")[4]}
+        {/* if pathname = "/Kambaz/Courses/1234/Assignments"
+pathname.split("/")  // result:
+["", "Kambaz", "Courses", "1234", "Assignments"] */}
       </h2>
       <hr />
       <hr />
@@ -46,11 +50,6 @@ export default function Courses() {
       </div>
     </div>
   );
-}
-
-function useParams(): { cid: any } {
-  const params = useReactRouterParams();
-  return { cid: params.cid };
 }
 
 /* 2️⃣ Why mb-1 for aligning icons with text?
