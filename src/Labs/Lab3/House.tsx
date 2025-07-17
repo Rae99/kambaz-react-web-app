@@ -14,6 +14,8 @@ export default function House() {
   }; // All keys in JavaScript objects are strings — even if you don’t put quotes around them.
   // 	Note: Python requires keys to be quoted if they’re strings.
 
+  console.log(house);
+
   return (
     <div id="wd-house">
       <h4>House</h4>

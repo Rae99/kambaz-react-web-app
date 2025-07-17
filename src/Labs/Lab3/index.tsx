@@ -29,6 +29,7 @@ import Styles from "./Styles.tsx";
 import Add from "./Add.tsx";
 import Square from "./Square.tsx";
 import Highlight from "./Highlight.tsx";
+import PathParameters from "./AddPathParameters.tsx";
 
 export default function Lab3() {
   return (
@@ -67,9 +68,12 @@ export default function Lab3() {
       <Square>4</Square>
       <hr />
       <Highlight>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipitratione eaque illo minus cum, saepe totam
-        vel nihil repellat nemo explicabo excepturi consectetur. Modi omnis minus sequi maiores, provident voluptates.
-     </Highlight>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Suscipitratione
+        eaque illo minus cum, saepe totam vel nihil repellat nemo explicabo
+        excepturi consectetur. Modi omnis minus sequi maiores, provident
+        voluptates.
+      </Highlight>
+      <PathParameters />
     </div>
   );
 }
