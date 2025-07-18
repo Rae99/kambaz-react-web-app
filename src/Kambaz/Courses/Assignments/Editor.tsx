@@ -1,4 +1,3 @@
-import { Database } from "lucide-react";
 import { assignments } from "../../Database";
 import { useParams, Link } from "react-router-dom";
 
