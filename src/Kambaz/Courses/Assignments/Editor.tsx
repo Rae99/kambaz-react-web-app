@@ -1,6 +1,6 @@
 import { Database } from "lucide-react";
 import { assignments } from "../../Database";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams();
@@ -13,7 +13,11 @@ export default function AssignmentEditor() {
         <label htmlFor="wd-name" className="form-label">
           Assignment Name
         </label>
-        <input id="wd-name" value={assignment?.title || ""} className="form-control" />
+        <input
+          id="wd-name"
+          value={assignment?.title || "New Assignment"}
+          className="form-control"
+        />
       </div>
 
       <div className="mb-3">
@@ -21,8 +25,8 @@ export default function AssignmentEditor() {
           Description
         </label>
         <textarea id="wd-description" rows={4} className="form-control">
-          The assignment is available online Submit a link to the landing page
-          of your web application.
+          {assignment?.description ||
+            "The assignment is available online. Submit a link to the landing page of your project."}
         </textarea>
       </div>
 
@@ -33,7 +37,11 @@ export default function AssignmentEditor() {
           </label>
         </div>
         <div className="col-md-9">
-          <input id="wd-points" value={100} className="form-control" />
+          <input
+            id="wd-points"
+            value={assignment?.points || 100}
+            className="form-control"
+          />
         </div>
       </div>
 
@@ -166,9 +174,10 @@ export default function AssignmentEditor() {
                 Due
               </label>
               <input
-                type="datetime-local"
+                type="date"
                 id="wd-due-date"
                 className="form-control"
+                defaultValue={assignment?.dueDate || ""}
               />
             </div>
             <div className="row">
@@ -180,9 +189,10 @@ export default function AssignmentEditor() {
                   Available from
                 </label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   id="wd-available-from"
                   className="form-control"
+                  defaultValue={assignment?.availableDate || ""}
                 />
               </div>
               <div className="col">
@@ -193,7 +203,7 @@ export default function AssignmentEditor() {
                   Until
                 </label>
                 <input
-                  type="datetime-local"
+                  type="date"
                   id="wd-available-until"
                   className="form-control"
                 />
@@ -205,12 +215,16 @@ export default function AssignmentEditor() {
       <hr />
 
       <div className="text-end">
-        <button className="btn btn-secondary me-2" id="wd-cancel-assignment">
-          Cancel
-        </button>
-        <button className="btn btn-danger" id="wd-save-assignment">
-          Save
-        </button>
+        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+          <button className="btn btn-secondary me-2" id="wd-cancel-assignment">
+            Cancel
+          </button>
+        </Link>
+        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+          <button className="btn btn-danger" id="wd-save-assignment">
+            Save
+          </button>
+        </Link>
       </div>
     </div>
   );

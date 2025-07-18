@@ -25,7 +25,10 @@ export default function Modules() {
         {modules
           .filter((module: any) => module.course === cid)
           .map((module: any) => (
-            <ListGroup.Item className="wd-module p-0 mb-5 fs-5 border-gray">
+            <ListGroup.Item
+              key={module._id}
+              className="wd-module p-0 mb-5 fs-5 border-gray"
+            >
               {/* p-0 removes padding, mb-5 adds bottom margin*/}
               <div className="wd-title p-3 ps-2 bg-secondary">
                 <BsGripVertical className="me-2 fs-3" /> {module.name}
@@ -34,7 +37,10 @@ export default function Modules() {
               {module.lessons && ( // This checks if module.lessons exists
                 <ListGroup className="wd-lessons rounded-0">
                   {module.lessons.map((lesson: any) => (
-                    <ListGroup.Item className="wd-lesson p-3 ps-1">
+                    <ListGroup.Item
+                      key={lesson._id}
+                      className="wd-lesson p-3 ps-1"
+                    >
                       <BsGripVertical className="me-2 fs-3" />
                       {lesson.name}
                       <LessonControlButtons />
@@ -60,3 +66,5 @@ export default function Modules() {
 //   name: string;
 //   lessons?: Lesson[];
 // }
+
+// Uses any type because the module objects are complex and the developer hasn't defined proper types

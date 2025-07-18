@@ -18,10 +18,6 @@ export default function Assignments() {
   return (
     <div id="wd-assignments">
       <AssignmentsControls />
-      <br />
-      <br />
-      <br />
-      <br />
 
       <Header />
 
@@ -33,23 +29,23 @@ export default function Assignments() {
           <ListGroup.Item
             key={assignment._id}
             className="wd-assignment py-3 px-3"
+            as={Link}
+            to={`/Kambaz/Courses/${cid}/Assignments/${assignment._id}`}
           >
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center">
                 <BsGripVertical className="me-2 fs-3" />
                 <FaRegEdit className="me-2 fs-3 text-success" />
                 <div className="ms-2 d-flex flex-column">
-                  <Link
-                    to={`/Kambaz/Courses/${cid}/Assignments/${assignment._id}`}
-                    className="fw-bold fs-4 text-decoration-none text-dark"
-                  >
+                  <span className="fw-bold fs-4 text-decoration-none text-dark">
                     {assignment.title}
-                  </Link>
+                  </span>
                   <small className="text-muted fs-5">
                     <span className="text-danger">Multiple Modules </span> |{" "}
-                    <span className="fw-bold">Not available until </span>May 6
-                    at 12:00am | <span className="fw-bold">Due</span> May 13 at
-                    11:59pm | 100 pts
+                    <span className="fw-bold">Not available until </span> $
+                    {assignment.availableDate} at 12:00am | at 12:00am |{" "}
+                    <span className="fw-bold">Due</span> {assignment.dueDate} at
+                    11:59pm | {assignment.points} pts
                   </small>
                 </div>
               </div>

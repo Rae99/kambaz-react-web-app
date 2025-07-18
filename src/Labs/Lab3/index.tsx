@@ -29,7 +29,7 @@ import Styles from "./Styles.tsx";
 import Add from "./Add.tsx";
 import Square from "./Square.tsx";
 import Highlight from "./Highlight.tsx";
-import PathParameters from "./AddPathParameters.tsx";
+import PathParameters from "./PathParameters.tsx";
 
 export default function Lab3() {
   return (
