@@ -1,11 +1,19 @@
+import { Database } from "lucide-react";
+import { assignments } from "../../Database";
+import { useParams } from "react-router-dom";
+
 export default function AssignmentEditor() {
+  const { cid, aid } = useParams();
+
+  const assignment = assignments.find((a) => a._id === aid);
+
   return (
     <div id="wd-assignments-editor" className="container">
       <div className="mb-3">
         <label htmlFor="wd-name" className="form-label">
           Assignment Name
         </label>
-        <input id="wd-name" value="A1" className="form-control" />
+        <input id="wd-name" value={assignment?.title || ""} className="form-control" />
       </div>
 
       <div className="mb-3">
@@ -14,7 +22,7 @@ export default function AssignmentEditor() {
         </label>
         <textarea id="wd-description" rows={4} className="form-control">
           The assignment is available online Submit a link to the landing page
-          of
+          of your web application.
         </textarea>
       </div>
 

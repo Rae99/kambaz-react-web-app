@@ -10,7 +10,7 @@ import { useParams } from "react-router";
 import { assignments } from "../../Database";
 
 export default function Assignments() {
-  const { cid, aid } = useParams();
+  const { cid } = useParams();
   const courseAssignments = assignments.filter(
     (assignment) => assignment.course === cid
   );

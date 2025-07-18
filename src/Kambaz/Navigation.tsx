@@ -13,6 +13,9 @@ export default function KambazNavigation() {
     { label: "Inbox", path: "/Kambaz/Inbox", icon: FaInbox },
     { label: "Labs", path: "/Labs", icon: LiaCogSolid },
   ];
+  // We want to do it dynamicallly, so don't put AiOutlineDashboard in a <>
+  // link.icon is a function we can pass a parameter into
+
   return (
     <ListGroup
       id="wd-kambaz-navigation"
@@ -48,7 +51,7 @@ export default function KambazNavigation() {
       </ListGroup.Item>
       {links.map((link) => (
         <ListGroup.Item
-          key={link.path}
+          key={link.path} // The key needs to be unique for each item
           as={Link}
           to={link.path}
           className={`bg-black text-center border-0
