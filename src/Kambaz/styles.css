@@ -91,3 +91,18 @@ A media query is a CSS feature that applies styles only when certain conditions 
 .wd-assignment {
   border-left: 3px solid green !important;
 }
+
+/* 
+
+.box ul,
+.box li {
+  background-color: yellow;
+}
+  The first one is a group selector, which means it will apply to both <ul> and <li> elements inside a .box element.
+
+.box ul li {
+  background-color: yellow;
+}  
+  The second one is descendent selector, which means it will only apply to <li> elements that are inside a <ul> inside a .box element.
+
+*/
