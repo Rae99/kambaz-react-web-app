@@ -2,6 +2,10 @@ const subtract = (a: number, b: number) => {
   return a - b;
 };
 
+// const sayHello = (): void => {
+//   alert("Hello");
+// };
+// You can optionally specify the return type (like : void).
 
 export default function ArrowFunctions() {
   const threeMinusOne = subtract(3, 1);
@@ -9,7 +13,7 @@ export default function ArrowFunctions() {
   return (
     <div id="wd-arrow-functions">
       <h4>New ES6 arrow functions</h4>
-      threeMinusOne = {threeMinusOne}   <br />
+      threeMinusOne = {threeMinusOne} <br />
       subtract(3, 1) = {subtract(3, 1)} <hr />
     </div>
   );
