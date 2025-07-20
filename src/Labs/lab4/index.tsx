@@ -1,6 +1,12 @@
 import ClickEvent from "./ClickEvent";
+import Counter from "./Counter";
+import EventObject from "./EventObject";
 import PassingDataOnEvent from "./PassingDataOnEvent";
 import PassingFunctions from "./PassingFunctions";
+import BooleanStateVariables from "./BooleanStateVariables";
+import StringStateVariables from "./StringStateVariables";
+import DateStateVariable from "./DateStateVariable";
+import ObjectStateVariable from "./ObjectStateVariable";
 
 export default function Lab4() {
   function sayHello() {
@@ -12,6 +18,12 @@ export default function Lab4() {
       <ClickEvent />
       <PassingDataOnEvent />
       <PassingFunctions theFunction={sayHello} />
+      <EventObject />
+      <Counter />
+      <BooleanStateVariables />
+      <StringStateVariables />
+      <DateStateVariable />
+      <ObjectStateVariable />
     </div>
   );
 }
