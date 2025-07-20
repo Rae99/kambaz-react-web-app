@@ -10,7 +10,7 @@ export default function Signin() {
         placeholder="password"
         type="password"
       />
-      <Link to="/Kambaz/Courses/Home">
+      <Link to="/Kambaz/Account/Profile">
         <button className="btn btn-primary w-100 mb-2 ">Signin</button>
       </Link>
       <Link to="/Kambaz/Account/Signup" className="text-primary">
