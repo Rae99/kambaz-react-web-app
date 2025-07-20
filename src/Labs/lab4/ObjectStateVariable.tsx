@@ -20,3 +20,7 @@ export default function ObjectStateVariable() {
     </div>
   );
 }
+
+// Object spread creates a new object with all of person’s properties,
+// but when you add name: ... after spreading, 
+// it overwrites the name field — but keeps age unchanged.
