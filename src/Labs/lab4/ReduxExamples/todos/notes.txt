@@ -1,0 +1,56 @@
+Below is a step-by-step walk-through of every user action and the exact line of code that reacts to it.
+
+todos ――――――――――― array of ALL items on screen
+todo   ――――――――――― the “draft” object that lives in the text box
+
+UI action	What code runs	What really happens
+1. Type in the text box	onChange={(e) => setTodo({ …todo, title: e.target.value })}	➜ Only the local‐draft (todo) is mutated.➜ The todos array is unchanged.
+2. Click Edit next to an existing row	onClick={() => setTodo(todo)} (row’s todo)	➜ The whole object for that row is copied into todo.  todo.id is now the same id as the row you clicked.➜ Text box shows that item’s title.
+3. Click Update	onClick={() => updateTodo(todo)}	inside updateTodoconst newTodos = todos.map(item => item.id === todo.id ? todo : item)• Every row is compared.• When ids match, that row is replaced by the draft object.• setTodos(newTodos) triggers re-render.• setTodo({ id: "-1", title: "" }) clears the draft.
+4. Click Add (while text box holds something)	onClick={() => addTodo(todo)}	inside addTodo{ ...todo, id: new Date().getTime().toString() }• A fresh id is generated → never duplicates.• Title is whatever is in the box.• Even if that title already exists, the id is new, so a duplicate row appears.• Draft is cleared.
+5. Click Delete	onClick={() => deleteTodo(todo.id)}	filter produces a new array without that id, then setTodos.
+
+
+⸻
+
+Why duplicates appear when you click Add after Edit
+	1.	Edit copies an existing object into todo.
+todo.id == "2" (for example).
+	2.	Add never uses that id; it overwrites the id with new Date().getTime().
+So you get a brand-new row that happens to have the same title but a different id.
+
+Add 👉 “Always insert new item”
+Update 👉 “Replace item that has the same id as the draft”
+
+⸻
+
+Why typing + Update works only after Edit
+
+If you start with the default draft ({ id: "-1", title: "" }):
+	•	Update goes through map, but no row has id “-1”, so nothing is replaced.
+	•	Therefore nothing changes on the screen.
+
+After you Edit a real row, the draft’s id matches an existing id, so Update can find and replace it.
+
+⸻
+
+How to “master” this pattern
+	1.	Console-log inside each handler
+
+console.log("-- addTodo draft:", todo);
+console.log("-- updateTodo draft:", todo);
+
+
+	2.	Always remember
+todos   = list on screen
+todo    = text-box draft
+	3.	Draw this mini-state diagram on a sticky note:
+
+(typing) ──► todo.title
+(Edit)  ──► todo = rowObject
+(Update) ──► todos[row.id] = todo
+(Add)    ──► todos.push({ ...todo, id:newId })
+(Delete) ──► todos = todos.filter(id≠row.id)
+
+Repeat the click flow a few times while watching the console.
+After two or three passes the relationship between draft and list becomes intuitive.

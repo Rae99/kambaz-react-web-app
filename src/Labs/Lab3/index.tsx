@@ -30,8 +30,11 @@ import Add from "./Add.tsx";
 import Square from "./Square.tsx";
 import Highlight from "./Highlight.tsx";
 import PathParameters from "./PathParameters.tsx";
+import { ListGroup } from "react-bootstrap";
+import { useSelector } from "react-redux";
 
 export default function Lab3() {
+  const todos = useSelector((state: any) => state.todosReducer.todos);
   return (
     <div>
       <h2>Lab 3</h2>
@@ -74,6 +77,12 @@ export default function Lab3() {
         voluptates.
       </Highlight>
       <PathParameters />
+      <ListGroup>
+        {todos.map((todo: any) => (
+          <ListGroup.Item key={todo.id}>{todo.title}</ListGroup.Item>
+        ))}
+      </ListGroup>
+      <hr />
     </div>
   );
 }

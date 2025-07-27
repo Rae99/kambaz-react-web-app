@@ -10,10 +10,10 @@ import Piazza from "./Piazza";
 import Zoom from "./Zoom";
 import Quizzes from "./Quizzes";
 import Grades from "./Grades";
-import { courses } from "../Database";
+
 import { useParams, useLocation } from "react-router-dom";
 
-export default function Courses() {
+export default function Courses({ courses }: { courses: any[] }) {
   const { cid } = useParams();
   const course = courses.find((course) => course._id === cid);
   const { pathname } = useLocation();

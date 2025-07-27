@@ -1,0 +1,33 @@
+import { useSelector } from "react-redux";
+import TodoForm from "./TodoForm";
+import TodoItem from "./TodoItem";
+import { ListGroup } from "react-bootstrap";
+export default function TodoList() {
+  const todos = useSelector((state: any) => state.todosReducer.todos);
+
+  return (
+    <div>
+      <h2>Todo List</h2>
+      <ListGroup>
+        <TodoForm />
+        {todos.map((todo: any) => (
+          <ListGroup.Item key={todo.id}>
+            <TodoItem todo={todo} />
+          </ListGroup.Item>
+        ))}
+      </ListGroup>
+      <hr />
+    </div>
+  );
+}
+
+// See notes.txt
+// The user seems confused about how the update function works.
+// There are two pieces of state: the todos array and the todo draft.
+// When adding a new todo, addTodo generates a new item with a unique id
+// and adds it to the list, then resets the draft.
+// For updating an existing todo, updateTodo replaces the item in the array
+// if the ids match.
+// Clicking “Edit” simply loads the existing item into the draft,
+// without duplicating it yet.
+// However, if the draft id doesn’t match an existing todo, a duplication happens.
