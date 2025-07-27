@@ -5,10 +5,32 @@ import LessonControlButtons from "./LessonControlButtons";
 import ModuleControlButtons from "./ModuleControlButtons";
 import { useParams } from "react-router";
 import * as db from "../../Database";
+import { useState } from "react";
 
 export default function Modules() {
   const { cid } = useParams();
-  const modules = db.modules;
+  const [modules, setModules] = useState<any[]>(db.modules);
+  const [moduleName, setModuleName] = useState("");
+  const addModule = () => {
+    if (moduleName.trim() === "") {
+      alert("Module name cannot be empty");
+      return;
+    }
+    const newModule = {
+      _id: new Date().getTime().toString(),
+      name: moduleName,
+      course: cid,
+      lessons: [],
+    };
+    setModules([...modules, newModule]);
+    setModuleName("");
+  };
+
+  const deleteModule = (moduleId: string) => {
+    setModules(modules.filter((m) => m._id !== moduleId));
+  };
+
+  // const modules = db.modules;
   // ✅ const modules = db.modules; is a normal variable assignment
 
   // This line is just saying:
@@ -16,7 +38,11 @@ export default function Modules() {
   // It’s not a destructuring assignment, and it doesn’t need {}.
   return (
     <div>
-      <ModulesControls />
+      <ModulesControls
+        moduleName={moduleName}
+        setModuleName={setModuleName}
+        addModule={addModule}
+      />
       <br />
       <br />
       <br />
@@ -32,8 +58,14 @@ export default function Modules() {
               {/* p-0 removes padding, mb-5 adds bottom margin*/}
               <div className="wd-title p-3 ps-2 bg-secondary">
                 <BsGripVertical className="me-2 fs-3" /> {module.name}
-                <ModuleControlButtons />
+                <ModuleControlButtons
+                  moduleId={module._id}
+                  deleteModule={deleteModule}
+                />
               </div>
+              {/* React Best Practice • UI events and handlers are often defined in
+              the component that owns the relevant state. 
+              Presentational components receive handler functions as props, and just “call back” to the parent when needed. */}
               {module.lessons && ( // This checks if module.lessons exists
                 <ListGroup className="wd-lessons rounded-0">
                   {module.lessons.map((lesson: any) => (

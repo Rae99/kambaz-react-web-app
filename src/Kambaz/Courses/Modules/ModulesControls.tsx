@@ -2,7 +2,20 @@ import { FaPlus } from "react-icons/fa";
 import GreenCheckmark from "./GreenCheckmark";
 import { Button, Dropdown } from "react-bootstrap";
 import { MdDoNotDisturbAlt } from "react-icons/md";
-export default function ModulesControls() {
+import { useState } from "react";
+import ModuleEditor from "./ModuleEditor";
+export default function ModulesControls({
+  moduleName,
+  setModuleName,
+  addModule,
+}: {
+  moduleName: string;
+  setModuleName: (name: string) => void;
+  addModule: () => void;
+}) {
+  const [show, setShow] = useState(false);
+  const handleShow = () => setShow(true);
+  const handleClose = () => setShow(false);
   return (
     <div id="wd-modules-controls" className="text-nowrap">
       <Button
@@ -10,6 +23,7 @@ export default function ModulesControls() {
         size="lg"
         className="me-1 float-end"
         id="wd-add-module-btn"
+        onClick={handleShow}
       >
         <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
         {/* Normally, you can’t use top, bottom, left, or right unless the element is positioned.
@@ -61,6 +75,14 @@ export default function ModulesControls() {
         Collapse All
       </Button>
       <div className="clearfix"></div>
+      <ModuleEditor
+        show={show}
+        handleClose={handleClose}
+        dialogTitle="Add Module"
+        moduleName={moduleName}
+        setModuleName={setModuleName}
+        addModule={addModule}
+      />
     </div>
   );
 }

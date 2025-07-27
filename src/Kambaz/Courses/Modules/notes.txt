@@ -1,0 +1,162 @@
+Q1: we pass in all 6 things into ModuleEditor
+  show={show}
+        handleClose={handleClose}
+        dialogTitle="Add Module"
+        moduleName={moduleName}
+        setModuleName={setModuleName}
+        addModule={addModule}
+
+but we defined only 3 of them in ModulesControls.tsx
+
+the other 3 is passed into ModulesControls.tsx from upper level.
+why the design???
+
+
+A: Great observation!
+This is actually a very common React design pattern—and it’s all about “props drilling” (passing data/functions down through component layers), and component composition.
+
+⸻
+
+What’s happening here?
+	•	ModulesControls receives some props from its parent:
+	•	moduleName
+	•	setModuleName
+	•	addModule
+	•	Locally, ModulesControls defines:
+	•	show (state, with useState)
+	•	handleShow and handleClose (event handlers)
+	•	dialogTitle (just a string in this case)
+
+When rendering <ModuleEditor />, you pass all 6 props to it.
+
+⸻
+
+So why this design?
+
+1. Separation of concerns
+	•	The parent of ModulesControls is responsible for the actual module data and logic (moduleName, setModuleName, addModule). It “owns” the state that affects the whole modules list.
+	•	ModulesControls is responsible for showing and hiding the modal/editor and local UI actions (show, handleClose).
+	•	ModuleEditor needs to know both when to show (modal open/close state, handlers) and how to edit/add (data and functions from above).
+
+2. Component reusability
+	•	By passing moduleName, setModuleName, and addModule from above, you can reuse <ModuleEditor /> in other contexts with different data or logic.
+	•	If all logic was inside ModuleEditor, it wouldn’t be as flexible or testable.
+
+3. Unidirectional data flow
+	•	React encourages a “top-down” data flow: parents “own” state, children “receive” state and callbacks as props, and children can only modify state via those callbacks.
+	•	This makes it easy to track where data comes from and how it changes.
+
+4. Composition
+	•	You’re composing your UI:
+Parent (owns the data) → Controls (UI and modal state) → Editor (edits the data).
+	•	Each piece is focused, which helps with scaling and maintainability.
+
+⸻
+
+Visual Diagram
+
+Parent
+  |
+  +-- ModulesControls
+        |
+        +-- ModuleEditor
+
+	•	Parent “owns” the key state and logic for modules.
+	•	ModulesControls manages showing/hiding editor modals.
+	•	ModuleEditor displays the modal, edits data, and calls callbacks when needed.
+
+⸻
+
+What if you didn’t do this?
+	•	If every component owned all of its own state, you’d end up with inconsistent or duplicated state.
+	•	The parent wouldn’t know about changes made inside deeply nested components.
+	•	Harder to coordinate actions or synchronize UI.
+
+⸻
+
+TL;DR
+	•	ModulesControls passes some props down from its parent and some from itself, combining them for ModuleEditor.
+	•	This makes each component do one thing well and keeps data consistent.
+	•	It’s a fundamental React pattern for large, maintainable UIs!
+
+⸻
+
+Let me know if you want to see a concrete example or have more questions about React component design!
+
+
+Q2: a. Lift state up to a common parent
+	•	If you want two sibling components (like Courses and Dashboard) to share some state, you move that state up to their closest common ancestor.
+	•	Example: If both are rendered by App or Kambaz, you’d put the state there, then pass it down as props to both.
+
+Yeah, this is exactly what I was talking about. So are you saying that even though the child components can see those states living in parent components, but they don't have the right to mutate those states?
+
+A: Great summary! Yes, you’re exactly right—
+Child components can see (read/use) state passed from a parent,
+but they cannot directly mutate or change that state themselves.
+
+⸻
+
+How do child components change parent state?
+	•	The parent controls the state:
+Only the parent (where the state is defined) can actually call setState (like setModules).
+	•	The parent can give the child a “setter” function as a prop:
+If you want the child to be able to “ask” for the state to change,
+the parent passes down a function, e.g.:
+
+<Child updateModules={setModules} />
+
+
+	•	Or more commonly, the parent wraps setModules in a handler, e.g.:
+
+const deleteModule = id => setModules(ms => ms.filter(m => m._id !== id));
+<Child deleteModule={deleteModule} />
+
+
+	•	The child calls the function, passing whatever info is needed (like an ID).
+The parent receives that request and updates its own state.
+
+⸻
+
+Why is this design good?
+	•	It prevents accidental/chaotic data changes—the parent always knows when its state is changing.
+	•	It keeps your data flow clear and predictable.
+
+⸻
+
+Visual analogy
+	•	Parent: “Here’s my current list of modules. If you want to change it, call this function and I’ll take care of it.”
+	•	Child: “Okay, I’ll call your function when I need something to change!”
+
+⸻
+
+Quick code example:
+
+// Parent
+const [count, setCount] = useState(0);
+const increment = () => setCount(c => c + 1);
+
+<Child count={count} increment={increment} />
+
+// Child
+function Child({ count, increment }) {
+  return (
+    <div>
+      <span>{count}</span>
+      <button onClick={increment}>+</button>
+    </div>
+  );
+}
+
+	•	Child cannot write: count++ or setCount() itself.
+	•	Child can ask the parent to change the state by calling the function provided.
+
+⸻
+
+TL;DR
+	•	Child can “see” parent’s state (via props)
+	•	Child cannot directly mutate that state
+	•	Parent must pass a function to the child if it wants the child to be able to request changes
+
+⸻
+
+Let me know if you want a more concrete code sample, or a real analogy!
