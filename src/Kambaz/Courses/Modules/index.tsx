@@ -13,6 +13,10 @@ export default function Modules() {
   const { modules } = useSelector((state: any) => state.modulesReducer);
   const dispatch = useDispatch();
   const [moduleName, setModuleName] = useState("");
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
+  // @ts-ignore
+  window.testStore = useSelector((state) => state);
 
   // const modules = db.modules;
   // ✅ const modules = db.modules; is a normal variable assignment
@@ -59,11 +63,15 @@ export default function Modules() {
                     defaultValue={module.name}
                   />
                 )}
-                <ModuleControlButtons
-                  moduleId={module._id}
-                  deleteModule={(moduleId) => dispatch(deleteModule(moduleId))}
-                  editModule={(moduleId) => dispatch(editModule(moduleId))}
-                />
+                {isFaculty && (
+                  <ModuleControlButtons
+                    moduleId={module._id}
+                    deleteModule={(moduleId) =>
+                      dispatch(deleteModule(moduleId))
+                    }
+                    editModule={(moduleId) => dispatch(editModule(moduleId))}
+                  />
+                )}
               </div>
               {/* React Best Practice • UI events and handlers are often defined in
               the component that owns the relevant state. 

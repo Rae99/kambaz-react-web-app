@@ -1,0 +1,198 @@
+Q1: what's wrong with this code snippet
+{isFaculty && (
+        <h5>
+          New Course
+          <button
+            className="btn btn-primary float-end"
+            id="wd-add-new-course-click"
+            onClick={addNewCourse}
+        >
+          {" "}
+          Add{" "}
+        </button>
+        <button
+          className="btn btn-warning float-end me-2"
+          onClick={updateCourse}
+          id="wd-update-course-click"
+        >
+          Update
+        </button>
+      </h5>
+      <br />
+      <FormControl
+        value={course.name}
+        className="mb-2"
+        onChange={(e) => setCourse({ ...course, name: e.target.value })}
+      />
+      <FormControl
+        as="textarea"
+        value={course.description}
+        rows={3}
+        onChange={(e) => setCourse({ ...course, description: e.target.value })}
+      />
+      <hr />)
+      }
+
+//
+//
+
+
+A1: Great question! The issue with your code is where the curly braces are closed in your JSX.
+
+Let’s break it down:
+
+⸻
+
+What’s wrong?
+
+You wrote:
+
+{isFaculty && (
+  <h5>
+    ...
+  </h5>
+  <br />
+  <FormControl ... />
+  <FormControl ... />
+  <hr />
+)}
+
+But in React/JSX, a single pair of parentheses after && must contain exactly one parent element (a single element to return).
+
+⸻
+
+The Problem:
+	•	You opened {isFaculty && ( ... )},
+	•	but inside you returned multiple sibling elements (<h5>, <br />, two <FormControl>, <hr />)
+	•	You cannot do that directly in JSX.
+
+⸻
+
+How to Fix
+
+You have two options:
+
+Option 1: Wrap with a Fragment (<> ... </>)
+
+{isFaculty && (
+  <>
+    <h5>
+      New Course
+      <button
+        className="btn btn-primary float-end"
+        id="wd-add-new-course-click"
+        onClick={addNewCourse}
+      >
+        Add
+      </button>
+      <button
+        className="btn btn-warning float-end me-2"
+        onClick={updateCourse}
+        id="wd-update-course-click"
+      >
+        Update
+      </button>
+    </h5>
+    <br />
+    <FormControl
+      value={course.name}
+      className="mb-2"
+      onChange={(e) => setCourse({ ...course, name: e.target.value })}
+    />
+    <FormControl
+      as="textarea"
+      value={course.description}
+      rows={3}
+      onChange={(e) => setCourse({ ...course, description: e.target.value })}
+    />
+    <hr />
+  </>
+)}
+
+	•	<>...</> is a React Fragment, which allows you to group sibling elements without introducing a new DOM node.
+
+Option 2: Wrap with a single <div>
+
+{isFaculty && (
+  <div>
+    ...all your code...
+  </div>
+)}
+
+Either way, the key is:
+You must return a single parent element from the && block.
+
+⸻
+
+Summary
+	•	You cannot return multiple sibling elements directly from an expression.
+	•	Always wrap with <>...</> (fragment) or a <div>...</div>.
+
+⸻
+
+Let me know if you need help with any other JSX quirks!s
+
+
+Q2: current user is not iron_man when I am in the modules page
+why?
+
+but current user is  iron_man when I am in the dashboard
+
+A2: Your currentUser becoming null or inconsistent between pages (e.g., it’s iron_man in Dashboard, but not in Modules) is a classic problem in React/Redux apps—state initialization and persistence.
+
+Let me clarify your two key questions:
+
+⸻
+
+1. Why is currentUser different (or null) in different pages?
+	•	In Redux, currentUser should be “global”—any component that uses useSelector((state) => state.currentUserReducer) should see the same value at the same time, unless something causes it to reset.
+	•	If you ever see currentUser become null or not persist when you navigate, something is resetting your Redux state.
+
+Possible reasons:
+	•	You are reloading the page: Redux state is in-memory. If you reload, it resets unless you store it in localStorage (which the starter code does not do).
+	•	Your Redux store is being re-created: If you accidentally call <Provider store={store}> in multiple places, or re-initialize your store, your app gets a fresh empty store.
+	•	You are logging out somewhere (by calling setCurrentUser(null)).
+
+⸻
+
+2. Does it cause a problem to select currentUser in both Modules/index and ModulesControls?
+
+No problem at all!
+	•	useSelector just grabs the value at that moment from Redux.
+	•	If you select it in two components, both will see the same value (if your Redux setup is correct and the state is not being reset as above).
+
+⸻
+
+Diagnosis Tips
+	1.	Test without page reload:
+	•	Sign in as iron_man.
+	•	Click around (Dashboard → Modules, etc.) using only the in-app navigation (not browser refresh).
+	•	Does currentUser persist? If yes, Redux is working.
+	2.	Try a browser reload (Cmd+R or F5):
+	•	Does currentUser reset to null? If yes, that’s normal—Redux does not persist state by default.
+	3.	Check store setup:
+	•	Your <Provider store={store}> should be at the very top-level (usually in App.tsx).
+	•	There should be only one store per app.
+	4.	Console logs:
+	•	Good move! If you log currentUser in both Dashboard and Modules and get different results (without reload), something is wrong with how Redux is wired.
+
+⸻
+
+How to persist currentUser across page reloads?
+
+If you want the user to stay logged in even after a browser refresh, you need to:
+	•	Save currentUser to localStorage/sessionStorage on login.
+	•	Read from localStorage when the app starts, and set currentUser in Redux if found.
+
+If you want code for this, just ask!
+
+⸻
+
+In summary:
+	•	useSelector is safe to use in as many components as you want.
+	•	If currentUser is inconsistent or null, your Redux state is being reset (likely on page reload).
+	•	For persistence across reloads, you need to add localStorage logic manually.
+
+⸻
+
+Let me know if you want a code example of Redux state persistence, or help debugging your current setup further!

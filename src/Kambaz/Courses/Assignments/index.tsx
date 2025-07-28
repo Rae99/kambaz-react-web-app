@@ -8,16 +8,19 @@ import { BsThreeDotsVertical } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router";
 import { assignments } from "../../Database";
+import { useSelector } from "react-redux";
 
 export default function Assignments() {
   const { cid } = useParams();
   const courseAssignments = assignments.filter(
     (assignment) => assignment.course === cid
   );
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const isFaculty = currentUser?.role === "FACULTY";
 
   return (
     <div id="wd-assignments">
-      <AssignmentsControls />
+      {isFaculty && <AssignmentsControls />}
 
       <Header />
 
@@ -29,8 +32,11 @@ export default function Assignments() {
           <ListGroup.Item
             key={assignment._id}
             className="wd-assignment py-3 px-3"
-            as={Link}
-            to={`/Kambaz/Courses/${cid}/Assignments/${assignment._id}`}
+            as={isFaculty ? Link : "div"}
+            {...(isFaculty
+              ? { to: `/Kambaz/Courses/${cid}/Assignments/${assignment._id}` }
+              : {})}
+            style={{ cursor: isFaculty ? "pointer" : "not-allowed" }}
           >
             <div className="d-flex justify-content-between align-items-center">
               <div className="d-flex align-items-center">

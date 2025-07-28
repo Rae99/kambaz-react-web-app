@@ -1,0 +1,182 @@
+Q1:
+code: export default function Courses({ courses }: { courses: any[] }) {
+
+why it's like { courses }: { courses: any[] }
+not like { courses }: { any[] }?
+
+A: { courses }: { courses: any[] } means:
+“Destructure the courses prop from props, and require props to have the shape { courses: any[] }.”
+
+
+Q2: what is props object
+    property?
+but in the upper level, it seems like we do pass in a course, not some object that contains a course property
+code: <Route path="/Courses/:cid/*" element={<Courses courses={courses} />} />
+
+Great question! Let’s break it down with some real-world React examples:
+
+⸻
+
+1. What is the props object?
+	•	In React, every component receives a single argument called props.
+	•	props is always an object.
+	•	This object contains all the data (“properties” or “props”) you pass into the component from its parent.
+
+⸻
+
+2. “Property” vs. “props”
+	•	A property (or “prop”) is a single key/value inside the props object.
+	•	The props object is the collection of all those properties.
+
+Example:
+
+<Courses courses={myCourses} name="Spring" />
+
+	•	Here, the props object is:
+{ courses: myCourses, name: "Spring" }
+
+⸻
+
+3. What is passed from the parent?
+
+When you write:
+
+<Courses courses={myCourses} />
+
+	•	You are not passing just the value myCourses.
+	•	You are passing an object with one property:
+{ courses: myCourses }
+
+So in your component:
+
+export default function Courses({ courses }: { courses: any[] }) {
+  // ...
+}
+
+	•	{ courses } means “take the courses property from the props object.”
+
+⸻
+
+4. If you passed a course directly
+
+If you did this:
+
+<Courses {...myCourses} />
+
+	•	And myCourses is { _id: "1", name: "Math" }, then the props object would be:
+{ _id: "1", name: "Math" }
+
+But that’s not how it’s usually done for lists.
+
+⸻
+
+5. Summary Table
+
+What you write as parent	What the child receives as props
+<Courses courses={myCourses} />	{ courses: myCourses }
+<Courses course={aCourse} />	{ course: aCourse }
+<Courses {...aCourse} />	{ _id: "1", name: "Math" }
+
+
+⸻
+
+TL;DR
+	•	props = always an object (even if you only pass one thing)
+	•	Each property (or “prop”) is a key inside that object.
+	•	You always pass in an object, not just a raw value, unless you use {...something} syntax.
+
+⸻
+
+Let me know if you want to see this with a real code demo or diagram!
+
+Q3: so we can pass whatever object that contains the property course?
+Yes, exactly!
+A: You can pass any object as props, as long as it contains the expected property (in this case, courses).
+
+
+
+Q4: const isFaculty = currentUser?.role === "faculty";
+so this is defined in dashboard.tsx
+
+I added some isFaculty && in this file
+
+but I still need to handle the modules and assignments
+
+how do I ensure const isFaculty is visible in those related components
+
+"Solution: Compute it wherever you need it, using Redux.
+
+Instead of trying to “share the variable,” simply do this in each component:"
+
+why is this considered good practice?
+can we also make it a state in the store???
+
+A4: This is a fantastic, advanced question!
+Let’s break down why “compute it from Redux everywhere” is best practice—and when (or if) you’d ever make it a state in your store.
+
+⸻
+
+Why compute isFaculty locally in each component?
+
+1. Derived State Should Be Derived!
+	•	isFaculty is not its own “data”, but a property that is derived from the actual state:
+	•	You store the user’s role (e.g., "FACULTY", "STUDENT") in the Redux store.
+	•	From this, you can easily compute “is the user a faculty?” (role === "FACULTY").
+	•	It’s best to keep your store small and only store the “source of truth” data (in this case, just the user and their role).
+
+2. Automatic Reactivity
+	•	If you always compute isFaculty from currentUser, it will always update correctly if the user changes (logs in/out, switches account, etc.).
+	•	There’s no risk of your app showing stale info due to out-of-sync state.
+
+3. DRY and Testable
+	•	If you ever want to check for other roles (e.g., isStudent), you don’t need to change the store—just write another little function or selector.
+	•	You can easily test these derived values.
+
+⸻
+
+Why NOT store isFaculty in Redux directly?
+	•	If you store isFaculty in the Redux state, then whenever the role changes, you must remember to update both the role and the isFaculty flag.
+	•	That’s duplicated info, which can go out of sync (“state bugs”).
+	•	Redux store should only have “single sources of truth.”
+	•	Derived or computed properties (like isFaculty) should be computed as needed.
+
+⸻
+
+When WOULD you store a computed value in the store?
+	•	Only if the computation is so expensive or complex that you don’t want to recompute it every time (rare in typical apps!).
+	•	Or, if you want to explicitly “lock in” a particular state for a certain period (e.g., for time-travel debugging, or if it’s needed for undo/redo).
+
+But for simple things like isFaculty, deriving locally is standard and recommended.
+
+⸻
+
+Extra: Use Selector Functions
+
+If you want to keep your code clean and avoid repeating the logic, use a selector helper, like:
+
+export const selectIsFaculty = (state) =>
+  state.accountReducer.currentUser?.role === "FACULTY";
+
+Then in any component:
+
+const isFaculty = useSelector(selectIsFaculty);
+
+
+⸻
+
+Summary Table
+
+Approach	Pros	Cons
+Derive isFaculty from user.role	Clean, always up-to-date, no redundancy	Slight repetition of code
+Store isFaculty in Redux state	Easy to access, single value	Risk of being out-of-sync!
+
+
+⸻
+
+TL;DR:
+
+Store “facts” in Redux; derive “questions” (like isFaculty) from those facts as needed.
+
+⸻
+
+Let me know if you want to see a real code example or want more advanced selector patterns!
