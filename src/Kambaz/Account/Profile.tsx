@@ -1,35 +1,91 @@
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { setCurrentUser } from "./reducer";
+import { FormControl, Button } from "react-bootstrap";
 
 export default function Profile() {
+  const [profile, setProfile] = useState<any>({});
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const fetchProfile = () => {
+    if (!currentUser) return navigate("/Kambaz/Account/Signin");
+    setProfile(currentUser);
+  };
+  const signout = () => {
+    dispatch(setCurrentUser(null));
+    navigate("/Kambaz/Account/Signin");
+  };
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+  // This effect does not depend on any variable. Only run it after mounting.
   return (
     <div className="container mt-5" style={{ maxWidth: 400 }}>
       <h2>Profile</h2>
-      <div className="form-group mb-3">
-        <input className="form-control" value="alice" />
-      </div>
-      <div className="form-group mb-3">
-        <input className="form-control" value="123" />
-      </div>
-      <div className="form-group mb-3">
-        <input className="form-control" value="Alice" />
-      </div>
-      <div className="form-group mb-3">
-        <input className="form-control" value="Wonderland" />
-      </div>
-      <div className="form-group mb-3">
-        <input type="date" className="form-control" value="2000-01-01" />
-      </div>
-      <div className="form-group mb-3">
-        <input className="form-control" value="alice@wonderland.com" />
-      </div>
-      <div className="form-group mb-3">
-        <input className="form-control" value="User" />
-      </div>
-      <div className="d-grid">
-        <Link to="/Kambaz/Account/Signin">
-          <button className="btn btn-danger">Signout</button>
-        </Link>
-      </div>
+      {profile && (
+        <div>
+          <FormControl
+            defaultValue={profile.username}
+            id="wd-username"
+            className="mb-2"
+            onChange={(e) =>
+              setProfile({ ...profile, username: e.target.value })
+            }
+          />
+          <FormControl
+            defaultValue={profile.password}
+            id="wd-password"
+            className="mb-2"
+            onChange={(e) =>
+              setProfile({ ...profile, password: e.target.value })
+            }
+          />
+          <FormControl
+            defaultValue={profile.firstName}
+            id="wd-firstname"
+            className="mb-2"
+            onChange={(e) =>
+              setProfile({ ...profile, firstName: e.target.value })
+            }
+          />
+          <FormControl
+            defaultValue={profile.lastName}
+            id="wd-lastname"
+            className="mb-2"
+            onChange={(e) =>
+              setProfile({ ...profile, lastName: e.target.value })
+            }
+          />
+          <FormControl
+            defaultValue={profile.dob}
+            id="wd-dob"
+            className="mb-2"
+            onChange={(e) => setProfile({ ...profile, dob: e.target.value })}
+            type="date"
+          />
+          <FormControl
+            defaultValue={profile.email}
+            id="wd-email"
+            className="mb-2"
+            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+          />
+          <select
+            onChange={(e) => setProfile({ ...profile, role: e.target.value })}
+            className="form-control mb-2"
+            id="wd-role"
+          >
+            <option value="USER">User</option>{" "}
+            <option value="ADMIN">Admin</option>
+            <option value="FACULTY">Faculty</option>{" "}
+            <option value="STUDENT">Student</option>
+          </select>
+          <Button onClick={signout} className="w-100 mb-2" id="wd-signout-btn">
+            Sign out
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
