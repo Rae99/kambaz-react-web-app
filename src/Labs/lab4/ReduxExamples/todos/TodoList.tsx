@@ -2,20 +2,23 @@ import { useSelector } from "react-redux";
 import TodoForm from "./TodoForm";
 import TodoItem from "./TodoItem";
 import { ListGroup } from "react-bootstrap";
+
 export default function TodoList() {
   const todos = useSelector((state: any) => state.todosReducer.todos);
 
   return (
-    <div>
-      <h2>Todo List</h2>
-      <ListGroup>
+    <div className="bg-white rounded shadow">
+      <h2 className="fw-bold text-dark mb-3">Todo List</h2>
+      <div className="bg-light rounded p-2 mb-2">
         <TodoForm />
+      </div>
+      <div className="bg-light rounded p-2">
         {todos.map((todo: any) => (
-          <ListGroup.Item key={todo.id}>
+          <div key={todo.id} className="mb-1">
             <TodoItem todo={todo} />
-          </ListGroup.Item>
+          </div>
         ))}
-      </ListGroup>
+      </div>
       <hr />
     </div>
   );
