@@ -1,22 +1,27 @@
 import AssignmentsControls from "./ControlBar";
 import { ListGroup } from "react-bootstrap";
 import { BsGripVertical } from "react-icons/bs";
-import { FaCheckCircle } from "react-icons/fa";
 import Header from "./Header";
 import { FaRegEdit } from "react-icons/fa";
-import { BsThreeDotsVertical } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router";
-import { assignments } from "../../Database";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { deleteAssignment } from "./reducer";
+import AssignmentControlButtons from "./AssignmentControlButtons";
 
 export default function Assignments() {
   const { cid } = useParams();
+  const { assignments } = useSelector((state: any) => state.assignmentsReducer);
+  const dispatch = useDispatch();
   const courseAssignments = assignments.filter(
-    (assignment) => assignment.course === cid
+    (assignment: any) => assignment.course === cid
   );
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
+
+  const handleDeleteAssignment = (assignmentId: string) => {
+    dispatch(deleteAssignment(assignmentId));
+  };
 
   return (
     <div id="wd-assignments">
@@ -28,7 +33,7 @@ export default function Assignments() {
         className="wd-assignments rounded-0 flex"
         id="wd-assignments-list"
       >
-        {courseAssignments.map((assignment) => (
+        {courseAssignments.map((assignment: any) => (
           <ListGroup.Item
             key={assignment._id}
             className="wd-assignment py-3 px-3"
@@ -48,17 +53,19 @@ export default function Assignments() {
                   </span>
                   <small className="text-muted fs-5">
                     <span className="text-danger">Multiple Modules </span> |{" "}
-                    <span className="fw-bold">Not available until </span> $
-                    {assignment.availableDate} at 12:00am | at 12:00am |{" "}
+                    <span className="fw-bold">Not available until </span> {assignment.availableDate} <span> at 12:00am | </span>
                     <span className="fw-bold">Due</span> {assignment.dueDate} at
                     11:59pm | {assignment.points} pts
                   </small>
                 </div>
               </div>
-              <div className="d-flex align-items-center">
-                <FaCheckCircle className="text-success fs-4 me-3" />
-                <BsThreeDotsVertical className="fs-4 text-muted" />
-              </div>
+              {isFaculty && (
+                <AssignmentControlButtons
+                  assignmentId={assignment._id}
+                  assignmentTitle={assignment.title}
+                  deleteAssignment={handleDeleteAssignment}
+                />
+              )}
             </div>
           </ListGroup.Item>
         ))}

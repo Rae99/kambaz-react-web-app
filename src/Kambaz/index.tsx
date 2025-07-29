@@ -4,36 +4,9 @@ import Dashboard from "./Dashboard";
 import KambazNavigation from "./Navigation";
 import Courses from "./Courses";
 import "./styles.css";
-import * as db from "./Database";
-import { useState } from "react";
 import ProtectedRoute from "./Account/ProtectedRoute";
 
 export default function Kambaz() {
-  const [courses, setCourses] = useState<any[]>(db.courses);
-
-  const [course, setCourse] = useState<any>({
-    _id: "0",
-    name: "New Course",
-    number: "New Number",
-    startDate: "2023-09-10",
-    endDate: "2023-12-15",
-    image: "/images/reactjs.jpg",
-    description: "New Description",
-  });
-
-  const addNewCourse = () => {
-    const newCourse = { ...course, _id: new Date().getTime().toString() };
-    setCourses([...courses, newCourse]);
-  };
-  // we can also use uuidv4() from the uuid library to generate unique IDs.
-
-  const deleteCourse = (courseId: string) => {
-    setCourses(courses.filter((course) => course._id !== courseId));
-  };
-
-  const updateCourse = () => {
-    setCourses(courses.map((c) => (c._id === course._id ? { ...course } : c)));
-  };
   return (
     <div id="wd-kambaz">
       <KambazNavigation />
@@ -45,14 +18,7 @@ export default function Kambaz() {
             path="/Dashboard"
             element={
               <ProtectedRoute>
-                <Dashboard
-                  courses={courses}
-                  course={course}
-                  setCourse={setCourse}
-                  addNewCourse={addNewCourse}
-                  deleteCourse={deleteCourse}
-                  updateCourse={updateCourse}
-                />
+                <Dashboard />
               </ProtectedRoute>
             }
           />
@@ -60,7 +26,7 @@ export default function Kambaz() {
             path="/Courses/:cid/*"
             element={
               <ProtectedRoute>
-                <Courses courses={courses} />
+                <Courses />
               </ProtectedRoute>
             }
           />

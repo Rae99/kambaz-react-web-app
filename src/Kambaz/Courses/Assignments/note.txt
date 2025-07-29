@@ -1,0 +1,12 @@
+Why the difference?
+Dashboard: The button is inside a Card.Body which is inside a Link. The Link is the parent of the button.
+Assignments: The FaTrash icon is inside a div which is inside a ListGroup.Item that IS the Link (using as={Link}).
+The Key Difference
+Dashboard: Link → Card.Body → button
+Assignments: ListGroup.Item as={Link} → div → FaTrash
+In the Dashboard, the button is a child of the Link, so preventDefault() is enough to stop the navigation.
+In our Assignments, the FaTrash is a child of an element that IS the Link itself, so we need both:
+preventDefault() - stops the navigation
+stopPropagation() - stops the event from bubbling up to the Link
+
+That's why the Dashboard only needs preventDefault() but our Assignments need both!
