@@ -1,7 +1,5 @@
-import { IoEllipsisVertical } from "react-icons/io5";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { FaTrash } from "react-icons/fa";
-import { FaRegEdit } from "react-icons/fa";
 import { FaCheckCircle } from "react-icons/fa";
 import { useState } from "react";
 import { Modal, Button } from "react-bootstrap";
