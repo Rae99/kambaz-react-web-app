@@ -1,7 +1,6 @@
 import { useSelector } from "react-redux";
 import TodoForm from "./TodoForm";
 import TodoItem from "./TodoItem";
-import { ListGroup } from "react-bootstrap";
 
 export default function TodoList() {
   const todos = useSelector((state: any) => state.todosReducer.todos);
