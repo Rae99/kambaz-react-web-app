@@ -102,10 +102,13 @@ export default function WorkingWithArrays() {
           className="form-check-input"
           type="checkbox"
           id="wd-completed"
-          checked={todo.completed}
+          defaultChecked={todo.completed}
           onChange={(e) => {
             const newCompleted = e.target.checked;
-            setTodo({ ...todo, completed: newCompleted });
+            console.log(`Checkbox changed to: ${newCompleted}`);
+            console.log(
+              `Navigating to: ${API}/${todo.id}/completed/${newCompleted}`
+            );
             window.location.href = `${API}/${todo.id}/completed/${newCompleted}`;
           }}
         />
