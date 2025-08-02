@@ -7,6 +7,7 @@ import { TiDelete } from 'react-icons/ti';
 import { FormControl } from 'react-bootstrap';
 export default function WorkingWithArraysAsynchronously() {
   const [todos, setTodos] = useState<any[]>([]);
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const editTodo = (todo: any) => {
     const updatedTodos = todos.map((t) =>
@@ -16,8 +17,12 @@ export default function WorkingWithArraysAsynchronously() {
   };
 
   const updateTodo = async (todo: any) => {
-    await client.updateTodo(todo);
-    setTodos(todos.map((t) => (t.id === todo.id ? todo : t)));
+    try {
+      await client.updateTodo(todo);
+      setTodos(todos.map((t) => (t.id === todo.id ? todo : t)));
+    } catch (error: any) {
+      setErrorMessage(error.response.data.message);
+    }
   };
 
   const fetchTodos = async () => {
@@ -31,9 +36,14 @@ export default function WorkingWithArraysAsynchronously() {
   };
 
   const deleteTodo = async (todo: any) => {
-    await client.deleteTodo(todo); // The server is still called, but we don't wait for it to finish, and the response is ignored.
-    const newTodos = todos.filter((t) => t.id !== todo.id);
-    setTodos(newTodos);
+    try {
+      await client.deleteTodo(todo); // The server is still called, but we don't wait for it to finish, and the response is ignored.
+      const newTodos = todos.filter((t) => t.id !== todo.id);
+      setTodos(newTodos);
+    } catch (error: any) {
+      console.log(error);
+      setErrorMessage(error.response.data.message);
+    }
   };
   // A different approach than how we handle postNewTodo.
   // ⚠ This is called optimistic UI update — it assumes the server will succeed.
@@ -73,6 +83,14 @@ export default function WorkingWithArraysAsynchronously() {
   return (
     <div id="wd-asynchronous-arrays">
       <h3>Working with Arrays Asynchronously</h3>
+      {errorMessage && (
+        <div
+          id="wd-todo-error-message"
+          className="alert alert-danger mb-2 mt-2"
+        >
+          {errorMessage}
+        </div>
+      )}
       <h4>
         Todos{' '}
         <FaPlusCircle
