@@ -1,0 +1,27 @@
+1. Does “origin” mean the same thing in CORS and in Git?
+
+No—they’re completely different concepts, just the same word!
+
+In Web Browsers / CORS:
+	•	Origin means:
+protocol + domain + port
+For example:
+
+	•	http://localhost:5173
+	•	https://example.com:443
+	•	Browsers use “origin” to define what counts as “the same place” for security reasons.
+	•	If you change any of the three (protocol, domain, or port), you have a new origin.
+
+2. 
+In Git:
+	•	Origin is just the default name given to the remote repository you cloned from.
+	•	When you run git clone, Git remembers where you cloned from and labels it as origin.
+	•	It could be GitHub, GitLab, or any remote repo.
+
+
+Q: 
+but when I create a new branch
+and I need to set the upstream remote branch, it asked me to use this command: git origin something
+
+btw does this happen each time I create a new branch? "it asked me to use this command: git origin something"
+or just for the first push?

@@ -1,0 +1,3 @@
+4. Synchronous vs. Asynchronous: The core idea
+	•	Synchronous: User clicks a link → browser loads a new page (or reloads the current one) → server processes the request and returns the new content.
+	•	Asynchronous: User interacts (e.g. toggles a checkbox) → JS sends an HTTP request in the background → UI updates without reloading the whole page.
