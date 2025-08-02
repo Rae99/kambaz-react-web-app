@@ -48,14 +48,21 @@ export const postNewTodo = async (todo: any) => {
   // •	In JavaScript, axios.post() returns a Promise, not the final result.
 // •	If you want to use await to pause until the Promise is resolved, the enclosing function must be declared async.
   
-
-
-
-
 export const removeTodo = async (todo: any) => {
   const response = await axios.get(`${TODOS_API}/${todo.id}/delete`);
   return response.data;
 };
+
+export const deleteTodo = async (todo: any) => {
+  const response = await axios.delete(`${TODOS_API}/${todo.id}`);
+  return response.data;
+};
+
+export const updateTodo = async (todo: any) => {
+  const response = await axios.put(`${TODOS_API}/${todo.id}`, todo);
+  return response.data;
+};
+
 
 
 

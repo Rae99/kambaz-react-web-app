@@ -3,6 +3,7 @@ import * as client from './client';
 import ListGroup from 'react-bootstrap/esm/ListGroup';
 import { FaTrash } from 'react-icons/fa6';
 import { FaPlusCircle } from 'react-icons/fa';
+import { TiDelete } from 'react-icons/ti';
 export default function WorkingWithArraysAsynchronously() {
   const [todos, setTodos] = useState<any[]>([]);
   const fetchTodos = async () => {
@@ -13,6 +14,14 @@ export default function WorkingWithArraysAsynchronously() {
     const updatedTodos = await client.removeTodo(todo);
     setTodos(updatedTodos);
   };
+
+  const deleteTodo = async (todo: any) => {
+    await client.deleteTodo(todo); // The server is still called, but we don't wait for it to finish, and the response is ignored.
+    const newTodos = todos.filter((t) => t.id !== todo.id);
+    setTodos(newTodos);
+  };
+  // A different approach than how we handle postNewTodo.
+  // ⚠ This is called optimistic UI update — it assumes the server will succeed.
 
   const updateCompleted = async (id: string, completed: boolean) => {
     try {
@@ -29,7 +38,8 @@ export default function WorkingWithArraysAsynchronously() {
   };
 
   const postNewTodo = async () => {
-    const newTodo = await client.postNewTodo({ // <-- also a Promise
+    const newTodo = await client.postNewTodo({
+      // <-- also a Promise
       title: 'New Posted Todo',
       completed: false,
     });
@@ -41,8 +51,6 @@ export default function WorkingWithArraysAsynchronously() {
 
   // Yes — exactly, it is a chain:
   // React component → client.ts function → Axios → HTTP → Express server → back again.
-
-  
 
   useEffect(() => {
     fetchTodos();
@@ -69,6 +77,11 @@ export default function WorkingWithArraysAsynchronously() {
               onClick={() => removeTodo(todo)}
               className="text-danger float-end mt-1"
               id="wd-remove-todo"
+            />
+            <TiDelete
+              onClick={() => deleteTodo(todo)}
+              className="text-danger float-end me-2 fs-3"
+              id="wd-delete-todo"
             />
             <input
               type="checkbox"
