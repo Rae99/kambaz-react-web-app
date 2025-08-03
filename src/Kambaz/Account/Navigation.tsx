@@ -7,7 +7,7 @@ export default function AccountNavigation() {
   const { pathname } = useLocation();
 
   return (
-    <nav className="ms-4 mt-2">
+    <nav className="ms-4 mt-2">``
       {links.map((link) => (
         <div key={link}>
           <Link
