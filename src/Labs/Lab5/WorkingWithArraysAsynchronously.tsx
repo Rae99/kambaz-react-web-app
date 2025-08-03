@@ -48,14 +48,14 @@ export default function WorkingWithArraysAsynchronously() {
   // A different approach than how we handle postNewTodo.
   // ⚠ This is called optimistic UI update — it assumes the server will succeed.
 
-  const updateCompleted = async (id: string, completed: boolean) => {
-    try {
-      const updatedTodos = await client.updateTodoCompleted(id, completed);
-      setTodos(updatedTodos);
-    } catch (error) {
-      console.error('Error updating todo:', error);
-    }
-  };
+  // const updateCompleted = async (id: string, completed: boolean) => {
+  //   try {
+  //     const updatedTodos = await client.updateTodoCompleted(id, completed);
+  //     setTodos(updatedTodos);
+  //   } catch (error) {
+  //     console.error('Error updating todo:', error);
+  //   }
+  // };
 
   const createNewTodo = async () => {
     const todos = await client.createNewTodo();
@@ -124,7 +124,7 @@ export default function WorkingWithArraysAsynchronously() {
             <input
               type="checkbox"
               defaultChecked={todo.completed}
-              className="form-check-input me-2 float-start"
+              className="form-check-input me-2"
               onChange={(e) =>
                 updateTodo({ ...todo, completed: e.target.checked })
               }
@@ -139,7 +139,7 @@ export default function WorkingWithArraysAsynchronously() {
               </span>
             ) : (
               <FormControl
-                className="w-50 float-start"
+                className="w-50"
                 defaultValue={todo.title}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') {
