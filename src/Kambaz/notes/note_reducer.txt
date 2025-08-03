@@ -1,0 +1,139 @@
+以assignment为例
+/Users/jrd/cs/cs5610_web/kambaz-react-web-app/src/Kambaz/Courses/Assignments/index.tsx
+/Users/jrd/cs/cs5610_web/kambaz-react-web-app/src/Kambaz/Courses/Assignments/reducer.ts
+
+Q： deleteAssignment(assignmentId)
+就感觉这个不是立马执行的 跟普通的function call不大一样
+"真正执行逻辑的是 reducer
+他也叫deleteAssignment"
+那你一开始说的action creator deleteAssignment 在哪看
+
+A: 
+对，我帮你把这两个 同名的 deleteAssignment 分清楚，这样就不容易混了。
+
+⸻
+
+1️⃣ Reducer 里的 deleteAssignment
+
+在 createSlice({...}) 里：
+
+const assignmentsSlice = createSlice({
+  name: "assignments",
+  initialState: { assignments: [] },
+  reducers: {
+    deleteAssignment: (state, { payload: assignmentId }) => {
+      state.assignments = state.assignments.filter(
+        (a: any) => a._id !== assignmentId
+      );
+    },
+  },
+});
+
+这个 deleteAssignment 是你自己在 reducers 里写的 reducer 函数。
+它描述了收到 action 后，如何修改 state。
+
+⸻
+
+2️⃣ Action Creator deleteAssignment
+
+当你写：
+
+export const { deleteAssignment } = assignmentsSlice.actions;
+
+Redux Toolkit 会自动根据你在 reducers 中的 key（比如 "deleteAssignment"）生成同名的 action creator 函数。
+
+它的作用：
+
+deleteAssignment("abc123");
+
+会返回：
+
+{
+  type: "assignments/deleteAssignment", // 自动生成的 action type
+  payload: "abc123"                      // 你传的参数
+}
+
+这一步只是生成一个描述要发生什么的对象，并不会执行 reducer 里的逻辑。
+
+⸻
+
+3️⃣ dispatch 让 reducer 运行
+
+dispatch(deleteAssignment("abc123"));
+
+流程：
+	1.	deleteAssignment("abc123") → 生成 action 对象
+	2.	dispatch(...) → 把 action 送到 Redux store
+	3.	store 发现 type 对应 assignments/deleteAssignment
+	4.	调用 reducer 里的 deleteAssignment 函数 → 修改 state
+
+⸻
+
+📌 你问“在哪看 action creator”
+
+答：
+	•	它就是 assignmentsSlice.actions.deleteAssignment
+	•	你已经 export const { deleteAssignment } = assignmentsSlice.actions; 了
+	•	如果你想验证，可以：
+
+console.log(deleteAssignment("abc123"));
+
+就能看到它是个返回 { type, payload } 的函数。
+
+
+
+Q:
+为什么action也可以写成{payload}
+
+A:
+这是因为 Redux Toolkit 在调用你的 reducer 时，第二个参数 action 永远是一个对象：
+
+{
+  type: "assignments/deleteAssignment", // action 类型
+  payload: "abc123"                     // 你传给 action creator 的参数
+}
+
+
+⸻
+
+普通写法
+
+deleteAssignment: (state, action) => {
+  const assignmentId = action.payload;
+  state.assignments = state.assignments.filter(
+    (a: any) => a._id !== assignmentId
+  );
+}
+
+这里 action 是完整的对象，你再去访问 action.payload。
+
+⸻
+
+解构写法
+
+你也可以在函数参数里直接解构：
+
+deleteAssignment: (state, { payload: assignmentId }) => {
+  state.assignments = state.assignments.filter(
+    (a: any) => a._id !== assignmentId
+  );
+}
+
+	•	{ payload: assignmentId } 这句是 ES6 解构赋值，意思是：
+	•	从 action 对象中取出 payload
+	•	并且重命名成 assignmentId
+	•	所以不用在函数体里写 const assignmentId = action.payload; 了。
+
+⸻
+
+等价关系
+
+(state, { payload: assignmentId }) => {...}
+
+等价于：
+
+(state, action) => {
+  const assignmentId = action.payload;
+  ...
+}
+

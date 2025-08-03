@@ -7,7 +7,7 @@ const initialState = {
 };
 
 const assignmentsSlice = createSlice({
-  name: "assignments",
+  name: "assignments", // sliceName
   initialState,
   reducers: {
     addAssignment: (state, { payload: assignment }) => {
