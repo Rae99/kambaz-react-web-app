@@ -19,7 +19,8 @@ export default function Profile() {
     if (!currentUser) return navigate('/Kambaz/Account/Signin');
     setProfile(currentUser);
   };
-  const signout = () => {
+  const signout = async () => {
+    await client.signout();
     dispatch(setCurrentUser(null));
     navigate('/Kambaz/Account/Signin');
   };
