@@ -3,6 +3,11 @@ const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
 const USERS_API = `${HTTP_SERVER}/api/users`;
 const axiosWithCredentials = axios.create({ withCredentials: true });
 
+export const createCourse = async (course: any) => {
+  const { data } = await axiosWithCredentials.post(`${USERS_API}/current/courses`, course);
+  return data;
+};
+
 export const findMyCourses = async () => {
   const { data } = await axiosWithCredentials.get(`${USERS_API}/current/courses`);
   return data;
