@@ -7,8 +7,45 @@ import './styles.css';
 import ProtectedRoute from './Account/ProtectedRoute';
 import ProtectedCourseRoute from './Courses/ProtectedCourseRoute';
 import Session from './Account/Session';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as userClient from './Account/client';
+import * as courseClient from './Courses/client';
+import { setAllCourses, setEnrolledCourses } from './Courses/reducer';
 
 export default function Kambaz() {
+  const dispatch = useDispatch();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+  useEffect(() => {
+    // Fetch all courses for "All Courses" tab
+    async function fetchAllCourses() {
+      try {
+        const courses = await courseClient.fetchAllCourses(); // <-- must implement/find this API call
+        dispatch(setAllCourses(courses)); // <-- set all courses in Redux
+      } catch (err) {
+        console.error('Failed to fetch all courses', err);
+      }
+    }
+
+    // Fetch only enrolled courses for current user
+    async function fetchEnrolledCourses() {
+      if (currentUser) {
+        try {
+          const courses = await userClient.findMyCourses();
+          dispatch(setEnrolledCourses(courses)); // <-- set enrolled courses in Redux
+        } catch (err) {
+          console.error('Failed to fetch enrolled courses', err);
+        }
+      } else {
+        // If logged out, clear enrolledCourses list
+        dispatch(setEnrolledCourses([]));
+      }
+    }
+    fetchAllCourses();
+    fetchEnrolledCourses();
+  }, [currentUser, dispatch]); // <-- dependency array
+
   return (
     <Session>
       <div id="wd-kambaz">
