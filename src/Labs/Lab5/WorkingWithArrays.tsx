@@ -11,6 +11,7 @@ export default function WorkingWithArrays() {
     due: '2021-09-09',
     completed: false,
   });
+
   return (
     <div id="wd-working-with-arrays">
       <h3>Working with Arrays</h3>
@@ -102,13 +103,10 @@ export default function WorkingWithArrays() {
           className="form-check-input"
           type="checkbox"
           id="wd-completed"
-          defaultChecked={todo.completed}
+          checked={todo.completed}
           onChange={(e) => {
             const newCompleted = e.target.checked;
-            console.log(`Checkbox changed to: ${newCompleted}`);
-            console.log(
-              `Navigating to: ${API}/${todo.id}/completed/${newCompleted}`
-            );
+            setTodo({ ...todo, completed: newCompleted });
             window.location.href = `${API}/${todo.id}/completed/${newCompleted}`;
           }}
         />
