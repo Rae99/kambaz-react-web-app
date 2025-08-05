@@ -16,3 +16,10 @@ export const updateCourse = async (course: any) => {
   return data;
 };
 
+export const findModulesForCourse = async (courseId: string) => {
+  const response = await axios
+    .get(`${COURSES_API}/${courseId}/modules`);
+  return response.data;
+};
+
+

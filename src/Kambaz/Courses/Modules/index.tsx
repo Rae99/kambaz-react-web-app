@@ -1,17 +1,32 @@
-import { FormControl, ListGroup } from "react-bootstrap";
-import ModulesControls from "./ModulesControls";
-import { BsGripVertical } from "react-icons/bs";
-import LessonControlButtons from "./LessonControlButtons";
-import ModuleControlButtons from "./ModuleControlButtons";
-import { useParams } from "react-router";
-import { useState } from "react";
-import { addModule, editModule, updateModule, deleteModule } from "./reducer";
-import { useSelector, useDispatch } from "react-redux";
+import { FormControl, ListGroup } from 'react-bootstrap';
+import ModulesControls from './ModulesControls';
+import { BsGripVertical } from 'react-icons/bs';
+import LessonControlButtons from './LessonControlButtons';
+import ModuleControlButtons from './ModuleControlButtons';
+import { useParams } from 'react-router';
+import { useState, useEffect } from 'react';
+import {
+  setModules,
+  addModule,
+  editModule,
+  updateModule,
+  deleteModule,
+} from './reducer';
+import { useSelector, useDispatch } from 'react-redux';
+import * as coursesClient from '../client';
 
 export default function Modules() {
   const { cid } = useParams();
   const { modules } = useSelector((state: any) => state.modulesReducer);
   const dispatch = useDispatch();
+  const fetchModules = async () => {
+    const modules = await coursesClient.findModulesForCourse(cid as string);
+    dispatch(setModules(modules));
+  };
+  useEffect(() => {
+    fetchModules();
+  }, []);
+
   const [moduleName, setModuleName] = useState("");
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === "FACULTY";
@@ -31,13 +46,12 @@ export default function Modules() {
         setModuleName={setModuleName}
         addModule={() => {
           dispatch(addModule({ name: moduleName, course: cid }));
-          setModuleName("");
+          setModuleName('');
         }}
       />
 
       <ListGroup className="rounded-0" id="wd-modules">
         {modules
-          .filter((module: any) => module.course === cid)
           .map((module: any) => (
             <ListGroup.Item
               key={module._id}
@@ -45,7 +59,7 @@ export default function Modules() {
             >
               {/* p-0 removes padding, mb-5 adds bottom margin*/}
               <div className="wd-title p-3 ps-2 bg-secondary">
-                <BsGripVertical className="me-2 fs-3" />{" "}
+                <BsGripVertical className="me-2 fs-3" />{' '}
                 {!module.editing && module.name}
                 {module.editing && (
                   <FormControl
@@ -56,7 +70,7 @@ export default function Modules() {
                       )
                     }
                     onKeyDown={(e) => {
-                      if (e.key === "Enter") {
+                      if (e.key === 'Enter') {
                         dispatch(updateModule({ ...module, editing: false }));
                       }
                     }}
