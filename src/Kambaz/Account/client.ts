@@ -1,7 +1,12 @@
 import axios from "axios";
+const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
+const USERS_API = `${HTTP_SERVER}/api/users`;
 const axiosWithCredentials = axios.create({ withCredentials: true });
-export const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
-export const USERS_API = `${HTTP_SERVER}/api/users`;
+
+export const findMyCourses = async () => {
+  const { data } = await axiosWithCredentials.get(`${USERS_API}/current/courses`);
+  return data;
+};
 
 export const signin = async (credentials: any) => {
   const response = await axiosWithCredentials.post( `${USERS_API}/signin`, credentials );
@@ -27,5 +32,7 @@ export const signout = async () => {
   const response = await axiosWithCredentials.post(`${USERS_API}/signout`);
   return response.data;
 };
+
+
 
 

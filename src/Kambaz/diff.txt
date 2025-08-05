@@ -1,0 +1,496 @@
+diff --git a/src/Kambaz/Account/client.ts b/src/Kambaz/Account/client.ts
+index 86b60aa..805dcde 100644
+--- a/src/Kambaz/Account/client.ts
++++ b/src/Kambaz/Account/client.ts
+@@ -28,4 +28,8 @@ export const signout = async () => {
+   return response.data;
+ };
+ 
++export const findMyCourses = async () => {
++  const { data } = await axiosWithCredentials.get(`${USERS_API}/current/courses`);
++  return data;
++};
+ 
+diff --git a/src/Kambaz/Courses/ProtectedCourseRoute.tsx b/src/Kambaz/Courses/ProtectedCourseRoute.tsx
+index c7a3965..e142ce8 100644
+--- a/src/Kambaz/Courses/ProtectedCourseRoute.tsx
++++ b/src/Kambaz/Courses/ProtectedCourseRoute.tsx
+@@ -1,21 +1,46 @@
+-import { useSelector } from "react-redux";
+-import { useParams, Navigate } from "react-router-dom";
+-import type { ReactNode } from "react";
++import { useState, useEffect } from 'react';
++import type { ReactNode } from 'react';
++import { Navigate, useParams } from 'react-router-dom';
++import { useSelector } from 'react-redux';
++import * as userClient from '../Account/client';
+ 
+ interface ProtectedCourseRouteProps {
+   children: ReactNode;
+ }
+ 
+-export default function ProtectedCourseRoute({ children }: ProtectedCourseRouteProps) {
++export default function ProtectedCourseRoute({
++  children,
++}: ProtectedCourseRouteProps) {
+   const { cid } = useParams();
+   const { currentUser } = useSelector((state: any) => state.accountReducer);
+-  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
++  const [courses, setCourses] = useState<any[]>([]);
++  const [loading, setLoading] = useState(true);
+ 
+-  // Check if user is enrolled in this course
+-  const isEnrolled = enrollments.some(
+-    (enrollment: any) =>
+-      enrollment.user === currentUser._id && enrollment.course === cid
+-  );
++  // Fetch courses from server
++  const fetchCourses = async () => {
++    try {
++      setLoading(true);
++      const serverCourses = await userClient.findMyCourses();
++      setCourses(serverCourses);
++    } catch (error) {
++      console.error('Error fetching courses:', error);
++    } finally {
++      setLoading(false);
++    }
++  };
++
++  useEffect(() => {
++    if (currentUser) {
++      fetchCourses();
++    }
++  }, [currentUser]);
++
++  if (loading) {
++    return <div>Loading...</div>;
++  }
++
++  // Check if user is enrolled in this course by checking if the course exists in server-fetched courses
++  const isEnrolled = courses.some((course: any) => course._id === cid);
+ 
+   // If not enrolled, redirect to Dashboard
+   if (!isEnrolled) {
+@@ -24,4 +49,4 @@ export default function ProtectedCourseRoute({ children }: ProtectedCourseRouteP
+ 
+   // If enrolled, render the children (course content)
+   return <>{children}</>;
+-} 
+\ No newline at end of file
++}
+diff --git a/src/Kambaz/Courses/client.ts b/src/Kambaz/Courses/client.ts
+new file mode 100644
+index 0000000..7d74e51
+--- /dev/null
++++ b/src/Kambaz/Courses/client.ts
+@@ -0,0 +1,7 @@
++import axios from "axios";
++const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
++const COURSES_API = `${HTTP_SERVER}/api/courses`;
++export const fetchAllCourses = async () => {
++  const { data } = await axios.get(COURSES_API);
++  return data;
++};
+diff --git a/src/Kambaz/Courses/index.tsx b/src/Kambaz/Courses/index.tsx
+index c29d815..04e5367 100644
+--- a/src/Kambaz/Courses/index.tsx
++++ b/src/Kambaz/Courses/index.tsx
+@@ -1,29 +1,61 @@
+-import Modules from "./Modules";
+-import Home from "./Home";
+-import Assignments from "./Assignments";
+-import AssignmentEditor from "./Assignments/Editor";
+-import CourseNavigation from "./Navigation";
+-import { Routes, Route, Navigate } from "react-router-dom";
+-import { FaAlignJustify } from "react-icons/fa6";
+-import PeopleTable from "./People/Table";
+-import Piazza from "./Piazza";
+-import Zoom from "./Zoom";
+-import Quizzes from "./Quizzes";
+-import Grades from "./Grades";
+-import { useSelector } from "react-redux";
+-import { useParams, useLocation } from "react-router-dom";
++import Modules from './Modules';
++import Home from './Home';
++import Assignments from './Assignments';
++import AssignmentEditor from './Assignments/Editor';
++import CourseNavigation from './Navigation';
++import { Routes, Route, Navigate } from 'react-router-dom';
++import { FaAlignJustify } from 'react-icons/fa6';
++import PeopleTable from './People/Table';
++import Piazza from './Piazza';
++import Zoom from './Zoom';
++import Quizzes from './Quizzes';
++import Grades from './Grades';
++import { useSelector } from 'react-redux';
++import { useParams, useLocation } from 'react-router-dom';
++import { useState, useEffect } from 'react';
++import * as userClient from '../Account/client';
+ 
+ export default function Courses() {
+-  const { courses } = useSelector((state: any) => state.courseReducer);
+   const { cid } = useParams();
+-  const course = courses.find((course: any) => course._id === cid);
+   const { pathname } = useLocation();
++  const [courses, setCourses] = useState<any[]>([]);
++  const [loading, setLoading] = useState(true);
++  const { currentUser } = useSelector((state: any) => state.accountReducer);
++
++  // Fetch courses from server
++  const fetchCourses = async () => {
++    try {
++      setLoading(true);
++      const serverCourses = await userClient.findMyCourses();
++      setCourses(serverCourses);
++    } catch (error) {
++      console.error('Error fetching courses:', error);
++    } finally {
++      setLoading(false);
++    }
++  };
++
++  useEffect(() => {
++    if (currentUser) {
++      fetchCourses();
++    }
++  }, [currentUser]);
++
++  const course = courses.find((course: any) => course._id === cid);
++
++  if (loading) {
++    return <div>Loading course...</div>;
++  }
++
++  if (!course) {
++    return <Navigate to="/Kambaz/Dashboard" replace />;
++  }
+ 
+   return (
+     <div id="wd-courses">
+       <h2 className="text-danger">
+         <FaAlignJustify className="me-4 fs-4 mb-1" />
+-        {course && course.name} &gt; {pathname.split("/")[4]}
++        {course && course.name} &gt; {pathname.split('/')[4]}
+         {/* if pathname = "/Kambaz/Courses/1234/Assignments"
+ pathname.split("/")  // result:
+ ["", "Kambaz", "Courses", "1234", "Assignments"] */}
+@@ -55,7 +87,7 @@ pathname.split("/")  // result:
+ 
+ /* 2️⃣ Why mb-1 for aligning icons with text?
+ 	•	Icons often sit slightly below text baseline because their bounding box includes whitespace.
+-	•	mb-1 pulls the icon up by adding bottom margin, visually aligning it with the heading’s baseline.
++	•	mb-1 pulls the icon up by adding bottom margin, visually aligning it with the heading's baseline.
+ 	•	Using mb-0 might leave it slightly too low, while mb-2 (8px) might pull it too high or create too much spacing below.
+ 
+ In practice, mb-1 is a safe, visually balanced default for aligning icons inline with headings or text.*/
+diff --git a/src/Kambaz/Dashboard.tsx b/src/Kambaz/Dashboard.tsx
+index 8d075f2..451b8f0 100644
+--- a/src/Kambaz/Dashboard.tsx
++++ b/src/Kambaz/Dashboard.tsx
+@@ -1,43 +1,83 @@
+-import { Link } from "react-router-dom";
+-import { Col, FormControl, Row } from "react-bootstrap";
+-import { Card, Button } from "react-bootstrap";
+-import { useSelector, useDispatch } from "react-redux";
+-import { useState } from "react";
+-import { addCourse, deleteCourse, updateCourse } from "./Courses/reducer";
+-import { enrollInCourse, unenrollFromCourse } from "./Courses/enrollmentsReducer";
+-
++import { Link } from 'react-router-dom';
++import { Col, FormControl, Row } from 'react-bootstrap';
++import { Card, Button } from 'react-bootstrap';
++import { useSelector, useDispatch } from 'react-redux';
++import { useState, useEffect } from 'react';
++import { addCourse, deleteCourse, updateCourse } from './Courses/reducer';
++import {
++  enrollInCourse,
++  unenrollFromCourse,
++} from './Courses/enrollmentsReducer';
++import * as userClient from './Account/client';
++import * as courseClient from './Courses/client';
+ 
+ export default function Dashboard() {
+   const dispatch = useDispatch();
+-  const { courses } = useSelector((state: any) => state.courseReducer);
+-  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
+   const { currentUser } = useSelector((state: any) => state.accountReducer);
+-  const isFaculty = currentUser?.role === "FACULTY";
+-  
+-  // Local state for editing course and enrollment view
++  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
++  const isFaculty = currentUser?.role === 'FACULTY';
++
++  // State for courses fetched from server
++  const [enrolledCourses, setEnrolledCourses] = useState<any[]>([]);
++  const [allCourses, setAllCourses] = useState<any[]>([]);
++  const [loading, setLoading] = useState(true);
++  const [showAllCourses, setShowAllCourses] = useState(false);
++
++  // Local state for editing course
+   const [editingCourse, setEditingCourse] = useState<any>({
+-    _id: "0",
+-    name: "New Course",
+-    number: "New Number",
+-    startDate: "2023-09-10",
+-    endDate: "2023-12-15",
+-    image: "/images/reactjs.jpg",
+-    description: "New Description",
++    _id: '0',
++    name: 'New Course',
++    number: 'New Number',
++    startDate: '2023-09-10',
++    endDate: '2023-12-15',
++    image: '/images/reactjs.jpg',
++    description: 'New Description',
+   });
+-  const [showAllCourses, setShowAllCourses] = useState(false);
++
++  // Fetch enrolled courses from server
++  const fetchEnrolledCourses = async () => {
++    try {
++      const serverCourses = await userClient.findMyCourses();
++      setEnrolledCourses(serverCourses);
++    } catch (error) {
++      console.error("Error fetching enrolled courses:", error);
++    }
++  };
++
++  // Fetch all courses from server
++  const fetchAllCourses = async () => {
++    try {
++      const courses = await courseClient.fetchAllCourses();
++      setAllCourses(courses);
++    } catch (error) {
++      console.error("Error fetching all courses:", error);
++    }
++  };
++
++  useEffect(() => {
++    if (currentUser) {
++      setLoading(true);
++      Promise.all([fetchEnrolledCourses(), fetchAllCourses()]).finally(() => {
++        setLoading(false);
++      });
++    }
++  }, [currentUser]);
+ 
+   const handleAddCourse = () => {
+-    const newCourse = { ...editingCourse, _id: new Date().getTime().toString() };
++    const newCourse = {
++      ...editingCourse,
++      _id: new Date().getTime().toString(),
++    };
+     dispatch(addCourse(newCourse));
+     // Reset form
+     setEditingCourse({
+-      _id: "0",
+-      name: "New Course",
+-      number: "New Number",
+-      startDate: "2023-09-10",
+-      endDate: "2023-12-15",
+-      image: "/images/reactjs.jpg",
+-      description: "New Description",
++      _id: '0',
++      name: 'New Course',
++      number: 'New Number',
++      startDate: '2023-09-10',
++      endDate: '2023-12-15',
++      image: '/images/reactjs.jpg',
++      description: 'New Description',
+     });
+   };
+ 
+@@ -68,36 +108,45 @@ export default function Dashboard() {
+     );
+   };
+ 
+-  // Filter courses based on enrollment status and view mode
+-  const getFilteredCourses = () => {
++  // Get courses to display based on view mode
++  const getDisplayCourses = () => {
+     if (showAllCourses) {
+-      return courses;
++      return allCourses;
+     } else {
+-      return courses.filter((course: any) => isEnrolledInCourse(course._id));
++      return enrolledCourses;
+     }
+   };
+ 
+-  const filteredCourses = getFilteredCourses();
++  const displayCourses = getDisplayCourses();
+ 
+-  console.log("currentUser", currentUser);
+-  console.log("role", currentUser?.role);
++  console.log('currentUser', currentUser);
++  console.log('role', currentUser?.role);
+   // @ts-ignore
+   window.testStore = useSelector((state) => state);
+-  
++
++  if (loading) {
++    return (
++      <div id="wd-dashboard">
++        <h1 id="wd-dashboard-title">Dashboard</h1>
++        <p>Loading courses...</p>
++      </div>
++    );
++  }
++
+   return (
+     <div id="wd-dashboard">
+       <div className="d-flex justify-content-between align-items-center">
+         <h1 id="wd-dashboard-title">Dashboard</h1>
+-        <Button 
+-          variant="primary" 
++        <Button
++          variant="primary"
+           onClick={() => setShowAllCourses(!showAllCourses)}
+           className="me-3"
+         >
+-          {showAllCourses ? "My Enrollments" : "All Courses"}
++          {showAllCourses ? 'My Enrollments' : 'All Courses'}
+         </Button>
+       </div>
+       <hr />
+-      
++
+       {isFaculty && (
+         <>
+           <h5>
+@@ -107,8 +156,8 @@ export default function Dashboard() {
+               id="wd-add-new-course-click"
+               onClick={handleAddCourse}
+             >
+-              {" "}
+-              Add{" "}
++              {' '}
++              Add{' '}
+             </button>
+             <button
+               className="btn btn-warning float-end me-2"
+@@ -122,31 +171,41 @@ export default function Dashboard() {
+           <FormControl
+             value={editingCourse.name}
+             className="mb-2"
+-            onChange={(e) => setEditingCourse({ ...editingCourse, name: e.target.value })}
++            onChange={(e) =>
++              setEditingCourse({ ...editingCourse, name: e.target.value })
++            }
+           />
+           <FormControl
+             as="textarea"
+             value={editingCourse.description}
+             rows={3}
+             onChange={(e) =>
+-              setEditingCourse({ ...editingCourse, description: e.target.value })
++              setEditingCourse({
++                ...editingCourse,
++                description: e.target.value,
++              })
+             }
+           />
+           <hr />
+         </>
+       )}
+-      
++
+       <h2 id="wd-dashboard-published">
+-        {showAllCourses ? "All Courses" : "My Enrolled Courses"} ({filteredCourses.length})
++        {showAllCourses ? 'All Courses' : 'My Enrolled Courses'} (
++        {displayCourses.length})
+       </h2>
+       <hr />
+-      
++
+       <div id="wd-dashboard-courses">
+         <Row xs={1} md={5} className="g-4">
+-          {filteredCourses.map((course: any) => {
++          {displayCourses.map((course: any) => {
+             const isEnrolled = isEnrolledInCourse(course._id);
+             return (
+-              <Col key={course._id} className="wd-dashboard-course" style={{ width: "300px" }}>
++              <Col
++                key={course._id}
++                className="wd-dashboard-course"
++                style={{ width: '300px' }}
++              >
+                 <Card>
+                   <Link
+                     to={`/Kambaz/Courses/${course._id}/Home`}
+@@ -160,16 +219,16 @@ export default function Dashboard() {
+                     />
+                     <Card.Body className="card-body">
+                       <Card.Title className="wd-dashboard-course-title text-nowrap overflow-hidden">
+-                        {course.name}{" "}
++                        {course.name}{' '}
+                       </Card.Title>
+                       <Card.Text
+                         className="wd-dashboard-course-description overflow-hidden"
+-                        style={{ height: "100px" }}
++                        style={{ height: '100px' }}
+                       >
+-                        {course.description}{" "}
++                        {course.description}{' '}
+                       </Card.Text>
+                       <Button variant="primary"> Go </Button>
+-                      
++
+                       {isFaculty && (
+                         <>
+                           <button
+@@ -194,8 +253,8 @@ export default function Dashboard() {
+                           </button>
+                         </>
+                       )}
+-                      
+-                      {!isFaculty && (
++
++                      {!isFaculty && showAllCourses && (
+                         <button
+                           onClick={(event) => {
+                             event.preventDefault();
+@@ -206,10 +265,10 @@ export default function Dashboard() {
+                             }
+                           }}
+                           className={`btn float-end me-2 ${
+-                            isEnrolled ? "btn-danger" : "btn-success"
++                            isEnrolled ? 'btn-danger' : 'btn-success'
+                           }`}
+                         >
+-                          {isEnrolled ? "Unenroll" : "Enroll"}
++                          {isEnrolled ? 'Unenroll' : 'Enroll'}
+                         </button>
+                       )}
+                     </Card.Body>
+diff --git a/src/Kambaz/index.tsx b/src/Kambaz/index.tsx
+index 66a8c29..61b18d9 100644
+--- a/src/Kambaz/index.tsx
++++ b/src/Kambaz/index.tsx
+@@ -7,8 +7,25 @@ import './styles.css';
+ import ProtectedRoute from './Account/ProtectedRoute';
+ import ProtectedCourseRoute from './Courses/ProtectedCourseRoute';
+ import Session from './Account/Session';
++import { useState, useEffect } from 'react';
++import { useSelector } from 'react-redux';
++import * as userClient from "./Account/client";
+ 
+ export default function Kambaz() {
++  const [courses, setCourses] = useState<any[]>([]);
++  const { currentUser } = useSelector((state: any) => state.accountReducer);
++  const fetchCourses = async () => {
++    try {
++      const courses = await userClient.findMyCourses();
++      setCourses(courses);
++    } catch (error) {
++      console.error(error);
++    }
++  };
++  useEffect(() => {
++    fetchCourses();
++  }, [currentUser]);
++
+   return (
+     <Session>
+       <div id="wd-kambaz">
