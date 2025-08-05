@@ -21,6 +21,11 @@ export default function Modules() {
   const { modules } = useSelector((state: any) => state.modulesReducer);
   const dispatch = useDispatch();
 
+  const saveModule = async (module: any) => {
+    await modulesClient.updateModule(module);
+    dispatch(updateModule(module));
+  };
+
   const removeModule = async (moduleId: string) => {
     await modulesClient.deleteModule(moduleId);
     dispatch(deleteModule(moduleId));
@@ -41,9 +46,9 @@ export default function Modules() {
     fetchModules();
   }, []);
 
-  const [moduleName, setModuleName] = useState("");
+  const [moduleName, setModuleName] = useState('');
   const { currentUser } = useSelector((state: any) => state.accountReducer);
-  const isFaculty = currentUser?.role === "FACULTY";
+  const isFaculty = currentUser?.role === 'FACULTY';
   // @ts-ignore
   window.testStore = useSelector((state) => state);
 
@@ -62,59 +67,56 @@ export default function Modules() {
       />
 
       <ListGroup className="rounded-0" id="wd-modules">
-        {modules
-          .map((module: any) => (
-            <ListGroup.Item
-              key={module._id}
-              className="wd-module p-0 mb-5 fs-5 border-gray"
-            >
-              {/* p-0 removes padding, mb-5 adds bottom margin*/}
-              <div className="wd-title p-3 ps-2 bg-secondary">
-                <BsGripVertical className="me-2 fs-3" />{' '}
-                {!module.editing && module.name}
-                {module.editing && (
-                  <FormControl
-                    className="w-50 d-inline-block"
-                    onChange={(e) =>
-                      dispatch(
-                        updateModule({ ...module, name: e.target.value })
-                      )
+        {modules.map((module: any) => (
+          <ListGroup.Item
+            key={module._id}
+            className="wd-module p-0 mb-5 fs-5 border-gray"
+          >
+            {/* p-0 removes padding, mb-5 adds bottom margin*/}
+            <div className="wd-title p-3 ps-2 bg-secondary">
+              <BsGripVertical className="me-2 fs-3" />{' '}
+              {!module.editing && module.name}
+              {module.editing && (
+                <FormControl
+                  className="w-50 d-inline-block"
+                  onChange={(e) =>
+                    dispatch(updateModule({ ...module, name: e.target.value }))
+                  }
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      saveModule({ ...module, editing: false });
                     }
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        dispatch(updateModule({ ...module, editing: false }));
-                      }
-                    }}
-                    defaultValue={module.name}
-                  />
-                )}
-                {isFaculty && (
-                  <ModuleControlButtons
-                    moduleId={module._id}
-                    deleteModule={(moduleId) => removeModule(moduleId)}
-                    editModule={(moduleId) => dispatch(editModule(moduleId))}
-                  />
-                )}
-              </div>
-              {/* React Best Practice • UI events and handlers are often defined in
+                  }}
+                  defaultValue={module.name}
+                />
+              )}
+              {isFaculty && (
+                <ModuleControlButtons
+                  moduleId={module._id}
+                  deleteModule={(moduleId) => removeModule(moduleId)}
+                  editModule={(moduleId) => dispatch(editModule(moduleId))}
+                />
+              )}
+            </div>
+            {/* React Best Practice • UI events and handlers are often defined in
               the component that owns the relevant state. 
               Presentational components receive handler functions as props, and just “call back” to the parent when needed. */}
-              {module.lessons && ( // This checks if module.lessons exists
-                <ListGroup className="wd-lessons rounded-0">
-                  {module.lessons.map((lesson: any) => (
-                    <ListGroup.Item
-                      key={lesson._id}
-                      className="wd-lesson p-3 ps-1"
-                    >
-                      <BsGripVertical className="me-2 fs-3" />
-                      {lesson.name}
-                      <LessonControlButtons />
-                    </ListGroup.Item>
-                  ))}
-                </ListGroup>
-              )}
-            </ListGroup.Item>
-          ))}
+            {module.lessons && ( // This checks if module.lessons exists
+              <ListGroup className="wd-lessons rounded-0">
+                {module.lessons.map((lesson: any) => (
+                  <ListGroup.Item
+                    key={lesson._id}
+                    className="wd-lesson p-3 ps-1"
+                  >
+                    <BsGripVertical className="me-2 fs-3" />
+                    {lesson.name}
+                    <LessonControlButtons />
+                  </ListGroup.Item>
+                ))}
+              </ListGroup>
+            )}
+          </ListGroup.Item>
+        ))}
       </ListGroup>
     </div>
   );
