@@ -6,7 +6,10 @@ import { FaRegEdit } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import { useParams } from 'react-router';
 import { useSelector, useDispatch } from 'react-redux';
-import { deleteAssignment } from './reducer';
+import { useState, useEffect } from 'react';
+import { setAssignments, deleteAssignment } from './reducer';
+import * as coursesClient from '../client';
+import * as assignmentsClient from './client';
 import AssignmentControlButtons from './AssignmentControlButtons';
 
 export default function Assignments() {
@@ -23,8 +26,24 @@ export default function Assignments() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === 'FACULTY';
 
-  const handleDeleteAssignment = (assignmentId: string) => {
+  const removeAssignment = async (assignmentId: string) => {
+    await assignmentsClient.deleteAssignment(assignmentId);
     dispatch(deleteAssignment(assignmentId));
+  };
+
+  const fetchAssignments = async () => {
+    const assignments = await coursesClient.findAssignmentsForCourse(
+      cid as string
+    );
+    dispatch(setAssignments(assignments));
+  };
+
+  useEffect(() => {
+    fetchAssignments();
+  }, []);
+
+  const handleDeleteAssignment = (assignmentId: string) => {
+    removeAssignment(assignmentId);
   };
 
   // call deleteAssignment("abc123") will return a Redux action object
