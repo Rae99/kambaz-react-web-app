@@ -9,6 +9,7 @@ import {
   unenrollFromCourse,
 } from './Courses/enrollmentsReducer';
 import * as userClient from './Account/client';
+import * as courseClient from './Courses/client';
 
 export default function Dashboard() {
   const dispatch = useDispatch();
@@ -54,7 +55,8 @@ export default function Dashboard() {
     dispatch(updateCourse(editingCourse));
   };
 
-  const handleDeleteCourse = (courseId: string) => {
+  const handleDeleteCourse = async (courseId: string) => {
+    await courseClient.deleteCourse(courseId);
     dispatch(deleteCourse(courseId));
   };
 
