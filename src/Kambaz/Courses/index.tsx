@@ -1,29 +1,29 @@
-import Modules from "./Modules";
-import Home from "./Home";
-import Assignments from "./Assignments";
-import AssignmentEditor from "./Assignments/Editor";
-import CourseNavigation from "./Navigation";
-import { Routes, Route, Navigate } from "react-router-dom";
-import { FaAlignJustify } from "react-icons/fa6";
-import PeopleTable from "./People/Table";
-import Piazza from "./Piazza";
-import Zoom from "./Zoom";
-import Quizzes from "./Quizzes";
-import Grades from "./Grades";
-import { useSelector } from "react-redux";
-import { useParams, useLocation } from "react-router-dom";
+import Modules from './Modules';
+import Home from './Home';
+import Assignments from './Assignments';
+import AssignmentEditor from './Assignments/Editor';
+import CourseNavigation from './Navigation';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { FaAlignJustify } from 'react-icons/fa6';
+import PeopleTable from './People/Table';
+import Piazza from './Piazza';
+import Zoom from './Zoom';
+import Quizzes from './Quizzes';
+import Grades from './Grades';
+import { useSelector } from 'react-redux';
+import { useParams, useLocation } from 'react-router-dom';
 
 export default function Courses() {
-  const { courses } = useSelector((state: any) => state.courseReducer);
+  const { allCourses } = useSelector((state: any) => state.courseReducer);
   const { cid } = useParams();
-  const course = courses.find((course: any) => course._id === cid);
+  const course = allCourses.find((course: any) => course._id === cid);
   const { pathname } = useLocation();
 
   return (
     <div id="wd-courses">
       <h2 className="text-danger">
         <FaAlignJustify className="me-4 fs-4 mb-1" />
-        {course && course.name} &gt; {pathname.split("/")[4]}
+        {course && course.name} &gt; {pathname.split('/')[4]}
         {/* if pathname = "/Kambaz/Courses/1234/Assignments"
 pathname.split("/")  // result:
 ["", "Kambaz", "Courses", "1234", "Assignments"] */}
