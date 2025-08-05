@@ -2,14 +2,23 @@ import { Link } from 'react-router-dom';
 import { Col, FormControl, Row } from 'react-bootstrap';
 import { Card, Button } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
-import { useState } from 'react';
-import { addCourse, deleteCourse, updateCourse } from './Courses/reducer';
+import { useState, useEffect } from 'react';
 import {
+  addCourse,
+  deleteCourse,
+  updateCourse,
+  setEnrolledCourses,
+} from './Courses/reducer';
+
+import {
+  setEnrollments,
   enrollInCourse,
   unenrollFromCourse,
 } from './Courses/enrollmentsReducer';
+
 import * as userClient from './Account/client';
 import * as courseClient from './Courses/client';
+import * as enrollmentsClient from './Courses/Enrollments/client';
 
 export default function Dashboard() {
   const dispatch = useDispatch();
@@ -32,6 +41,23 @@ export default function Dashboard() {
   });
 
   const [showAllCourses, setShowAllCourses] = useState(false);
+
+  // Fetch enrollments when component loads
+  useEffect(() => {
+    const fetchEnrollments = async () => {
+      if (currentUser) {
+        try {
+          const userEnrollments =
+            await enrollmentsClient.findEnrollmentsForUser(currentUser._id);
+          dispatch(setEnrollments(userEnrollments));
+        } catch (error) {
+          console.error('Error fetching enrollments:', error);
+        }
+      }
+    };
+
+    fetchEnrollments();
+  }, [currentUser, dispatch]);
 
   const handleAddCourse = async () => {
     // Post the new course to the server and get the created course back
@@ -76,13 +102,31 @@ export default function Dashboard() {
     setEditingCourse(course);
   };
 
-  // Just let the server handle enroll/un-enroll (you might POST/DELETE in real app)
-  const handleEnroll = (courseId: string) => {
-    dispatch(enrollInCourse({ userId: currentUser._id, courseId }));
+  // Server-integrated enroll/unenroll functions
+  const handleEnroll = async (courseId: string) => {
+    try {
+      await enrollmentsClient.enrollUserInCourse(currentUser._id, courseId);
+      dispatch(enrollInCourse({ userId: currentUser._id, courseId }));
+
+      // Refresh enrolled courses from server
+      const updatedEnrolledCourses = await userClient.findMyCourses();
+      dispatch(setEnrolledCourses(updatedEnrolledCourses));
+    } catch (error) {
+      console.error('Error enrolling in course:', error);
+    }
   };
 
-  const handleUnenroll = (courseId: string) => {
-    dispatch(unenrollFromCourse({ userId: currentUser._id, courseId }));
+  const handleUnenroll = async (courseId: string) => {
+    try {
+      await enrollmentsClient.unenrollUserFromCourse(currentUser._id, courseId);
+      dispatch(unenrollFromCourse({ userId: currentUser._id, courseId }));
+
+      // Refresh enrolled courses from server
+      const updatedEnrolledCourses = await userClient.findMyCourses();
+      dispatch(setEnrolledCourses(updatedEnrolledCourses));
+    } catch (error) {
+      console.error('Error unenrolling from course:', error);
+    }
   };
 
   // Choose which courses to show based on UI toggle.

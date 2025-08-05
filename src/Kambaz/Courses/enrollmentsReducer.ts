@@ -1,15 +1,17 @@
 import { createSlice } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";  
-import { enrollments } from "../Database";
 
 const initialState = {
-  enrollments: enrollments
+  enrollments: []
 };
 
 const enrollmentsSlice = createSlice({
   name: "enrollments",
   initialState,
   reducers: {
+    setEnrollments: (state, action) => {
+      state.enrollments = action.payload;
+    },
     enrollInCourse: (state, action) => {
       const { userId, courseId } = action.payload;
       // Check if enrollment already exists
@@ -37,5 +39,5 @@ const enrollmentsSlice = createSlice({
   },
 });
 
-export const { enrollInCourse, unenrollFromCourse } = enrollmentsSlice.actions;
+export const { setEnrollments, enrollInCourse, unenrollFromCourse } = enrollmentsSlice.actions;
 export default enrollmentsSlice.reducer; 
