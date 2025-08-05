@@ -11,12 +11,12 @@ import {
 
 export default function Dashboard() {
   const dispatch = useDispatch();
+  // Now both course lists come from Redux, set by the server API!
   const { allCourses, enrolledCourses } = useSelector((state: any) => state.courseReducer);
-  const { enrollments } = useSelector((state: any) => state.enrollmentsReducer);
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === 'FACULTY';
 
-  // Local state for editing course and enrollment view
+  // Local UI state for editing course
   const [editingCourse, setEditingCourse] = useState<any>({
     _id: '0',
     name: 'New Course',
@@ -34,7 +34,6 @@ export default function Dashboard() {
       _id: new Date().getTime().toString(),
     };
     dispatch(addCourse(newCourse));
-    // Reset form
     setEditingCourse({
       _id: '0',
       name: 'New Course',
@@ -58,6 +57,7 @@ export default function Dashboard() {
     setEditingCourse(course);
   };
 
+  // Just let the server handle enroll/un-enroll (you might POST/DELETE in real app)
   const handleEnroll = (courseId: string) => {
     dispatch(enrollInCourse({ userId: currentUser._id, courseId }));
   };
@@ -66,28 +66,14 @@ export default function Dashboard() {
     dispatch(unenrollFromCourse({ userId: currentUser._id, courseId }));
   };
 
+  // Choose which courses to show based on UI toggle.
+  const courseList = showAllCourses ? allCourses : enrolledCourses;
+
+  // If you need to know if the user is enrolled in a course for button states,
+  // you might still want this, but it should use enrolledCourses from Redux only.
   const isEnrolledInCourse = (courseId: string) => {
-    return enrollments.some(
-      (enrollment: any) =>
-        enrollment.user === currentUser._id && enrollment.course === courseId
-    );
+    return enrolledCourses.some((course: any) => course._id === courseId);
   };
-
-  // Filter courses based on enrollment status and view mode
-  const getFilteredCourses = () => {
-    if (showAllCourses) {
-      return courses;
-    } else {
-      return courses.filter((course: any) => isEnrolledInCourse(course._id));
-    }
-  };
-
-  const filteredCourses = getFilteredCourses();
-
-  console.log('currentUser', currentUser);
-  console.log('role', currentUser?.role);
-  // @ts-ignore
-  window.testStore = useSelector((state) => state);
 
   return (
     <div id="wd-dashboard">
@@ -112,8 +98,7 @@ export default function Dashboard() {
               id="wd-add-new-course-click"
               onClick={handleAddCourse}
             >
-              {' '}
-              Add{' '}
+              Add
             </button>
             <button
               className="btn btn-warning float-end me-2"
@@ -148,13 +133,13 @@ export default function Dashboard() {
 
       <h2 id="wd-dashboard-published">
         {showAllCourses ? 'All Courses' : 'My Enrolled Courses'} (
-        {filteredCourses.length})
+        {courseList.length})
       </h2>
       <hr />
 
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
-          {filteredCourses.map((course: any) => {
+          {courseList.map((course: any) => {
             const isEnrolled = isEnrolledInCourse(course._id);
             return (
               <Col
