@@ -51,8 +51,20 @@ export default function Dashboard() {
     });
   };
 
-  const handleUpdateCourse = () => {
-    dispatch(updateCourse(editingCourse));
+  const handleUpdateCourse = async () => {
+    const updatedCourse = await courseClient.updateCourse(editingCourse);
+    dispatch(updateCourse(updatedCourse));
+
+    // Optionally, clear the editing form
+    setEditingCourse({
+      _id: '0',
+      name: 'New Course',
+      number: 'New Number',
+      startDate: '2023-09-10',
+      endDate: '2023-12-15',
+      image: '/images/reactjs.jpg',
+      description: 'New Description',
+    });
   };
 
   const handleDeleteCourse = async (courseId: string) => {
