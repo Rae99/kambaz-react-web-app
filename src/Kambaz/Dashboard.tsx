@@ -8,11 +8,14 @@ import {
   enrollInCourse,
   unenrollFromCourse,
 } from './Courses/enrollmentsReducer';
+import * as userClient from './Account/client';
 
 export default function Dashboard() {
   const dispatch = useDispatch();
   // Now both course lists come from Redux, set by the server API!
-  const { allCourses, enrolledCourses } = useSelector((state: any) => state.courseReducer);
+  const { allCourses, enrolledCourses } = useSelector(
+    (state: any) => state.courseReducer
+  );
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const isFaculty = currentUser?.role === 'FACULTY';
 
@@ -26,14 +29,16 @@ export default function Dashboard() {
     image: '/images/reactjs.jpg',
     description: 'New Description',
   });
+
   const [showAllCourses, setShowAllCourses] = useState(false);
 
-  const handleAddCourse = () => {
-    const newCourse = {
-      ...editingCourse,
-      _id: new Date().getTime().toString(),
-    };
+  const handleAddCourse = async () => {
+    // Post the new course to the server and get the created course back
+    const newCourse = await userClient.createCourse(editingCourse);
+    // Add the new course to Redux state
     dispatch(addCourse(newCourse));
+
+    // Optionally, clear the editing form
     setEditingCourse({
       _id: '0',
       name: 'New Course',

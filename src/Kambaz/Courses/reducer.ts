@@ -27,12 +27,17 @@ const courseSlice = createSlice({
         description: action.payload.description,
       };
       state.allCourses = [...state.allCourses, newCourse] as any;
+      state.enrolledCourses = [...state.enrolledCourses, newCourse] as any;
     },
     deleteCourse: (state, action) => {
       state.allCourses = state.allCourses.filter((course: any) => course._id !== action.payload);
+      state.enrolledCourses = state.enrolledCourses.filter((course: any) => course._id !== action.payload);
     },
     updateCourse: (state, action) => {
       state.allCourses = state.allCourses.map((course: any) =>
+        course._id === action.payload._id ? action.payload : course
+      ) as any;
+      state.enrolledCourses = state.enrolledCourses.map((course: any) =>
         course._id === action.payload._id ? action.payload : course
       ) as any;
     },
