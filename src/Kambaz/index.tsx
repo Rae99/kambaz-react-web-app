@@ -11,7 +11,9 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import * as userClient from './Account/client';
 import * as courseClient from './Courses/client';
+import * as enrollmentsClient from './Courses/Enrollments/client';
 import { setAllCourses, setEnrolledCourses } from './Courses/reducer';
+import { setEnrollments } from './Courses/enrollmentsReducer';
 
 export default function Kambaz() {
   const dispatch = useDispatch();
@@ -42,8 +44,26 @@ export default function Kambaz() {
         dispatch(setEnrolledCourses([]));
       }
     }
+
+    // Fetch enrollments for current user
+    async function fetchEnrollments() {
+      if (currentUser) {
+        try {
+          const userEnrollments =
+            await enrollmentsClient.findEnrollmentsForUser(currentUser._id);
+          dispatch(setEnrollments(userEnrollments));
+        } catch (err) {
+          console.error('Failed to fetch enrollments', err);
+        }
+      } else {
+        // If logged out, clear enrollments
+        dispatch(setEnrollments([]));
+      }
+    }
+
     fetchAllCourses();
     fetchEnrolledCourses();
+    fetchEnrollments();
   }, [currentUser, dispatch]); // <-- dependency array
 
   return (

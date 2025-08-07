@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom';
 import { Col, FormControl, Row } from 'react-bootstrap';
 import { Card, Button } from 'react-bootstrap';
 import { useSelector, useDispatch } from 'react-redux';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   addCourse,
   deleteCourse,
@@ -11,7 +11,6 @@ import {
 } from './Courses/reducer';
 
 import {
-  setEnrollments,
   enrollInCourse,
   unenrollFromCourse,
 } from './Courses/enrollmentsReducer';
@@ -41,23 +40,6 @@ export default function Dashboard() {
   });
 
   const [showAllCourses, setShowAllCourses] = useState(false);
-
-  // Fetch enrollments when component loads
-  useEffect(() => {
-    const fetchEnrollments = async () => {
-      if (currentUser) {
-        try {
-          const userEnrollments =
-            await enrollmentsClient.findEnrollmentsForUser(currentUser._id);
-          dispatch(setEnrollments(userEnrollments));
-        } catch (error) {
-          console.error('Error fetching enrollments:', error);
-        }
-      }
-    };
-
-    fetchEnrollments();
-  }, [currentUser, dispatch]);
 
   const handleAddCourse = async () => {
     // Post the new course to the server and get the created course back
