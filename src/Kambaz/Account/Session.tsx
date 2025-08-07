@@ -6,11 +6,20 @@ export default function Session({ children }: { children: any }) {
   const [pending, setPending] = useState(true);
   const dispatch = useDispatch();
   const fetchProfile = async () => {
+    const startTime = Date.now();
     try {
+      console.log('🚀 Starting profile fetch...');
       const currentUser = await client.profile();
+      const duration = Date.now() - startTime;
+      console.log(`✅ Profile fetch successful in ${duration}ms`);
       dispatch(setCurrentUser(currentUser));
     } catch (err: any) {
-      console.error(err);
+      const duration = Date.now() - startTime;
+      console.error(`❌ Profile fetch failed after ${duration}ms:`, err);
+      console.log('🌐 Network info:', {
+        online: navigator.onLine,
+        connection: (navigator as any).connection?.effectiveType || 'unknown',
+      });
     }
     setPending(false);
   };
