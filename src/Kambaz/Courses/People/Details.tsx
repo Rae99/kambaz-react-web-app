@@ -2,12 +2,16 @@ import { useEffect, useState } from 'react';
 import { FaUserCircle } from 'react-icons/fa';
 import { IoCloseSharp } from 'react-icons/io5';
 import { useParams, useNavigate } from 'react-router';
-import { Link } from 'react-router-dom';
 import * as client from '../../Account/client';
 export default function PeopleDetails() {
   const { uid } = useParams();
   const [user, setUser] = useState<any>({});
   const navigate = useNavigate();
+
+  const deleteUser = async (uid: string) => {
+    await client.deleteUser(uid);
+    navigate(-1);
+  };
 
   const fetchUser = async () => {
     if (!uid) return;
@@ -42,7 +46,21 @@ export default function PeopleDetails() {
       <b>Section:</b> <span className="wd-section"> {user.section} </span>{' '}
       <br />
       <b>Total Activity:</b>{' '}
-      <span className="wd-total-activity">{user.totalActivity}</span>{' '}
+      <span className="wd-total-activity">{user.totalActivity}</span> <hr />
+      <button
+        onClick={() => deleteUser(uid)}
+        className="btn btn-danger float-end wd-delete"
+      >
+        {' '}
+        Delete{' '}
+      </button>
+      <button
+        onClick={() => navigate(-1)}
+        className="btn btn-secondary float-start float-end me-2 wd-cancel"
+      >
+        {' '}
+        Cancel{' '}
+      </button>
     </div>
   );
 }
