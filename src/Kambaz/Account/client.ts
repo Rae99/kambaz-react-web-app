@@ -3,6 +3,11 @@ const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
 const USERS_API = `${HTTP_SERVER}/api/users`;
 const axiosWithCredentials = axios.create({ withCredentials: true });
 
+export const createUser = async (user: any) => {
+  const response = await axios.post(`${USERS_API}`, user);
+  return response.data;
+};
+
 export const deleteUser = async (id: string) => {
   const response = await axiosWithCredentials.delete(`${USERS_API}/${id}`);
   return response.data;

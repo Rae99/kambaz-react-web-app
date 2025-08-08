@@ -3,10 +3,37 @@ import { useParams } from 'react-router';
 import PeopleTable from '../Courses/People/Table';
 import * as client from './client';
 import { FormControl } from 'react-bootstrap';
+import { FaPlus } from 'react-icons/fa';
 
 export default function Users() {
   const [name, setName] = useState('');
   const [role, setRole] = useState('');
+  const [users, setUsers] = useState<any[]>([]);
+  const { uid } = useParams();
+  const fetchUsers = async () => {
+    try {
+      const users = await client.findAllUsers();
+      setUsers(users);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+    }
+  };
+  useEffect(() => {
+    fetchUsers();
+  }, [uid]);
+
+  const createUser = async () => {
+    const user = await client.createUser({
+      firstName: 'New',
+      lastName: `User${users.length + 1}`,
+      username: `newuser${Date.now()}`,
+      password: 'password123',
+      email: `email${users.length + 1}@neu.edu`,
+      section: 'S101',
+      role: 'STUDENT',
+    });
+    setUsers([...users, user]);
+  };
 
   const filterUsers = async (nameFilter: string, roleFilter: string) => {
     if (nameFilter && roleFilter) {
@@ -43,19 +70,6 @@ export default function Users() {
     fetchUsers();
   };
 
-  const [users, setUsers] = useState<any[]>([]);
-  const { uid } = useParams();
-  const fetchUsers = async () => {
-    try {
-      const users = await client.findAllUsers();
-      setUsers(users);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-  };
-  useEffect(() => {
-    fetchUsers();
-  }, [uid]);
   return (
     <div>
       <h3>Users</h3>
@@ -70,11 +84,12 @@ export default function Users() {
         onChange={(e) => handleRoleChange(e.target.value)}
         className="form-select float-start w-25 wd-select-role"
       >
-        <option value="">All Roles</option>{' '}
+        <option value="">All Roles</option>
         <option value="STUDENT">Students</option>
-        <option value="TA">Assistants</option>{' '}
+        <option value="TA">Assistants</option>
         <option value="FACULTY">Faculty</option>
         <option value="ADMIN">Administrators</option>
+        <option value="USER">Users</option>
       </select>
       <button
         onClick={clearFilters}
@@ -82,6 +97,13 @@ export default function Users() {
         disabled={!name && !role}
       >
         Clear Filters
+      </button>
+      <button
+        onClick={createUser}
+        className="float-end btn btn-danger wd-add-people"
+      >
+        <FaPlus className="me-2" />
+        Users
       </button>
       <PeopleTable users={users} />
     </div>

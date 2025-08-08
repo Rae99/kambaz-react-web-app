@@ -8,18 +8,25 @@ import { FaPencil } from 'react-icons/fa6';
 export default function PeopleDetails() {
   const { uid } = useParams();
   const [user, setUser] = useState<any>({});
-  const [name, setName] = useState('');
+  const [editedUser, setEditedUser] = useState<any>({});
   const [editing, setEditing] = useState(false);
 
   const navigate = useNavigate();
 
   const saveUser = async () => {
-    const [firstName, lastName] = name.split(' ');
-    const updatedUser = { ...user, firstName, lastName };
-    await client.updateUser(updatedUser);
-    setUser(updatedUser);
+    await client.updateUser(editedUser);
+    setUser(editedUser);
     setEditing(false);
-    navigate(-1);
+  };
+
+  const startEditing = () => {
+    setEditedUser({ ...user });
+    setEditing(true);
+  };
+
+  const cancelEditing = () => {
+    setEditedUser({});
+    setEditing(false);
   };
   const deleteUser = async (uid: string) => {
     await client.deleteUser(uid);
@@ -52,41 +59,149 @@ export default function PeopleDetails() {
       <div className="text-danger fs-4">
         {!editing && (
           <FaPencil
-            onClick={() => setEditing(true)}
+            onClick={startEditing}
             className="float-end fs-5 mt-2 wd-edit"
           />
         )}
         {editing && (
           <FaCheck
-            onClick={() => saveUser()}
+            onClick={saveUser}
             className="float-end fs-5 mt-2 me-2 wd-save"
           />
         )}
+
+        {/* Name Field */}
         {!editing && (
-          <div className="wd-name" onClick={() => setEditing(true)}>
+          <div className="wd-name" onClick={startEditing}>
             {user.firstName} {user.lastName}
           </div>
         )}
-        {user && editing && (
-          <FormControl
-            className="w-50 wd-edit-name"
-            defaultValue={`${user.firstName} ${user.lastName}`}
-            onChange={(e) => setName(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                saveUser();
+        {editing && (
+          <div className="mb-2">
+            <FormControl
+              className="mb-1 wd-edit-firstname"
+              placeholder="First Name"
+              value={editedUser.firstName || ''}
+              onChange={(e) =>
+                setEditedUser({ ...editedUser, firstName: e.target.value })
               }
-            }}
-          />
+            />
+            <FormControl
+              className="wd-edit-lastname"
+              placeholder="Last Name"
+              value={editedUser.lastName || ''}
+              onChange={(e) =>
+                setEditedUser({ ...editedUser, lastName: e.target.value })
+              }
+            />
+          </div>
         )}
       </div>
-      <b>Roles:</b> <span className="wd-roles"> {user.role} </span> <br />
-      <b>Login ID:</b> <span className="wd-login-id"> {user.loginId} </span>{' '}
+      {/* Role Field */}
+      <b>Role:</b> {!editing && <span className="wd-roles">{user.role}</span>}
+      {editing && (
+        <select
+          className="form-select mb-2 wd-edit-role"
+          value={editedUser.role || ''}
+          onChange={(e) =>
+            setEditedUser({ ...editedUser, role: e.target.value })
+          }
+        >
+          <option value="STUDENT">Student</option>
+          <option value="TA">TA</option>
+          <option value="FACULTY">Faculty</option>
+          <option value="ADMIN">Admin</option>
+          <option value="USER">User</option>
+        </select>
+      )}
       <br />
-      <b>Section:</b> <span className="wd-section"> {user.section} </span>{' '}
+      {/* Email Field */}
+      <b>Email:</b> {!editing && <span className="wd-email">{user.email}</span>}
+      {editing && (
+        <FormControl
+          className="mb-2 wd-edit-email"
+          placeholder="Email address"
+          type="email"
+          value={editedUser.email || ''}
+          onChange={(e) =>
+            setEditedUser({ ...editedUser, email: e.target.value })
+          }
+        />
+      )}
       <br />
+      {/* Username Field */}
+      <b>Username:</b>{' '}
+      {!editing && <span className="wd-username">{user.username}</span>}
+      {editing && (
+        <FormControl
+          className="mb-2 wd-edit-username"
+          placeholder="Username"
+          value={editedUser.username || ''}
+          onChange={(e) =>
+            setEditedUser({ ...editedUser, username: e.target.value })
+          }
+        />
+      )}
+      <br />
+      {/* Password Field */}
+      <b>Password:</b>{' '}
+      {!editing && <span className="wd-password">••••••••</span>}
+      {editing && (
+        <FormControl
+          className="mb-2 wd-edit-password"
+          placeholder="Password"
+          type="password"
+          value={editedUser.password || ''}
+          onChange={(e) =>
+            setEditedUser({ ...editedUser, password: e.target.value })
+          }
+        />
+      )}
+      <br />
+      {/* Login ID Field */}
+      <b>Login ID:</b>{' '}
+      {!editing && <span className="wd-login-id">{user.loginId}</span>}
+      {editing && (
+        <FormControl
+          className="mb-2 wd-edit-loginid"
+          placeholder="Login ID"
+          value={editedUser.loginId || ''}
+          onChange={(e) =>
+            setEditedUser({ ...editedUser, loginId: e.target.value })
+          }
+        />
+      )}
+      <br />
+      {/* Section Field */}
+      <b>Section:</b>{' '}
+      {!editing && <span className="wd-section">{user.section}</span>}
+      {editing && (
+        <FormControl
+          className="mb-2 wd-edit-section"
+          placeholder="Section"
+          value={editedUser.section || ''}
+          onChange={(e) =>
+            setEditedUser({ ...editedUser, section: e.target.value })
+          }
+        />
+      )}
+      <br />
+      {/* Total Activity Field */}
       <b>Total Activity:</b>{' '}
-      <span className="wd-total-activity">{user.totalActivity}</span> <hr />
+      {!editing && (
+        <span className="wd-total-activity">{user.totalActivity}</span>
+      )}
+      {editing && (
+        <FormControl
+          className="mb-2 wd-edit-totalactivity"
+          placeholder="Total Activity"
+          value={editedUser.totalActivity || ''}
+          onChange={(e) =>
+            setEditedUser({ ...editedUser, totalActivity: e.target.value })
+          }
+        />
+      )}
+      <hr />
       <button
         onClick={() => deleteUser(uid)}
         className="btn btn-danger float-end wd-delete"
@@ -95,11 +210,10 @@ export default function PeopleDetails() {
         Delete{' '}
       </button>
       <button
-        onClick={() => navigate(-1)}
-        className="btn btn-secondary float-start float-end me-2 wd-cancel"
+        onClick={editing ? cancelEditing : () => navigate(-1)}
+        className="btn btn-secondary float-start me-2 wd-cancel"
       >
-        {' '}
-        Cancel{' '}
+        {editing ? 'Cancel' : 'Close'}
       </button>
     </div>
   );

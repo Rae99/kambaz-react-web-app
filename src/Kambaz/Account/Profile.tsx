@@ -102,10 +102,10 @@ export default function Profile() {
             id="wd-role"
             value={profile.role}
           >
-            <option value="USER">User</option>{' '}
-            <option value="ADMIN">Admin</option>
-            <option value="FACULTY">Faculty</option>{' '}
             <option value="STUDENT">Student</option>
+            <option value="TA">TA</option>
+            <option value="FACULTY">Faculty</option>
+            <option value="ADMIN">Admin</option>
           </select>
           <button
             onClick={updateProfile}
