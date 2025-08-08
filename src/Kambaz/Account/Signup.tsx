@@ -19,7 +19,7 @@ export default function Signup() {
       <FormControl
         value={user.username}
         onChange={(e) => setUser({ ...user, username: e.target.value })}
-        className="wd-username b-2"
+        className="wd-username mb-2"
         placeholder="username"
       />
       <FormControl

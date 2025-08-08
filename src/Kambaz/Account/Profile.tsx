@@ -49,6 +49,7 @@ export default function Profile() {
             defaultValue={profile.username}
             id="wd-username"
             className="mb-2"
+            placeholder="Enter username"
             onChange={(e) =>
               setProfile({ ...profile, username: e.target.value })
             }
@@ -57,6 +58,7 @@ export default function Profile() {
             defaultValue={profile.password}
             id="wd-password"
             className="mb-2"
+            placeholder="Enter password"
             onChange={(e) =>
               setProfile({ ...profile, password: e.target.value })
             }
@@ -65,6 +67,7 @@ export default function Profile() {
             defaultValue={profile.firstName}
             id="wd-firstname"
             className="mb-2"
+            placeholder="Enter first name"
             onChange={(e) =>
               setProfile({ ...profile, firstName: e.target.value })
             }
@@ -73,6 +76,7 @@ export default function Profile() {
             defaultValue={profile.lastName}
             id="wd-lastname"
             className="mb-2"
+            placeholder="Enter last name"
             onChange={(e) =>
               setProfile({ ...profile, lastName: e.target.value })
             }
@@ -81,6 +85,7 @@ export default function Profile() {
             defaultValue={profile.dob ? profile.dob.split('T')[0] : ''}
             id="wd-dob"
             className="mb-2"
+            placeholder="Select date of birth"
             onChange={(e) => setProfile({ ...profile, dob: e.target.value })}
             type="date"
           />
@@ -88,6 +93,7 @@ export default function Profile() {
             defaultValue={profile.email}
             id="wd-email"
             className="mb-2"
+            placeholder="Enter email address"
             onChange={(e) => setProfile({ ...profile, email: e.target.value })}
           />
           <select
