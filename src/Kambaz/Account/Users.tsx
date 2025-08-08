@@ -6,25 +6,41 @@ import { FormControl } from 'react-bootstrap';
 
 export default function Users() {
   const [name, setName] = useState('');
-  const filterUsersByName = async (name: string) => {
-    setName(name);
-    if (name) {
-      const users = await client.findUsersByPartialName(name);
+  const [role, setRole] = useState('');
+
+  const filterUsers = async (nameFilter: string, roleFilter: string) => {
+    if (nameFilter && roleFilter) {
+      // Both filters active - use combined filtering
+      const users = await client.findUsersByNameAndRole(nameFilter, roleFilter);
+      setUsers(users);
+    } else if (nameFilter) {
+      // Only name filter active
+      const users = await client.findUsersByPartialName(nameFilter);
+      setUsers(users);
+    } else if (roleFilter) {
+      // Only role filter active
+      const users = await client.findUsersByRole(roleFilter);
       setUsers(users);
     } else {
+      // No filters - show all users
       fetchUsers();
     }
   };
 
-  const [role, setRole] = useState('');
-  const filterUsersByRole = async (role: string) => {
-    setRole(role);
-    if (role) {
-      const users = await client.findUsersByRole(role);
-      setUsers(users);
-    } else {
-      fetchUsers();
-    }
+  const handleNameChange = (newName: string) => {
+    setName(newName);
+    filterUsers(newName, role);
+  };
+
+  const handleRoleChange = (newRole: string) => {
+    setRole(newRole);
+    filterUsers(name, newRole);
+  };
+
+  const clearFilters = () => {
+    setName('');
+    setRole('');
+    fetchUsers();
   };
 
   const [users, setUsers] = useState<any[]>([]);
@@ -44,13 +60,14 @@ export default function Users() {
     <div>
       <h3>Users</h3>
       <FormControl
-        onChange={(e) => filterUsersByName(e.target.value)}
+        value={name}
+        onChange={(e) => handleNameChange(e.target.value)}
         placeholder="Search people"
         className="float-start w-25 me-2 wd-filter-by-name"
       />
       <select
         value={role}
-        onChange={(e) => filterUsersByRole(e.target.value)}
+        onChange={(e) => handleRoleChange(e.target.value)}
         className="form-select float-start w-25 wd-select-role"
       >
         <option value="">All Roles</option>{' '}
@@ -59,6 +76,13 @@ export default function Users() {
         <option value="FACULTY">Faculty</option>
         <option value="ADMIN">Administrators</option>
       </select>
+      <button
+        onClick={clearFilters}
+        className="btn btn-secondary ms-2"
+        disabled={!name && !role}
+      >
+        Clear Filters
+      </button>
       <PeopleTable users={users} />
     </div>
   );

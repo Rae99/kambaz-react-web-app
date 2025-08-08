@@ -14,9 +14,22 @@ export const findUsersByRole = async (role: string) => {
 };
 
 export const findUsersByPartialName = async (name: string) => {
-  const response = await axios.get(`${USERS_API}?name=${name}`);
+  const response = await axiosWithCredentials.get(`${USERS_API}?name=${name}`);
   return response.data;
 };
+
+export const findUsersByNameAndRole = async (name: string, role: string) => {
+  const params = new URLSearchParams();
+  if (name) params.append('name', name);
+  if (role) params.append('role', role);
+  const response = await axiosWithCredentials.get(`${USERS_API}?${params.toString()}`);
+  return response.data;
+};
+
+// 💡 Why use URLSearchParams instead of manual string concatenation?
+	// •	It automatically URL-encodes special characters and spaces.
+	// •	It handles joining multiple parameters with &.
+	// •	It’s cleaner and avoids ? / & placement mistakes.
 
 
 export const createCourse = async (course: any) => {
