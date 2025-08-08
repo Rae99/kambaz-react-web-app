@@ -66,7 +66,7 @@ export default function Profile() {
             }
           />
           <FormControl
-            defaultValue={profile.dob}
+            defaultValue={profile.dob ? profile.dob.split('T')[0] : ''}
             id="wd-dob"
             className="mb-2"
             onChange={(e) => setProfile({ ...profile, dob: e.target.value })}

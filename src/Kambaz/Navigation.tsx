@@ -1,17 +1,17 @@
-import { AiOutlineDashboard } from "react-icons/ai";
-import { IoCalendarOutline } from "react-icons/io5";
-import { LiaBookSolid, LiaCogSolid } from "react-icons/lia";
-import { FaInbox, FaRegCircleUser } from "react-icons/fa6";
-import { Link, useLocation } from "react-router-dom";
-import { ListGroup } from "react-bootstrap";
+import { AiOutlineDashboard } from 'react-icons/ai';
+import { IoCalendarOutline } from 'react-icons/io5';
+import { LiaBookSolid, LiaCogSolid } from 'react-icons/lia';
+import { FaInbox, FaRegCircleUser } from 'react-icons/fa6';
+import { Link, useLocation } from 'react-router-dom';
+import { ListGroup } from 'react-bootstrap';
 export default function KambazNavigation() {
   const { pathname } = useLocation();
   const links = [
-    { label: "Dashboard", path: "/Kambaz/Dashboard", icon: AiOutlineDashboard },
-    { label: "Courses", path: "/Kambaz/Dashboard", icon: LiaBookSolid },
-    { label: "Calendar", path: "/Kambaz/Calendar", icon: IoCalendarOutline },
-    { label: "Inbox", path: "/Kambaz/Inbox", icon: FaInbox },
-    { label: "Labs", path: "/Labs", icon: LiaCogSolid },
+    { label: 'Dashboard', path: '/Kambaz/Dashboard', icon: AiOutlineDashboard },
+    { label: 'Courses', path: '/Kambaz/Dashboard', icon: LiaBookSolid },
+    { label: 'Calendar', path: '/Kambaz/Calendar', icon: IoCalendarOutline },
+    { label: 'Inbox', path: '/Kambaz/Inbox', icon: FaInbox },
+    { label: 'Labs', path: '/Labs', icon: LiaCogSolid },
   ];
   // We want to do it dynamicallly, so don't put AiOutlineDashboard in a <>
   // link.icon is a function we can pass a parameter into
@@ -36,14 +36,14 @@ export default function KambazNavigation() {
         to="/Kambaz/Account"
         className={`text-center border-0 bg-black
             ${
-              pathname.includes("Account")
-                ? "bg-white text-danger"
-                : "bg-black text-white"
+              pathname.includes('Account')
+                ? 'bg-white text-danger'
+                : 'bg-black text-white'
             }`}
       >
         <FaRegCircleUser
           className={`fs-1 ${
-            pathname.includes("Account") ? "text-danger" : "text-white"
+            pathname.includes('Account') ? 'text-danger' : 'text-white'
           }`}
         />
         <br />
@@ -51,17 +51,17 @@ export default function KambazNavigation() {
       </ListGroup.Item>
       {links.map((link) => (
         <ListGroup.Item
-          key={link.path} // The key needs to be unique for each item
+          key={link.label} // Use label as key since it's unique
           as={Link}
           to={link.path}
           className={`bg-black text-center border-0
               ${
                 pathname.includes(link.label)
-                  ? "text-danger bg-white"
-                  : "text-white bg-black"
+                  ? 'text-danger bg-white'
+                  : 'text-white bg-black'
               }`}
         >
-          {link.icon({ className: "fs-1 text-danger" })}
+          {link.icon({ className: 'fs-1 text-danger' })}
           <br />
           {link.label}
         </ListGroup.Item>
