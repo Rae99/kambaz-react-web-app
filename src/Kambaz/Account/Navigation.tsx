@@ -1,9 +1,13 @@
-import { useSelector } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import { useSelector } from 'react-redux';
+import { Link, useLocation } from 'react-router-dom';
 export default function AccountNavigation() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
 
-  const links = currentUser ? ["Profile"] : ["Signin", "Signup"];
+  const links = currentUser
+    ? currentUser.role === 'ADMIN'
+      ? ['Profile', 'Users']
+      : ['Profile']
+    : ['Signin', 'Signup'];
   const { pathname } = useLocation();
 
   return (
@@ -15,8 +19,8 @@ export default function AccountNavigation() {
             id={`wd-account-${link.toLowerCase()}-link`}
             className={
               pathname.includes(link)
-                ? "text-decoration-none text-dark d-block border-start border-3 border-dark ps-2"
-                : "text-danger d-block ps-2"
+                ? 'text-decoration-none text-dark d-block border-start border-3 border-dark ps-2'
+                : 'text-danger d-block ps-2'
             }
           >
             {link}

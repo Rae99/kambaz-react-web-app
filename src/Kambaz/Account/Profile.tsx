@@ -11,8 +11,13 @@ export default function Profile() {
   const navigate = useNavigate();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const updateProfile = async () => {
-    const updatedProfile = await client.updateUser(profile);
-    dispatch(setCurrentUser(updatedProfile));
+    try {
+      const updatedProfile = await client.updateUser(profile);
+      dispatch(setCurrentUser(updatedProfile));
+      setProfile(updatedProfile); // Update local profile state to reflect the changes
+    } catch (error) {
+      console.error('Failed to update profile:', error);
+    }
   };
 
   const fetchProfile = () => {
@@ -27,6 +32,13 @@ export default function Profile() {
   useEffect(() => {
     fetchProfile();
   }, []);
+
+  // Update local profile state when currentUser changes from Redux
+  useEffect(() => {
+    if (currentUser) {
+      setProfile(currentUser);
+    }
+  }, [currentUser]);
   // This effect does not depend on any variable. Only run it after mounting.
   return (
     <div className="container mt-5" style={{ maxWidth: 400 }}>
@@ -82,6 +94,7 @@ export default function Profile() {
             onChange={(e) => setProfile({ ...profile, role: e.target.value })}
             className="form-control mb-2"
             id="wd-role"
+            value={profile.role}
           >
             <option value="USER">User</option>{' '}
             <option value="ADMIN">Admin</option>
