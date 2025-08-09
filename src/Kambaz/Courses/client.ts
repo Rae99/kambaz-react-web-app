@@ -1,8 +1,10 @@
 import axios from "axios";
 const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
 const COURSES_API = `${HTTP_SERVER}/api/courses`;
+const axiosWithCredentials = axios.create({ withCredentials: true });
+
 export const fetchAllCourses = async () => {
-  const { data } = await axios.get(COURSES_API);
+  const { data } = await axiosWithCredentials.get(COURSES_API);
   return data;
 };
 
