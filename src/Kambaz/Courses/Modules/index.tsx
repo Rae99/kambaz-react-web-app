@@ -38,13 +38,13 @@ export default function Modules() {
     dispatch(addModule(module));
   };
 
-  const fetchModules = async () => {
+  const fetchModulesForCourse = async () => {
     const modules = await coursesClient.findModulesForCourse(cid as string);
     dispatch(setModules(modules));
   };
   useEffect(() => {
-    fetchModules();
-  }, []);
+    fetchModulesForCourse();
+  }, [cid]); 
 
   const [moduleName, setModuleName] = useState('');
   const { currentUser } = useSelector((state: any) => state.accountReducer);
