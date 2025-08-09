@@ -36,6 +36,7 @@ export default function Modules() {
     const newModule = { name: moduleName, course: cid };
     const module = await coursesClient.createModuleForCourse(cid, newModule);
     dispatch(addModule(module));
+    setModuleName(''); // Clear input field after adding
   };
 
   const fetchModulesForCourse = async () => {
@@ -44,7 +45,7 @@ export default function Modules() {
   };
   useEffect(() => {
     fetchModulesForCourse();
-  }, [cid]); 
+  }, [cid]);
 
   const [moduleName, setModuleName] = useState('');
   const { currentUser } = useSelector((state: any) => state.accountReducer);
