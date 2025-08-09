@@ -43,7 +43,7 @@ export default function Dashboard() {
 
   const handleAddCourse = async () => {
     // Post the new course to the server and get the created course back
-    const newCourse = await userClient.createCourse(editingCourse);
+    const newCourse = await courseClient.createCourse(editingCourse);
     // Add the new course to Redux state
     dispatch(addCourse(newCourse));
 

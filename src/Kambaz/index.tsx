@@ -15,7 +15,6 @@ import * as enrollmentsClient from './Courses/Enrollments/client';
 import { setAllCourses, setEnrolledCourses } from './Courses/reducer';
 import { setEnrollments } from './Courses/enrollmentsReducer';
 
-
 export default function Kambaz() {
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
