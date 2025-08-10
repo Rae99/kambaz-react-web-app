@@ -23,8 +23,10 @@ export default function Kambaz() {
     // Fetch all courses for "All Courses" tab
     async function fetchAllCourses() {
       try {
-        const courses = await courseClient.fetchAllCourses(); // <-- must implement/find this API call
-        dispatch(setAllCourses(courses)); // <-- set all courses in Redux
+        console.log('Fetching all courses...');
+        const courses = await courseClient.fetchAllCourses();
+        console.log('All courses fetched:', courses);
+        dispatch(setAllCourses(courses));
       } catch (err) {
         console.error('Failed to fetch all courses', err);
       }
@@ -34,13 +36,15 @@ export default function Kambaz() {
     async function fetchEnrolledCourses() {
       if (currentUser) {
         try {
+          console.log('Fetching enrolled courses for user:', currentUser._id);
           const courses = await userClient.findMyCourses();
-          dispatch(setEnrolledCourses(courses)); // <-- set enrolled courses in Redux
+          console.log('Enrolled courses fetched:', courses);
+          dispatch(setEnrolledCourses(courses));
         } catch (err) {
           console.error('Failed to fetch enrolled courses', err);
         }
       } else {
-        // If logged out, clear enrolledCourses list
+        console.log('No currentUser, clearing enrolled courses');
         dispatch(setEnrolledCourses([]));
       }
     }
@@ -49,14 +53,16 @@ export default function Kambaz() {
     async function fetchEnrollments() {
       if (currentUser) {
         try {
+          console.log('Fetching enrollments for user:', currentUser._id);
           const userEnrollments =
             await enrollmentsClient.findEnrollmentsForUser(currentUser._id);
+          console.log('Enrollments fetched:', userEnrollments);
           dispatch(setEnrollments(userEnrollments));
         } catch (err) {
           console.error('Failed to fetch enrollments', err);
         }
       } else {
-        // If logged out, clear enrollments
+        console.log('No currentUser, clearing enrollments');
         dispatch(setEnrollments([]));
       }
     }
@@ -64,7 +70,7 @@ export default function Kambaz() {
     fetchAllCourses();
     fetchEnrolledCourses();
     fetchEnrollments();
-  }, [currentUser, dispatch]); // <-- dependency array
+  }, [currentUser, dispatch]);
 
   return (
     <Session>

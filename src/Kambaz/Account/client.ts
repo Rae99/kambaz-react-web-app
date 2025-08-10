@@ -3,8 +3,19 @@ const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
 const USERS_API = `${HTTP_SERVER}/api/users`;
 const axiosWithCredentials = axios.create({ withCredentials: true });
 
+
+export const enrollUserInCourse = async (userId: string, courseId: string) => {
+  const { data } = await axiosWithCredentials.post(`${USERS_API}/${userId}/courses/${courseId}`);
+  return data;
+};
+
+export const unenrollUserFromCourse = async (userId: string, courseId: string) => {
+  const { data } = await axiosWithCredentials.delete(`${USERS_API}/${userId}/courses/${courseId}`);
+  return data;
+};
+
 export const createUser = async (user: any) => {
-  const response = await axios.post(`${USERS_API}`, user);
+  const response = await axiosWithCredentials.post(`${USERS_API}`, user);
   return response.data;
 };
 
@@ -54,6 +65,11 @@ export const createCourse = async (course: any) => {
 
 export const findMyCourses = async () => {
   const { data } = await axiosWithCredentials.get(`${USERS_API}/current/courses`);
+  return data;
+};
+
+export const findCoursesForUser = async (userId: string) => {
+  const { data } = await axiosWithCredentials.get(`${USERS_API}/${userId}/courses`);
   return data;
 };
 

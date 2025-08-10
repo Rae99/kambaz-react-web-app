@@ -21,7 +21,7 @@ import * as enrollmentsClient from './Courses/Enrollments/client';
 
 export default function Dashboard() {
   const dispatch = useDispatch();
-  // Now both course lists come from Redux, set by the server API!
+  // Redux state
   const { allCourses, enrolledCourses } = useSelector(
     (state: any) => state.courseReducer
   );
@@ -42,42 +42,48 @@ export default function Dashboard() {
   const [showAllCourses, setShowAllCourses] = useState(false);
 
   const handleAddCourse = async () => {
-    // Post the new course to the server and get the created course back
-    const newCourse = await courseClient.createCourse(editingCourse);
-    // Add the new course to Redux state
-    dispatch(addCourse(newCourse));
-
-    // Optionally, clear the editing form
-    setEditingCourse({
-      _id: '0',
-      name: 'New Course',
-      number: 'New Number',
-      startDate: '2023-09-10',
-      endDate: '2023-12-15',
-      image: '/images/reactjs.jpg',
-      description: 'New Description',
-    });
+    try {
+      const newCourse = await courseClient.createCourse(editingCourse);
+      dispatch(addCourse(newCourse));
+      setEditingCourse({
+        _id: '0',
+        name: 'New Course',
+        number: 'New Number',
+        startDate: '2023-09-10',
+        endDate: '2023-12-15',
+        image: '/images/reactjs.jpg',
+        description: 'New Description',
+      });
+    } catch (error) {
+      console.error('Error adding course:', error);
+    }
   };
 
   const handleUpdateCourse = async () => {
-    const updatedCourse = await courseClient.updateCourse(editingCourse);
-    dispatch(updateCourse(updatedCourse));
-
-    // Optionally, clear the editing form
-    setEditingCourse({
-      _id: '0',
-      name: 'New Course',
-      number: 'New Number',
-      startDate: '2023-09-10',
-      endDate: '2023-12-15',
-      image: '/images/reactjs.jpg',
-      description: 'New Description',
-    });
+    try {
+      const updatedCourse = await courseClient.updateCourse(editingCourse);
+      dispatch(updateCourse(updatedCourse));
+      setEditingCourse({
+        _id: '0',
+        name: 'New Course',
+        number: 'New Number',
+        startDate: '2023-09-10',
+        endDate: '2023-12-15',
+        image: '/images/reactjs.jpg',
+        description: 'New Description',
+      });
+    } catch (error) {
+      console.error('Error updating course:', error);
+    }
   };
 
   const handleDeleteCourse = async (courseId: string) => {
-    await courseClient.deleteCourse(courseId);
-    dispatch(deleteCourse(courseId));
+    try {
+      await courseClient.deleteCourse(courseId);
+      dispatch(deleteCourse(courseId));
+    } catch (error) {
+      console.error('Error deleting course:', error);
+    }
   };
 
   const handleEditCourse = (course: any) => {
@@ -87,12 +93,20 @@ export default function Dashboard() {
   // Server-integrated enroll/unenroll functions
   const handleEnroll = async (courseId: string) => {
     try {
-      await enrollmentsClient.enrollUserInCourse(currentUser._id, courseId);
+      console.log('Enrolling user:', currentUser._id, 'in course:', courseId);
+      const result = await userClient.enrollUserInCourse(
+        currentUser._id,
+        courseId
+      );
+      console.log('Enrollment API response:', result);
+
       dispatch(enrollInCourse({ userId: currentUser._id, courseId }));
 
       // Refresh enrolled courses from server
       const updatedEnrolledCourses = await userClient.findMyCourses();
+      console.log('Updated enrolled courses:', updatedEnrolledCourses);
       dispatch(setEnrolledCourses(updatedEnrolledCourses));
+      console.log('Enrollment successful');
     } catch (error) {
       console.error('Error enrolling in course:', error);
     }
@@ -100,25 +114,46 @@ export default function Dashboard() {
 
   const handleUnenroll = async (courseId: string) => {
     try {
-      await enrollmentsClient.unenrollUserFromCourse(currentUser._id, courseId);
+      console.log(
+        'Unenrolling user:',
+        currentUser._id,
+        'from course:',
+        courseId
+      );
+      const result = await userClient.unenrollUserFromCourse(
+        currentUser._id,
+        courseId
+      );
+      console.log('Unenrollment API response:', result);
+
       dispatch(unenrollFromCourse({ userId: currentUser._id, courseId }));
 
       // Refresh enrolled courses from server
       const updatedEnrolledCourses = await userClient.findMyCourses();
+      console.log(
+        'Updated enrolled courses after unenroll:',
+        updatedEnrolledCourses
+      );
       dispatch(setEnrolledCourses(updatedEnrolledCourses));
+      console.log('Unenrollment successful');
     } catch (error) {
       console.error('Error unenrolling from course:', error);
     }
   };
 
-  // Choose which courses to show based on UI toggle.
+  // Choose which courses to show based on UI toggle
   const courseList = showAllCourses ? allCourses : enrolledCourses;
 
-  // If you need to know if the user is enrolled in a course for button states,
-  // you might still want this, but it should use enrolledCourses from Redux only.
+  // Check if user is enrolled in a course
   const isEnrolledInCourse = (courseId: string) => {
     return enrolledCourses.some((course: any) => course._id === courseId);
   };
+
+  // Debug logging
+  console.log('Dashboard - showAllCourses:', showAllCourses);
+  console.log('Dashboard - allCourses:', allCourses);
+  console.log('Dashboard - enrolledCourses:', enrolledCourses);
+  console.log('Dashboard - courseList:', courseList);
 
   return (
     <div id="wd-dashboard">
@@ -186,6 +221,7 @@ export default function Dashboard() {
         <Row xs={1} md={5} className="g-4">
           {courseList.map((course: any) => {
             const isEnrolled = isEnrolledInCourse(course._id);
+            console.log('Course', course._id, 'isEnrolled:', isEnrolled);
             return (
               <Col
                 key={course._id}
