@@ -5,7 +5,7 @@ import AssignmentEditor from './Assignments/Editor';
 import CourseNavigation from './Navigation';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { FaAlignJustify } from 'react-icons/fa6';
-import PeopleTable from './People/Table';
+import People from './People';
 import Piazza from './Piazza';
 import Zoom from './Zoom';
 import Quizzes from './Quizzes';
@@ -41,7 +41,7 @@ pathname.split("/")  // result:
             <Route path="Modules" element={<Modules />} />
             <Route path="Assignments" element={<Assignments />} />
             <Route path="Assignments/:aid" element={<AssignmentEditor />} />
-            <Route path="People" element={<PeopleTable />} />
+            <Route path="People" element={<People />} />
             <Route path="/Piazza" element={<Piazza />} />
             <Route path="Zoom" element={<Zoom />} />
             <Route path="Quizzes" element={<Quizzes />} />

@@ -12,7 +12,9 @@ export default function Profile() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const updateProfile = async () => {
     try {
+      console.log('Updating profile with data:', profile);
       const updatedProfile = await client.updateUser(profile);
+      console.log('Profile updated successfully:', updatedProfile);
       dispatch(setCurrentUser(updatedProfile));
       setProfile(updatedProfile); // Update local profile state to reflect the changes
     } catch (error) {
