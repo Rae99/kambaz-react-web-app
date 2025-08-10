@@ -17,7 +17,6 @@ import {
 
 import * as userClient from './Account/client';
 import * as courseClient from './Courses/client';
-import * as enrollmentsClient from './Courses/Enrollments/client';
 
 export default function Dashboard() {
   const dispatch = useDispatch();
