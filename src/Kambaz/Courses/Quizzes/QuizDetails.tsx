@@ -253,7 +253,13 @@ export default function QuizDetails() {
               >
                 {quiz.isPublished ? 'Published' : 'Draft'}
               </Button>
-              <Button variant="outline-primary" size="sm">
+              <Button
+                variant="outline-primary"
+                size="sm"
+                onClick={() =>
+                  navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/preview`)
+                }
+              >
                 <FaEye className="me-1" />
                 Preview
               </Button>

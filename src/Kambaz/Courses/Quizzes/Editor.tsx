@@ -31,19 +31,29 @@ export default function QuizEditor() {
   const [quizForm, setQuizForm] = useState<QuizFormData>({
     title: quiz?.title || 'New Quiz',
     description: quiz?.description || 'Quiz description',
+    quizType: quiz?.quizType || 'Graded Quiz',
+    points: quiz?.points || 100,
+    assignmentGroup: quiz?.assignmentGroup || 'Quizzes',
+    shuffleAnswers: quiz?.shuffleAnswers || false,
     timeLimit: quiz?.timeLimit || 30,
+    multipleAttempts: quiz?.multipleAttempts || false,
+    attemptsAllowed: quiz?.attemptsAllowed || 1,
+    showCorrectAnswers: quiz?.showCorrectAnswers || 'Never',
+    accessCode: quiz?.accessCode || '',
+    oneQuestionAtATime: quiz?.oneQuestionAtATime || false,
+    webcamRequired: quiz?.webcamRequired || false,
+    lockQuestionsAfterAnswering: quiz?.lockQuestionsAfterAnswering || false,
     dueDate: quiz?.dueDate
       ? new Date(quiz.dueDate).toISOString().slice(0, 16)
       : '',
     availableDate: quiz?.availableDate
       ? new Date(quiz.availableDate).toISOString().slice(0, 16)
       : new Date().toISOString().slice(0, 16),
-    isPublished: quiz?.isPublished || false,
+    untilDate: quiz?.untilDate
+      ? new Date(quiz.untilDate).toISOString().slice(0, 16)
+      : '',
     questions: quiz?.questions || [],
-    quizType: 'Graded Quiz',
-    shuffleAnswers: false,
-    allowMultipleAttempts: false,
-    showCorrectAnswers: false,
+    isPublished: quiz?.isPublished || false,
   });
 
   // Update form when quiz changes
@@ -52,19 +62,29 @@ export default function QuizEditor() {
       setQuizForm({
         title: quiz.title,
         description: quiz.description,
+        quizType: quiz.quizType || 'Graded Quiz',
+        points: quiz.points || 100,
+        assignmentGroup: quiz.assignmentGroup || 'Quizzes',
+        shuffleAnswers: quiz.shuffleAnswers || false,
         timeLimit: quiz.timeLimit || 30,
+        multipleAttempts: quiz.multipleAttempts || false,
+        attemptsAllowed: quiz.attemptsAllowed || 1,
+        showCorrectAnswers: quiz.showCorrectAnswers || 'Never',
+        accessCode: quiz.accessCode || '',
+        oneQuestionAtATime: quiz.oneQuestionAtATime || false,
+        webcamRequired: quiz.webcamRequired || false,
+        lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering || false,
         dueDate: quiz.dueDate
           ? new Date(quiz.dueDate).toISOString().slice(0, 16)
           : '',
         availableDate: quiz.availableDate
           ? new Date(quiz.availableDate).toISOString().slice(0, 16)
           : '',
-        isPublished: quiz.isPublished,
+        untilDate: quiz.untilDate
+          ? new Date(quiz.untilDate).toISOString().slice(0, 16)
+          : '',
         questions: quiz.questions,
-        quizType: 'Graded Quiz',
-        shuffleAnswers: false,
-        allowMultipleAttempts: false,
-        showCorrectAnswers: false,
+        isPublished: quiz.isPublished,
       });
     }
   }, [quiz]);
@@ -84,6 +104,9 @@ export default function QuizEditor() {
         : new Date().toISOString(),
       dueDate: quizForm.dueDate
         ? new Date(quizForm.dueDate).toISOString()
+        : undefined,
+      untilDate: quizForm.untilDate
+        ? new Date(quizForm.untilDate).toISOString()
         : undefined,
     };
 

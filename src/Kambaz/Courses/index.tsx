@@ -11,6 +11,7 @@ import Zoom from './Zoom';
 import Quizzes from './Quizzes';
 import QuizEditor from './Quizzes/Editor';
 import QuizDetails from './Quizzes/QuizDetails';
+import QuizPreview from './Quizzes/QuizPreview';
 import Grades from './Grades';
 import { useSelector } from 'react-redux';
 import { useParams, useLocation } from 'react-router-dom';
@@ -58,6 +59,7 @@ pathname.split("/")  // result:
             <Route path="Quizzes" element={<Quizzes />} />
             <Route path="Quizzes/:qid" element={<QuizDetails />} />
             <Route path="Quizzes/:qid/edit" element={<QuizEditor />} />
+            <Route path="Quizzes/:qid/preview" element={<QuizPreview />} />
             <Route path="Grades" element={<Grades />} />
           </Routes>
         </div>
