@@ -1,26 +1,16 @@
 import axios from "axios";
-import type { Quiz, QuizAttempt, QuizFormData } from "./types";
+import type { QuizAttempt, QuizFormData } from "./types";
 
 const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
 const QUIZZES_API = `${HTTP_SERVER}/api/quizzes`;
 const ATTEMPTS_API = `${HTTP_SERVER}/api/quiz-attempts`;
 const axiosWithCredentials = axios.create({ withCredentials: true });
 
-// Quiz CRUD operations
-export const createQuiz = async (quiz: QuizFormData, courseId: string) => {
-  const response = await axiosWithCredentials.post(`${QUIZZES_API}`, { ...quiz, courseId });
-  return response.data;
-};
-
 export const findAllQuizzes = async () => {
   const response = await axiosWithCredentials.get(QUIZZES_API);
   return response.data;
 };
 
-export const findQuizzesByCourse = async (courseId: string) => {
-  const response = await axiosWithCredentials.get(`${QUIZZES_API}/course/${courseId}`);
-  return response.data;
-};
 
 export const findQuizById = async (quizId: string) => {
   const response = await axiosWithCredentials.get(`${QUIZZES_API}/${quizId}`);

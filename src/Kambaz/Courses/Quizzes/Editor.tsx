@@ -6,6 +6,7 @@ import * as quizzesClient from './client';
 import QuizDetailsEditor from './QuizDetailsEditor';
 import QuizQuestionsEditor from './QuizQuestionsEditor';
 import type { Quiz, QuizFormData } from './types';
+import * as coursesClient from '../client';
 
 export default function QuizEditor() {
   const { cid, qid } = useParams();
@@ -88,7 +89,7 @@ export default function QuizEditor() {
 
     try {
       if (isNewQuiz) {
-        const newQuiz = await quizzesClient.createQuiz(quizData, cid!);
+        const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
         dispatch(addQuiz(newQuiz));
       } else {
         const updatedQuiz = await quizzesClient.updateQuiz(qid!, quizData);

@@ -14,6 +14,7 @@ import {
 import * as quizzesClient from './client';
 import type { Quiz } from './types';
 import QuizzesControls from './ControlBar';
+import * as coursesClient from '../client';
 
 export default function Quizzes() {
   const { cid } = useParams();
@@ -34,7 +35,7 @@ export default function Quizzes() {
       if (cid) {
         try {
           dispatch(setLoading(true));
-          const courseQuizzes = await quizzesClient.findQuizzesByCourse(cid);
+          const courseQuizzes = await coursesClient.findQuizzesForCourse(cid);
           dispatch(setQuizzes(courseQuizzes || []));
         } catch (error) {
           console.error('Error fetching quizzes:', error);
@@ -84,13 +85,18 @@ export default function Quizzes() {
           updatedAt: new Date(),
         };
 
-        const newQuiz = await quizzesClient.createQuiz(quizCopy, cid!);
+        const newQuiz = await coursesClient.createQuizForCourse(cid!, quizCopy);
         dispatch(setQuizzes([...quizzes, newQuiz]));
       }
     } catch (error) {
       console.error('Error copying quiz:', error);
     }
   };
+
+  // 所有 hooks 必须在条件 return 之前调用
+  const [sortBy, setSortBy] = useState<'name' | 'dueDate' | 'availableDate'>(
+    'name'
+  );
 
   if (loading) {
     return (
@@ -110,11 +116,8 @@ export default function Quizzes() {
     );
   }
 
-  const courseQuizzes = quizzes.filter((quiz: Quiz) => quiz.courseId === cid);
-
-  // Sort quizzes by different criteria
-  const [sortBy, setSortBy] = useState<'name' | 'dueDate' | 'availableDate'>(
-    'name'
+  const courseQuizzes = (quizzes || []).filter(
+    (quiz: Quiz) => quiz.courseId === cid
   );
 
   const sortedQuizzes = [...courseQuizzes].sort((a, b) => {
