@@ -1,12 +1,10 @@
-import { FaPlus } from 'react-icons/fa6';
-import { FaSearch } from 'react-icons/fa';
+import { Button } from 'react-bootstrap';
 import { BsThreeDotsVertical } from 'react-icons/bs';
-import Button from 'react-bootstrap/esm/Button';
-import { useParams, Link } from 'react-router-dom';
+import { FaSearch, FaPlus } from 'react-icons/fa';
+import { Link, useParams } from 'react-router';
 
-export default function QuizzesControlBar() {
+export default function QuizzesControls() {
   const { cid } = useParams();
-
   return (
     <div className="d-flex justify-content-between align-items-center mb-3">
       <div
@@ -43,4 +41,4 @@ export default function QuizzesControlBar() {
       </div>
     </div>
   );
-}
+}   

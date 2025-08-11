@@ -1,4 +1,4 @@
-import { Form, Row, Col } from 'react-bootstrap';
+import { Row, Col } from 'react-bootstrap';
 import type { QuizFormData } from './types';
 
 interface QuizDetailsEditorProps {
