@@ -146,6 +146,7 @@ export default function Quizzes() {
       {/* Control Bar - only for faculty */}
       {isFaculty && <QuizzesControls />}
 
+      <hr className="mb-3" />
       {/* Header */}
       <div
         className="d-flex justify-content-between align-items-center mb-4 p-3"
@@ -169,7 +170,6 @@ export default function Quizzes() {
           </select>
         </div>
       </div>
-      <hr className="mb-3" />
 
       {/* Quizzes List */}
       <ListGroup className="wd-quizzes rounded-0">
@@ -204,9 +204,19 @@ export default function Quizzes() {
                     className="d-flex flex-column"
                     style={{ minWidth: 0, flex: 1 }}
                   >
-                    <span className="fw-bold fs-4 text-decoration-none text-dark">
-                      {quiz.title}
-                    </span>
+                    {isFaculty ? (
+                      <Link
+                        to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`}
+                        className="fw-bold fs-4 text-decoration-none text-dark"
+                        style={{ cursor: 'pointer' }}
+                      >
+                        {quiz.title}
+                      </Link>
+                    ) : (
+                      <span className="fw-bold fs-4 text-decoration-none text-dark">
+                        {quiz.title}
+                      </span>
+                    )}
 
                     {/* Availability and details - single line with overflow handling */}
                     <div
@@ -239,10 +249,6 @@ export default function Quizzes() {
 
                         return (
                           <>
-                            <span className="text-danger">
-                              Multiple Modules
-                            </span>{' '}
-                            |{' '}
                             <span className="fw-bold">
                               {availabilityStatus}
                             </span>{' '}
@@ -273,23 +279,19 @@ export default function Quizzes() {
                 >
                   {/* Publish/Unpublish Status - clickable for faculty */}
                   {isFaculty ? (
-                    <Badge
-                      bg={quiz.isPublished ? 'success' : 'secondary'}
-                      className="me-2"
+                    <span
+                      className="me-2 fs-4"
                       style={{ cursor: 'pointer' }}
                       onClick={() =>
                         handlePublishQuiz(quiz._id!, quiz.isPublished)
                       }
                     >
-                      {quiz.isPublished ? '✅ Published' : '🚫 Unpublished'}
-                    </Badge>
+                      {quiz.isPublished ? '✅' : '🚫'}
+                    </span>
                   ) : (
-                    <Badge
-                      bg={quiz.isPublished ? 'success' : 'secondary'}
-                      className="me-2"
-                    >
-                      {quiz.isPublished ? '✅ Published' : '🚫 Unpublished'}
-                    </Badge>
+                    <span className="me-2 fs-4">
+                      {quiz.isPublished ? '✅' : '🚫'}
+                    </span>
                   )}
 
                   {/* Role-specific Actions */}
@@ -334,14 +336,11 @@ export default function Quizzes() {
                         </Dropdown.Menu>
                       </Dropdown>
 
-                      <Button
-                        variant="outline-danger"
-                        size="sm"
+                      <FaTrash
+                        className="fs-5 text-danger"
+                        style={{ cursor: 'pointer' }}
                         onClick={() => handleDeleteQuiz(quiz._id!)}
-                      >
-                        <FaTrash className="me-1" />
-                        Delete
-                      </Button>
+                      />
                     </div>
                   ) : (
                     <div className="d-flex gap-2">

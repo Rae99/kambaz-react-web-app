@@ -3,11 +3,23 @@ export interface Quiz {
   title: string;
   description: string;
   courseId: string;
-  timeLimit?: number; // in minutes
-  availableDate?: Date; // when quiz becomes available
+  quizType: string;
+  points: number;
+  assignmentGroup: string;
+  shuffleAnswers: boolean;
+  timeLimit: number;
+  multipleAttempts: boolean;
+  attemptsAllowed: number;
+  showCorrectAnswers: string;
+  accessCode: string;
+  oneQuestionAtATime: boolean;
+  webcamRequired: boolean;
+  lockQuestionsAfterAnswering: boolean;
+  availableDate?: Date;
   dueDate?: Date;
-  isPublished: boolean;
+  untilDate?: Date;
   questions: Question[];
+  isPublished: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,13 +56,21 @@ export interface Answer {
 export interface QuizFormData {
   title: string;
   description: string;
-  timeLimit?: number;
+  quizType: string;
+  points: number;
+  assignmentGroup: string;
+  shuffleAnswers: boolean;
+  timeLimit: number;
+  multipleAttempts: boolean;
+  attemptsAllowed: number;
+  showCorrectAnswers: string;
+  accessCode: string;
+  oneQuestionAtATime: boolean;
+  webcamRequired: boolean;
+  lockQuestionsAfterAnswering: boolean;
   availableDate?: string;
   dueDate?: string;
-  isPublished: boolean;
+  untilDate?: string;
   questions: Question[];
-  quizType?: string;
-  shuffleAnswers?: boolean;
-  allowMultipleAttempts?: boolean;
-  showCorrectAnswers?: boolean;
+  isPublished: boolean;
 }
