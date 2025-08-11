@@ -18,7 +18,11 @@ export default function Quizzes() {
 
   useEffect(() => {
     if (currentUser) {
-      setIsFaculty(currentUser.role === 'Faculty');
+      // Map existing roles to quiz interface types
+      // Faculty interface: FACULTY, ADMIN, TA (elevated permissions)
+      // Student interface: STUDENT, USER (regular user permissions)
+      const facultyRoles = ['FACULTY', 'ADMIN', 'TA'];
+      setIsFaculty(facultyRoles.includes(currentUser.role));
     }
   }, [currentUser]);
 
@@ -62,6 +66,12 @@ export default function Quizzes() {
   return (
     <div className="container-fluid">
       <h2 className="mb-4">Course Quizzes</h2>
+      {currentUser && (
+        <div className="alert alert-info mb-3">
+          <strong>Debug Info:</strong> User: {currentUser.username}, Role:{' '}
+          {currentUser.role}, Interface: {isFaculty ? 'Faculty' : 'Student'}
+        </div>
+      )}
       {isFaculty ? (
         <FacultyQuizzes courseId={cid!} quizzes={quizzes} />
       ) : (
