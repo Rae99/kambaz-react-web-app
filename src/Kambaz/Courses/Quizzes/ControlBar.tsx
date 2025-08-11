@@ -1,7 +1,7 @@
 import { Button } from 'react-bootstrap';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { FaSearch, FaPlus } from 'react-icons/fa';
-import { Link, useParams } from 'react-router';
+import { Link, useParams } from 'react-router-dom';
 
 export default function QuizzesControls() {
   const { cid } = useParams();
@@ -41,4 +41,4 @@ export default function QuizzesControls() {
       </div>
     </div>
   );
-}   
+}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ListGroup, Badge, Button, Dropdown } from 'react-bootstrap';
@@ -70,6 +70,28 @@ export default function Quizzes() {
     }
   };
 
+  const handleCopyQuiz = async (quizId: string) => {
+    try {
+      const quiz = quizzes.find((q: Quiz) => q._id === quizId);
+      if (quiz) {
+        // Create a copy with a new title
+        const quizCopy = {
+          ...quiz,
+          title: `${quiz.title} (Copy)`,
+          isPublished: false, // Always unpublished when copied
+          _id: undefined, // Remove ID so it creates a new quiz
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        };
+
+        const newQuiz = await quizzesClient.createQuiz(quizCopy, cid!);
+        dispatch(setQuizzes([...quizzes, newQuiz]));
+      }
+    } catch (error) {
+      console.error('Error copying quiz:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center">
@@ -90,6 +112,32 @@ export default function Quizzes() {
 
   const courseQuizzes = quizzes.filter((quiz: Quiz) => quiz.courseId === cid);
 
+  // Sort quizzes by different criteria
+  const [sortBy, setSortBy] = useState<'name' | 'dueDate' | 'availableDate'>(
+    'name'
+  );
+
+  const sortedQuizzes = [...courseQuizzes].sort((a, b) => {
+    switch (sortBy) {
+      case 'name':
+        return a.title.localeCompare(b.title);
+      case 'dueDate':
+        const aDue = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+        const bDue = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+        return aDue - bDue;
+      case 'availableDate':
+        const aAvail = a.availableDate
+          ? new Date(a.availableDate).getTime()
+          : 0;
+        const bAvail = b.availableDate
+          ? new Date(b.availableDate).getTime()
+          : 0;
+        return aAvail - bAvail;
+      default:
+        return 0;
+    }
+  });
+
   return (
     <div id="wd-quizzes">
       {/* Control Bar - only for faculty */}
@@ -100,12 +148,26 @@ export default function Quizzes() {
         <div className="d-flex align-items-center">
           <span className="fw-bold fs-5">Assignment Quizzes</span>
         </div>
+        <div className="d-flex align-items-center gap-2">
+          <select
+            className="form-select form-select-sm"
+            value={sortBy}
+            onChange={(e) =>
+              setSortBy(e.target.value as 'name' | 'dueDate' | 'availableDate')
+            }
+            style={{ width: 'auto' }}
+          >
+            <option value="name">Sort by Name</option>
+            <option value="dueDate">Sort by Due Date</option>
+            <option value="availableDate">Sort by Available Date</option>
+          </select>
+        </div>
       </div>
       <hr className="mb-3" />
 
       {/* Quizzes List */}
       <ListGroup className="wd-quizzes rounded-0">
-        {courseQuizzes.length === 0 ? (
+        {sortedQuizzes.length === 0 ? (
           <div className="text-center py-5">
             <p className="text-muted">
               {isFaculty
@@ -114,7 +176,7 @@ export default function Quizzes() {
             </p>
           </div>
         ) : (
-          courseQuizzes.map((quiz: Quiz) => (
+          sortedQuizzes.map((quiz: Quiz) => (
             <ListGroup.Item
               key={quiz._id}
               className="wd-quiz py-3 px-3"
@@ -181,13 +243,20 @@ export default function Quizzes() {
                           >
                             {quiz.isPublished ? 'Unpublish' : 'Publish'}
                           </Dropdown.Item>
-                          <Dropdown.Item>
+                          <Dropdown.Item
+                            onClick={() => handleCopyQuiz(quiz._id!)}
+                          >
                             <FaCopy className="me-2" />
                             Copy
                           </Dropdown.Item>
                           <Dropdown.Item>
                             <FaSort className="me-2" />
-                            Sort
+                            Sort by:{' '}
+                            {sortBy === 'name'
+                              ? 'Name'
+                              : sortBy === 'dueDate'
+                              ? 'Due Date'
+                              : 'Available Date'}
                           </Dropdown.Item>
                         </Dropdown.Menu>
                       </Dropdown>
