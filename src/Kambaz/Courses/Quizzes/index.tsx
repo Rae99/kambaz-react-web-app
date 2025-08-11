@@ -147,9 +147,12 @@ export default function Quizzes() {
       {isFaculty && <QuizzesControls />}
 
       {/* Header */}
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <div
+        className="d-flex justify-content-between align-items-center mb-4 p-3"
+        style={{ backgroundColor: '#f8f9fa' }}
+      >
         <div className="d-flex align-items-center">
-          <span className="fw-bold fs-5">Assignment Quizzes</span>
+          <span className="fw-bold fs-4">Assignment Quizzes</span>
         </div>
         <div className="d-flex align-items-center gap-2">
           <select
@@ -190,47 +193,114 @@ export default function Quizzes() {
               style={{ cursor: isFaculty ? 'pointer' : 'not-allowed' }}
             >
               <div className="d-flex justify-content-between align-items-center">
-                <div className="d-flex align-items-center">
-                  <BsGripVertical className="me-2 fs-3" />
-                  <FaRegEdit className="me-2 fs-3 text-success" />
-                  <div className="ms-2 d-flex flex-column">
+                <div
+                  className="d-flex align-items-center"
+                  style={{ flex: 1, minWidth: 0 }}
+                >
+                  {/* Rocket icon instead of grip */}
+                  <span className="me-3 fs-4">🚀</span>
+
+                  <div
+                    className="d-flex flex-column"
+                    style={{ minWidth: 0, flex: 1 }}
+                  >
                     <span className="fw-bold fs-4 text-decoration-none text-dark">
                       {quiz.title}
                     </span>
-                    <small className="text-muted fs-5">
-                      <span className="text-danger">Multiple Modules </span> |{' '}
-                      <span className="fw-bold">Not available until </span>{' '}
-                      {quiz.availableDate
-                        ? new Date(quiz.availableDate).toLocaleDateString()
-                        : 'Not set'}{' '}
-                      <span> at 12:00am | </span>
-                      <span className="fw-bold">Due</span>{' '}
-                      {quiz.dueDate
-                        ? new Date(quiz.dueDate).toLocaleDateString()
-                        : 'Not set'}{' '}
-                      at 11:59pm |{' '}
-                      {quiz.questions.reduce((sum, q) => sum + q.points, 0)} pts
-                      | {quiz.questions?.length || 0} Questions
-                    </small>
+
+                    {/* Availability and details - single line with overflow handling */}
+                    <div
+                      className="text-muted fs-6"
+                      style={{
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}
+                    >
+                      {(() => {
+                        const now = new Date();
+                        const availableDate = quiz.availableDate
+                          ? new Date(quiz.availableDate)
+                          : null;
+                        const dueDate = quiz.dueDate
+                          ? new Date(quiz.dueDate)
+                          : null;
+
+                        let availabilityStatus = '';
+                        if (!availableDate) {
+                          availabilityStatus = 'Not available';
+                        } else if (now < availableDate) {
+                          availabilityStatus = `Not available until ${availableDate.toLocaleDateString()} at 12:00am`;
+                        } else if (dueDate && now > dueDate) {
+                          availabilityStatus = 'Closed';
+                        } else {
+                          availabilityStatus = 'Available';
+                        }
+
+                        return (
+                          <>
+                            <span className="text-danger">
+                              Multiple Modules
+                            </span>{' '}
+                            |{' '}
+                            <span className="fw-bold">
+                              {availabilityStatus}
+                            </span>{' '}
+                            | <span className="fw-bold">Due</span>{' '}
+                            {dueDate ? dueDate.toLocaleDateString() : 'Not set'}{' '}
+                            at 11:59pm |{' '}
+                            {quiz.questions.reduce(
+                              (sum, q) => sum + q.points,
+                              0
+                            )}{' '}
+                            pts | {quiz.questions?.length || 0} Questions
+                            {!isFaculty && (
+                              <>
+                                {' '}
+                                | <span className="fw-bold">Score: N/A</span>
+                              </>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
                   </div>
                 </div>
-                <div className="d-flex align-items-center gap-2">
-                  {/* Publish/Unpublish Status */}
-                  <Badge
-                    bg={quiz.isPublished ? 'success' : 'secondary'}
-                    className="me-2"
-                  >
-                    {quiz.isPublished ? '✅ Published' : '🚫 Unpublished'}
-                  </Badge>
+
+                <div
+                  className="d-flex align-items-center gap-2"
+                  style={{ flexShrink: 0 }}
+                >
+                  {/* Publish/Unpublish Status - clickable for faculty */}
+                  {isFaculty ? (
+                    <Badge
+                      bg={quiz.isPublished ? 'success' : 'secondary'}
+                      className="me-2"
+                      style={{ cursor: 'pointer' }}
+                      onClick={() =>
+                        handlePublishQuiz(quiz._id!, quiz.isPublished)
+                      }
+                    >
+                      {quiz.isPublished ? '✅ Published' : '🚫 Unpublished'}
+                    </Badge>
+                  ) : (
+                    <Badge
+                      bg={quiz.isPublished ? 'success' : 'secondary'}
+                      className="me-2"
+                    >
+                      {quiz.isPublished ? '✅ Published' : '🚫 Unpublished'}
+                    </Badge>
+                  )}
 
                   {/* Role-specific Actions */}
                   {isFaculty ? (
                     <div className="d-flex gap-1">
+                      {/* Edit icon moved to right, only for faculty */}
                       <Link to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`}>
-                        <Button variant="outline-primary" size="sm">
-                          <FaRegEdit className="me-1" />
-                          Edit
-                        </Button>
+                        <FaRegEdit
+                          className="fs-5 text-success"
+                          style={{ cursor: 'pointer' }}
+                        />
                       </Link>
 
                       <Dropdown>
