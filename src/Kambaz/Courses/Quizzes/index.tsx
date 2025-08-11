@@ -66,12 +66,7 @@ export default function Quizzes() {
   return (
     <div className="container-fluid">
       <h2 className="mb-4">Course Quizzes</h2>
-      {currentUser && (
-        <div className="alert alert-info mb-3">
-          <strong>Debug Info:</strong> User: {currentUser.username}, Role:{' '}
-          {currentUser.role}, Interface: {isFaculty ? 'Faculty' : 'Student'}
-        </div>
-      )}
+
       {isFaculty ? (
         <FacultyQuizzes courseId={cid!} quizzes={quizzes} />
       ) : (

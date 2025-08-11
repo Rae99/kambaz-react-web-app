@@ -1,5 +1,9 @@
-import React from 'react';
-import { Button, Card, Badge } from 'react-bootstrap';
+import { ListGroup, Button, Badge } from 'react-bootstrap';
+import { BsGripVertical } from 'react-icons/bs';
+import { FaRegEdit } from 'react-icons/fa';
+import { FaEllipsisV } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
+import QuizzesControlBar from './ControlBar';
 import type { Quiz } from './types';
 
 interface FacultyQuizzesProps {
@@ -11,69 +15,84 @@ export default function FacultyQuizzes({
   courseId,
   quizzes,
 }: FacultyQuizzesProps) {
+  const handleQuizAction = (action: string, quizId: string) => {
+    console.log(`${action} quiz:`, quizId);
+  };
+
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3>Faculty Quiz Management</h3>
-        <Button variant="primary" size="lg">
-          Create New Quiz
-        </Button>
-      </div>
+    <div id="wd-quizzes">
+      {/* Control Bar */}
+      <QuizzesControlBar />
 
-      <div className="row">
-        <div className="col-md-4 mb-3">
-          <Card>
-            <Card.Body>
-              <Card.Title>Quiz Statistics</Card.Title>
-              <Card.Text>
-                Total Quizzes: {quizzes.length}
-                <br />
-                Published: {quizzes.filter((q) => q.isPublished).length}
-                <br />
-                Draft: {quizzes.filter((q) => !q.isPublished).length}
-              </Card.Text>
-            </Card.Body>
-          </Card>
-        </div>
-      </div>
-
-      <h4 className="mt-4 mb-3">Course Quizzes</h4>
+      {/* Quizzes List */}
       {quizzes.length === 0 ? (
-        <div className="alert alert-info">
-          No quizzes created yet. Click "Create New Quiz" to get started!
+        <div className="text-center py-5">
+          <p className="text-muted">No quizzes available yet.</p>
+          <p className="text-muted">
+            Click the "+ Quiz" button to create your first quiz.
+          </p>
         </div>
       ) : (
-        <div className="row">
+        <ListGroup className="wd-quizzes rounded-0">
           {quizzes.map((quiz) => (
-            <div key={quiz._id} className="col-md-6 mb-3">
-              <Card>
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <Card.Title>{quiz.title}</Card.Title>
-                    <Badge bg={quiz.isPublished ? 'success' : 'secondary'}>
-                      {quiz.isPublished ? 'Published' : 'Draft'}
-                    </Badge>
+            <ListGroup.Item
+              key={quiz._id}
+              className="wd-quiz py-3 px-3"
+              as={Link}
+              to={`/Kambaz/Courses/${courseId}/Quizzes/${quiz._id}`}
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center">
+                  <BsGripVertical className="me-2 fs-3" />
+                  <FaRegEdit className="me-2 fs-3 text-success" />
+                  <div className="ms-2 d-flex flex-column">
+                    <span className="fw-bold fs-4 text-decoration-none text-dark">
+                      {quiz.title}
+                    </span>
+                    <small className="text-muted fs-5">
+                      <span className="text-danger">Multiple Modules </span> |{' '}
+                      <span className="fw-bold">Not available until </span>{' '}
+                      {quiz.availableDate
+                        ? new Date(quiz.availableDate).toLocaleDateString()
+                        : 'Not set'}{' '}
+                      <span> at 12:00am | </span>
+                      <span className="fw-bold">Due</span>{' '}
+                      {quiz.dueDate
+                        ? new Date(quiz.dueDate).toLocaleDateString()
+                        : 'Not set'}{' '}
+                      at 11:59pm |{' '}
+                      {quiz.questions.reduce((sum, q) => sum + q.points, 0)} pts
+                      | {quiz.questions?.length || 0} Questions
+                    </small>
                   </div>
-                  <Card.Text>{quiz.description}</Card.Text>
-                  <div className="d-flex gap-2">
-                    <Button variant="outline-primary" size="sm">
-                      Edit
-                    </Button>
-                    <Button variant="outline-info" size="sm">
-                      Preview
-                    </Button>
-                    <Button variant="outline-success" size="sm">
-                      Results
-                    </Button>
-                    <Button variant="outline-danger" size="sm">
-                      Delete
-                    </Button>
-                  </div>
-                </Card.Body>
-              </Card>
-            </div>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  {/* Publish/Unpublish Status */}
+                  <Badge
+                    bg={quiz.isPublished ? 'success' : 'secondary'}
+                    className="me-2"
+                  >
+                    {quiz.isPublished ? '✅ Published' : '🚫 Unpublished'}
+                  </Badge>
+
+                  {/* Context Menu */}
+                  <Button
+                    variant="outline-secondary"
+                    size="sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleQuizAction('menu', quiz._id!);
+                    }}
+                  >
+                    <FaEllipsisV />
+                  </Button>
+                </div>
+              </div>
+            </ListGroup.Item>
           ))}
-        </div>
+        </ListGroup>
       )}
     </div>
   );

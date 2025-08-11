@@ -4,6 +4,7 @@ export interface Quiz {
   description: string;
   courseId: string;
   timeLimit?: number; // in minutes
+  availableDate?: Date; // when quiz becomes available
   dueDate?: Date;
   isPublished: boolean;
   questions: Question[];
@@ -44,6 +45,7 @@ export interface QuizFormData {
   title: string;
   description: string;
   timeLimit?: number;
+  availableDate?: string;
   dueDate?: string;
   isPublished: boolean;
   questions: Question[];
