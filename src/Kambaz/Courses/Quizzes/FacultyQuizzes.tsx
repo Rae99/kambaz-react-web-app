@@ -1,9 +1,10 @@
-import { ListGroup, Button, Badge } from 'react-bootstrap';
+import { ListGroup, Badge } from 'react-bootstrap';
 import { BsGripVertical } from 'react-icons/bs';
 import { FaRegEdit } from 'react-icons/fa';
-import { FaEllipsisV } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import QuizzesControlBar from './ControlBar';
+import QuizHeader from './QuizHeader';
+import QuizControlButtons from './QuizControlButtons';
 import type { Quiz } from './types';
 
 interface FacultyQuizzesProps {
@@ -15,14 +16,25 @@ export default function FacultyQuizzes({
   courseId,
   quizzes,
 }: FacultyQuizzesProps) {
-  const handleQuizAction = (action: string, quizId: string) => {
-    console.log(`${action} quiz:`, quizId);
+  const handleDeleteQuiz = (quizId: string) => {
+    console.log('Delete quiz:', quizId);
+    // TODO: Implement delete functionality
+  };
+
+  const handlePublishQuiz = (quizId: string, isPublished: boolean) => {
+    console.log('Publish/Unpublish quiz:', quizId, isPublished);
+    // TODO: Implement publish functionality
   };
 
   return (
     <div id="wd-quizzes">
       {/* Control Bar */}
       <QuizzesControlBar />
+
+      <hr />
+
+      {/* Quiz Header */}
+      <QuizHeader />
 
       {/* Quizzes List */}
       {quizzes.length === 0 ? (
@@ -76,18 +88,14 @@ export default function FacultyQuizzes({
                     {quiz.isPublished ? '✅ Published' : '🚫 Unpublished'}
                   </Badge>
 
-                  {/* Context Menu */}
-                  <Button
-                    variant="outline-secondary"
-                    size="sm"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      handleQuizAction('menu', quiz._id!);
-                    }}
-                  >
-                    <FaEllipsisV />
-                  </Button>
+                  {/* Quiz Control Buttons */}
+                  <QuizControlButtons
+                    quizId={quiz._id!}
+                    quizTitle={quiz.title}
+                    isPublished={quiz.isPublished}
+                    onDelete={handleDeleteQuiz}
+                    onPublish={handlePublishQuiz}
+                  />
                 </div>
               </div>
             </ListGroup.Item>

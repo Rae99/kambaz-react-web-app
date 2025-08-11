@@ -9,7 +9,7 @@ import People from './People';
 import Piazza from './Piazza';
 import Zoom from './Zoom';
 import Quizzes from './Quizzes';
-import QuizEditor from './Quizzes/Editor'
+import QuizEditor from './Quizzes/Editor';
 import Grades from './Grades';
 import { useSelector } from 'react-redux';
 import { useParams, useLocation } from 'react-router-dom';
@@ -22,13 +22,22 @@ export default function Courses() {
 
   return (
     <div id="wd-courses">
-      <h2 className="text-danger">
-        <FaAlignJustify className="me-4 fs-4 mb-1" />
-        {course && course.name} &gt; {pathname.split('/')[4]}
-        {/* if pathname = "/Kambaz/Courses/1234/Assignments"
+      <div className="d-flex justify-content-between align-items-center">
+        <h2 className="text-danger mb-0">
+          <FaAlignJustify className="me-4 fs-4 mb-1" />
+          {course && course.name} &gt; {pathname.split('/')[4]}
+          {pathname.split('/')[5] && ` > ${pathname.split('/')[5]}`}
+          {/* if pathname = "/Kambaz/Courses/1234/Quizzes/new"
 pathname.split("/")  // result:
-["", "Kambaz", "Courses", "1234", "Assignments"] */}
-      </h2>
+["", "Kambaz", "Courses", "1234", "Quizzes", "new"] */}
+        </h2>
+        {pathname.split('/')[4] === 'Quizzes' && (
+          <button className="btn btn-outline-secondary btn-sm">
+            <i className="fas fa-user me-2"></i>
+            Student View
+          </button>
+        )}
+      </div>
       <hr />
       <hr />
       <div className="d-flex">

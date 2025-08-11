@@ -49,4 +49,8 @@ export interface QuizFormData {
   dueDate?: string;
   isPublished: boolean;
   questions: Question[];
+  quizType?: string;
+  shuffleAnswers?: boolean;
+  allowMultipleAttempts?: boolean;
+  showCorrectAnswers?: boolean;
 }

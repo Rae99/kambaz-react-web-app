@@ -1,5 +1,6 @@
 import { FaPlus } from 'react-icons/fa6';
 import { FaSearch } from 'react-icons/fa';
+import { BsThreeDotsVertical } from 'react-icons/bs';
 import Button from 'react-bootstrap/esm/Button';
 import { useParams, Link } from 'react-router-dom';
 
@@ -36,6 +37,9 @@ export default function QuizzesControlBar() {
             Quiz
           </Button>
         </Link>
+        <button className="btn btn-outline-secondary btn-lg">
+          <BsThreeDotsVertical size={16} />
+        </button>
       </div>
     </div>
   );

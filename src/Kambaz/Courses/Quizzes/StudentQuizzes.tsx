@@ -1,5 +1,7 @@
-import React from 'react';
-import { Button, Card, Badge } from 'react-bootstrap';
+import { ListGroup, Button, Badge } from 'react-bootstrap';
+import { BsGripVertical } from 'react-icons/bs';
+import { FaRegEdit } from 'react-icons/fa';
+import QuizHeader from './QuizHeader';
 import type { Quiz } from './types';
 
 interface StudentQuizzesProps {
@@ -14,50 +16,57 @@ export default function StudentQuizzes({
   const publishedQuizzes = quizzes.filter((quiz) => quiz.isPublished);
 
   return (
-    <div>
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h3>Available Quizzes</h3>
-        <div className="text-muted">
-          {publishedQuizzes.length} quiz
-          {publishedQuizzes.length !== 1 ? 'es' : ''} available
-        </div>
-      </div>
+    <div id="wd-quizzes">
+      {/* Quiz Header */}
+      <QuizHeader />
 
+      {/* Quizzes List */}
       {publishedQuizzes.length === 0 ? (
-        <div className="alert alert-info">
-          No quizzes are currently available for this course.
+        <div className="text-center py-5">
+          <p className="text-muted">
+            No quizzes are currently available for this course.
+          </p>
         </div>
       ) : (
-        <div className="row">
+        <ListGroup className="wd-quizzes rounded-0">
           {publishedQuizzes.map((quiz) => (
-            <div key={quiz._id} className="col-md-6 mb-3">
-              <Card>
-                <Card.Body>
-                  <Card.Title>{quiz.title}</Card.Title>
-                  <Card.Text>{quiz.description}</Card.Text>
-
-                  <div className="mb-3">
-                    <small className="text-muted">
-                      {quiz.timeLimit && (
-                        <>
-                          <strong>Time Limit:</strong> {quiz.timeLimit} minutes
-                          <br />
-                        </>
-                      )}
-                      {quiz.dueDate && (
-                        <>
-                          <strong>Due Date:</strong>{' '}
-                          {new Date(quiz.dueDate).toLocaleDateString()}
-                          <br />
-                        </>
-                      )}
-                      <strong>Questions:</strong> {quiz.questions.length}
-                      <br />
-                      <strong>Total Points:</strong>{' '}
-                      {quiz.questions.reduce((sum, q) => sum + q.points, 0)}
+            <ListGroup.Item
+              key={quiz._id}
+              className="wd-quiz py-3 px-3"
+              style={{ cursor: 'pointer' }}
+            >
+              <div className="d-flex justify-content-between align-items-center">
+                <div className="d-flex align-items-center">
+                  <BsGripVertical className="me-2 fs-3" />
+                  <FaRegEdit className="me-2 fs-3 text-success" />
+                  <div className="ms-2 d-flex flex-column">
+                    <span className="fw-bold fs-4 text-decoration-none text-dark">
+                      {quiz.title}
+                    </span>
+                    <small className="text-muted fs-5">
+                      <span className="text-danger">Multiple Modules </span> |{' '}
+                      <span className="fw-bold">Not available until </span>{' '}
+                      {quiz.availableDate
+                        ? new Date(quiz.availableDate).toLocaleDateString()
+                        : 'Not set'}{' '}
+                      <span> at 12:00am | </span>
+                      <span className="fw-bold">Due</span>{' '}
+                      {quiz.dueDate
+                        ? new Date(quiz.dueDate).toLocaleDateString()
+                        : 'Not set'}{' '}
+                      at 11:59pm |{' '}
+                      {quiz.questions.reduce((sum, q) => sum + q.points, 0)} pts
+                      | {quiz.questions?.length || 0} Questions
                     </small>
                   </div>
+                </div>
+                <div className="d-flex align-items-center gap-2">
+                  {/* Quiz Status */}
+                  <Badge bg="success" className="me-2">
+                    ✅ Available
+                  </Badge>
 
+                  {/* Student Actions */}
                   <div className="d-flex gap-2">
                     <Button variant="primary" size="sm">
                       Start Quiz
@@ -66,11 +75,11 @@ export default function StudentQuizzes({
                       View Previous Attempts
                     </Button>
                   </div>
-                </Card.Body>
-              </Card>
-            </div>
+                </div>
+              </div>
+            </ListGroup.Item>
           ))}
-        </div>
+        </ListGroup>
       )}
     </div>
   );

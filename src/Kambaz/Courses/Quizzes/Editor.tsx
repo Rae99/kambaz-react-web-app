@@ -3,6 +3,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
 import { addQuiz, updateQuiz } from './reducer';
 import * as quizzesClient from './client';
+import QuizDetailsEditor from './QuizDetailsEditor';
+import QuizQuestionsEditor from './QuizQuestionsEditor';
 import type { Quiz, QuizFormData } from './types';
 
 export default function QuizEditor() {
@@ -25,54 +27,63 @@ export default function QuizEditor() {
   }, [quiz, isNewQuiz, cid, navigate]);
 
   // State for form fields
-  const [title, setTitle] = useState(quiz?.title || 'New Quiz');
-  const [description, setDescription] = useState(
-    quiz?.description || 'Quiz description'
-  );
-  const [timeLimit, setTimeLimit] = useState(quiz?.timeLimit || 30);
-  const [dueDate, setDueDate] = useState(
-    quiz?.dueDate ? new Date(quiz.dueDate).toISOString().slice(0, 16) : ''
-  );
-  const [availableDate, setAvailableDate] = useState(
-    quiz?.availableDate
+  const [quizForm, setQuizForm] = useState<QuizFormData>({
+    title: quiz?.title || 'New Quiz',
+    description: quiz?.description || 'Quiz description',
+    timeLimit: quiz?.timeLimit || 30,
+    dueDate: quiz?.dueDate
+      ? new Date(quiz.dueDate).toISOString().slice(0, 16)
+      : '',
+    availableDate: quiz?.availableDate
       ? new Date(quiz.availableDate).toISOString().slice(0, 16)
-      : new Date().toISOString().slice(0, 16)
-  );
-  const [isPublished, setIsPublished] = useState(quiz?.isPublished || false);
-  const [quizType, setQuizType] = useState('Graded Quiz');
-  const [shuffleAnswers, setShuffleAnswers] = useState(false);
-  const [allowMultipleAttempts, setAllowMultipleAttempts] = useState(false);
-  const [showCorrectAnswers, setShowCorrectAnswers] = useState(false);
+      : new Date().toISOString().slice(0, 16),
+    isPublished: quiz?.isPublished || false,
+    questions: quiz?.questions || [],
+    quizType: 'Graded Quiz',
+    shuffleAnswers: false,
+    allowMultipleAttempts: false,
+    showCorrectAnswers: false,
+  });
 
   // Update form when quiz changes
   useEffect(() => {
     if (quiz) {
-      setTitle(quiz.title);
-      setDescription(quiz.description);
-      setTimeLimit(quiz.timeLimit || 30);
-      setDueDate(
-        quiz.dueDate ? new Date(quiz.dueDate).toISOString().slice(0, 16) : ''
-      );
-      setAvailableDate(
-        quiz.availableDate
+      setQuizForm({
+        title: quiz.title,
+        description: quiz.description,
+        timeLimit: quiz.timeLimit || 30,
+        dueDate: quiz.dueDate
+          ? new Date(quiz.dueDate).toISOString().slice(0, 16)
+          : '',
+        availableDate: quiz.availableDate
           ? new Date(quiz.availableDate).toISOString().slice(0, 16)
-          : ''
-      );
-      setIsPublished(quiz.isPublished);
+          : '',
+        isPublished: quiz.isPublished,
+        questions: quiz.questions,
+        quizType: 'Graded Quiz',
+        shuffleAnswers: false,
+        allowMultipleAttempts: false,
+        showCorrectAnswers: false,
+      });
     }
   }, [quiz]);
 
+  const handleFormChange = (field: keyof QuizFormData, value: any) => {
+    setQuizForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   const handleSave = async () => {
     const quizData: QuizFormData = {
-      title,
-      description,
-      timeLimit,
-      availableDate: availableDate
-        ? new Date(availableDate).toISOString()
+      ...quizForm,
+      availableDate: quizForm.availableDate
+        ? new Date(quizForm.availableDate).toISOString()
         : new Date().toISOString(),
-      dueDate: dueDate ? new Date(dueDate).toISOString() : undefined,
-      isPublished,
-      questions: quiz?.questions || [],
+      dueDate: quizForm.dueDate
+        ? new Date(quizForm.dueDate).toISOString()
+        : undefined,
     };
 
     try {
@@ -107,12 +118,17 @@ export default function QuizEditor() {
         <div className="d-flex align-items-center gap-3">
           <span className="text-muted">
             Points:{' '}
-            {quiz?.questions?.reduce((sum, q) => sum + q.points, 0) || 0}
+            {quizForm.questions?.reduce(
+              (sum: number, q: any) => sum + q.points,
+              0
+            ) || 0}
           </span>
           <span
-            className={`badge ${isPublished ? 'bg-success' : 'bg-secondary'}`}
+            className={`badge ${
+              quizForm.isPublished ? 'bg-success' : 'bg-secondary'
+            }`}
           >
-            {isPublished ? 'Published' : 'Not Published'}
+            {quizForm.isPublished ? 'Published' : 'Not Published'}
           </span>
         </div>
       </div>
@@ -133,190 +149,11 @@ export default function QuizEditor() {
 
       {/* Tab Content */}
       <div className="tab-content">
-        {/* Details Tab */}
-        <div className="tab-pane fade show active" id="details">
-          <div className="mb-3">
-            <label htmlFor="wd-quiz-title" className="form-label">
-              Quiz Title
-            </label>
-            <input
-              id="wd-quiz-title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="form-control"
-              placeholder="Enter quiz title"
-            />
-          </div>
-
-          <div className="mb-3">
-            <label htmlFor="wd-quiz-description" className="form-label">
-              Quiz Instructions
-            </label>
-            <textarea
-              id="wd-quiz-description"
-              rows={4}
-              className="form-control"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Enter quiz instructions"
-            />
-          </div>
-
-          <div className="row mb-3">
-            <div className="col-md-6">
-              <label htmlFor="wd-quiz-type" className="form-label">
-                Quiz Type
-              </label>
-              <select
-                id="wd-quiz-type"
-                className="form-select"
-                value={quizType}
-                onChange={(e) => setQuizType(e.target.value)}
-              >
-                <option>Graded Quiz</option>
-                <option>Practice Quiz</option>
-                <option>Graded Survey</option>
-                <option>Ungraded Survey</option>
-              </select>
-            </div>
-            <div className="col-md-6">
-              <label htmlFor="wd-time-limit" className="form-label">
-                Time Limit (minutes)
-              </label>
-              <input
-                id="wd-time-limit"
-                type="number"
-                value={timeLimit}
-                onChange={(e) => setTimeLimit(parseInt(e.target.value) || 0)}
-                className="form-control"
-                min="1"
-              />
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Options</label>
-            <div className="p-3 border rounded">
-              <div className="form-check mb-2">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="wd-shuffle-answers"
-                  checked={shuffleAnswers}
-                  onChange={(e) => setShuffleAnswers(e.target.checked)}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="wd-shuffle-answers"
-                >
-                  Shuffle Answers
-                </label>
-              </div>
-              <div className="form-check mb-2">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="wd-allow-multiple-attempts"
-                  checked={allowMultipleAttempts}
-                  onChange={(e) => setAllowMultipleAttempts(e.target.checked)}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="wd-allow-multiple-attempts"
-                >
-                  Allow Multiple Attempts
-                </label>
-              </div>
-              <div className="form-check mb-2">
-                <input
-                  type="checkbox"
-                  className="form-check-input"
-                  id="wd-show-correct-answers"
-                  checked={showCorrectAnswers}
-                  onChange={(e) => setShowCorrectAnswers(e.target.checked)}
-                />
-                <label
-                  className="form-check-label"
-                  htmlFor="wd-show-correct-answers"
-                >
-                  Show Correct Answers
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <label className="form-label">Assign</label>
-            <div className="p-3 border rounded">
-              <div className="mb-3">
-                <label htmlFor="wd-assign-to" className="form-label fw-bold">
-                  Assign to
-                </label>
-                <select id="wd-assign-to" className="form-select">
-                  <option>Everyone</option>
-                  <option>Section 1</option>
-                  <option>Section 2</option>
-                </select>
-              </div>
-              <div className="mb-3">
-                <label htmlFor="wd-due-date" className="form-label fw-bold">
-                  Due
-                </label>
-                <input
-                  type="datetime-local"
-                  id="wd-due-date"
-                  className="form-control"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                />
-              </div>
-              <div className="row">
-                <div className="col">
-                  <label
-                    htmlFor="wd-available-from"
-                    className="form-label fw-bold"
-                  >
-                    Available from
-                  </label>
-                  <input
-                    type="datetime-local"
-                    id="wd-available-from"
-                    className="form-control"
-                    value={availableDate}
-                    onChange={(e) => setAvailableDate(e.target.value)}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mb-3">
-            <div className="form-check">
-              <input
-                type="checkbox"
-                className="form-check-input"
-                id="wd-publish-quiz"
-                checked={isPublished}
-                onChange={(e) => setIsPublished(e.target.checked)}
-              />
-              <label className="form-check-label" htmlFor="wd-publish-quiz">
-                Publish quiz
-              </label>
-            </div>
-          </div>
-        </div>
-
-        {/* Questions Tab */}
-        <div className="tab-pane fade" id="questions">
-          <div className="text-center py-5">
-            <p className="text-muted">
-              Questions editor will be implemented here
-            </p>
-            <p className="text-muted">
-              This will allow you to add, edit, and manage quiz questions
-            </p>
-          </div>
-        </div>
+        <QuizDetailsEditor
+          quizForm={quizForm}
+          onFormChange={handleFormChange}
+        />
+        <QuizQuestionsEditor />
       </div>
 
       <hr />
