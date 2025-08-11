@@ -112,7 +112,10 @@ export default function QuizDetailsEditor({
               id="wd-show-correct-answers"
               checked={quizForm.showCorrectAnswers === 'true' || false}
               onChange={(e) =>
-                onFormChange('showCorrectAnswers', e.target.checked.toString())
+                onFormChange(
+                  'showCorrectAnswers',
+                  e.target.checked ? 'true' : 'false'
+                )
               }
             />
             <label
