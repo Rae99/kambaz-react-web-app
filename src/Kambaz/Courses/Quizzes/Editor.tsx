@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect } from 'react';
+import { Button } from 'react-bootstrap';
 import { addQuiz, updateQuiz } from './reducer';
 import * as quizzesClient from './client';
 import QuizDetailsEditor from './QuizDetailsEditor';
@@ -15,6 +16,9 @@ export default function QuizEditor() {
 
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const isNewQuiz = qid === 'new';
+  const [activeTab, setActiveTab] = useState<'details' | 'questions'>(
+    'details'
+  );
 
   const quiz = isNewQuiz ? null : quizzes.find((q: Quiz) => q._id === qid);
 
@@ -147,25 +151,43 @@ export default function QuizEditor() {
               0
             ) || 0}
           </span>
-          <span
-            className={`badge ${
-              quizForm.isPublished ? 'bg-success' : 'bg-secondary'
-            }`}
+          <Button
+            variant={quizForm.isPublished ? 'success' : 'secondary'}
+            size="sm"
+            onClick={() =>
+              handleFormChange('isPublished', !quizForm.isPublished)
+            }
+            className="d-flex align-items-center gap-2"
           >
             {quizForm.isPublished ? 'Published' : 'Not Published'}
-          </span>
+            <span className="ms-1">{quizForm.isPublished ? '✅' : '🚫'}</span>
+          </Button>
         </div>
       </div>
 
       {/* Tabs */}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
-          <a className="nav-link active" href="#details" data-bs-toggle="tab">
+          <a
+            className={`nav-link ${activeTab === 'details' ? 'active' : ''}`}
+            href="#details"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('details');
+            }}
+          >
             Details
           </a>
         </li>
         <li className="nav-item">
-          <a className="nav-link" href="#questions" data-bs-toggle="tab">
+          <a
+            className={`nav-link ${activeTab === 'questions' ? 'active' : ''}`}
+            href="#questions"
+            onClick={(e) => {
+              e.preventDefault();
+              setActiveTab('questions');
+            }}
+          >
             Questions
           </a>
         </li>
@@ -173,11 +195,20 @@ export default function QuizEditor() {
 
       {/* Tab Content */}
       <div className="tab-content">
-        <QuizDetailsEditor
-          quizForm={quizForm}
-          onFormChange={handleFormChange}
-        />
-        <QuizQuestionsEditor />
+        {activeTab === 'details' && (
+          <QuizDetailsEditor
+            quizForm={quizForm}
+            onFormChange={handleFormChange}
+          />
+        )}
+        {activeTab === 'questions' && (
+          <QuizQuestionsEditor
+            questions={quizForm.questions}
+            onQuestionsChange={(questions) =>
+              handleFormChange('questions', questions)
+            }
+          />
+        )}
       </div>
 
       <hr />

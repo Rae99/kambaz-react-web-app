@@ -252,6 +252,7 @@ export default function QuizDetails() {
                 size="sm"
               >
                 {quiz.isPublished ? 'Published' : 'Draft'}
+                <span className="ms-1">{quiz.isPublished ? '✅' : '🚫'}</span>
               </Button>
               <Button
                 variant="outline-primary"

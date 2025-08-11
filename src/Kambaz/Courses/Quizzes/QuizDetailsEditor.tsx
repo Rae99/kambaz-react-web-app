@@ -93,9 +93,9 @@ export default function QuizDetailsEditor({
               type="checkbox"
               className="form-check-input"
               id="wd-allow-multiple-attempts"
-              checked={quizForm.allowMultipleAttempts || false}
+              checked={quizForm.multipleAttempts || false}
               onChange={(e) =>
-                onFormChange('allowMultipleAttempts', e.target.checked)
+                onFormChange('multipleAttempts', e.target.checked)
               }
             />
             <label
@@ -110,9 +110,9 @@ export default function QuizDetailsEditor({
               type="checkbox"
               className="form-check-input"
               id="wd-show-correct-answers"
-              checked={quizForm.showCorrectAnswers || false}
+              checked={quizForm.showCorrectAnswers === 'true' || false}
               onChange={(e) =>
-                onFormChange('showCorrectAnswers', e.target.checked)
+                onFormChange('showCorrectAnswers', e.target.checked.toString())
               }
             />
             <label
