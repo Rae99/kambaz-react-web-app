@@ -11,7 +11,6 @@ import {
   FaQuestionCircle,
 } from 'react-icons/fa';
 import * as quizzesClient from './client';
-import * as coursesClient from '../client';
 import type { Quiz } from './types';
 
 export default function QuizDetails() {
@@ -144,7 +143,7 @@ export default function QuizDetails() {
             </Button>
           </div>
         )}
-      </div>
+          </div>
 
       {/* Quiz Information Cards */}
       <Row className="mb-4">

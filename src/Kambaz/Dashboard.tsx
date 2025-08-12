@@ -148,12 +148,6 @@ export default function Dashboard() {
     return enrolledCourses.some((course: any) => course._id === courseId);
   };
 
-  // Debug logging
-  console.log('Dashboard - showAllCourses:', showAllCourses);
-  console.log('Dashboard - allCourses:', allCourses);
-  console.log('Dashboard - enrolledCourses:', enrolledCourses);
-  console.log('Dashboard - courseList:', courseList);
-
   return (
     <div id="wd-dashboard">
       <div className="d-flex justify-content-between align-items-center">
