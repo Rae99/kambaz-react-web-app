@@ -9,7 +9,6 @@ import FillInBlankEditor from './FillInBlankEditor';
 interface QuizQuestionsEditorProps {
   questions?: Question[];
   onQuestionsChange?: (questions: Question[]) => void;
-  onSaveQuiz?: () => void;
 }
 
 export default function QuizQuestionsEditor({
@@ -61,18 +60,6 @@ export default function QuizQuestionsEditor({
         });
       }
     }, 100);
-
-    // 直接保存到后端
-    if (onSaveQuiz) {
-      try {
-        await onSaveQuiz();
-      } catch (error) {
-        console.error(
-          'Error saving quiz to backend after adding question:',
-          error
-        );
-      }
-    }
   };
 
   const handleEditQuestion = (question: Question, index: number) => {
@@ -88,15 +75,6 @@ export default function QuizQuestionsEditor({
 
       setEditingQuestion(null);
       setEditingIndex(-1);
-
-      // 直接保存到后端
-      if (onSaveQuiz) {
-        try {
-          await onSaveQuiz();
-        } catch (error) {
-          console.error('Error saving quiz to backend:', error);
-        }
-      }
     }
   };
 
@@ -115,15 +93,6 @@ export default function QuizQuestionsEditor({
         setEditingIndex(-1);
       } else if (editingIndex > index) {
         setEditingIndex(editingIndex - 1);
-      }
-
-      // 直接保存到后端
-      if (onSaveQuiz) {
-        try {
-          await onSaveQuiz();
-        } catch (error) {
-          console.error('Error saving quiz to backend:', error);
-        }
       }
     }
   };

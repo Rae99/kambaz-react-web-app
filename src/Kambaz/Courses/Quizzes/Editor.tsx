@@ -266,7 +266,6 @@ export default function QuizEditor() {
               );
               handleFormChange('questions', questions);
             }}
-            onSaveQuiz={() => handleSave(false)}
           />
         )}
       </div>
