@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { QuizFormData } from "./Quizzes/types";
+import type { Quiz } from "./Quizzes/types";
 const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
 const COURSES_API = `${HTTP_SERVER}/api/courses`;
 const axiosWithCredentials = axios.create({ withCredentials: true });
@@ -62,7 +62,7 @@ export const findQuizzesForCourse = async (courseId: string) => {
     return response.data;
   };
   
-  export const createQuizForCourse = async (courseId: string, quiz: QuizFormData) => {
+  export const createQuizForCourse = async (courseId: string, quiz: Quiz) => {
     const response = await axiosWithCredentials.post(`${COURSES_API}/${courseId}/quizzes`, quiz);
     return response.data;
   };

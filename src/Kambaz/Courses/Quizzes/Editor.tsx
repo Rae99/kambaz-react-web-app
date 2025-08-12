@@ -10,9 +10,14 @@ import type { Quiz } from './types';
 import * as coursesClient from '../client';
 
 export default function QuizEditor() {
-  const { cid, qid } = useParams();
+  const params = useParams();
+  const { cid, qid } = params;
   const navigate = useNavigate();
   const dispatch = useDispatch();
+
+  console.log('QuizEditor params:', params);
+  console.log('QuizEditor cid:', cid);
+  console.log('QuizEditor qid:', qid);
 
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const isNewQuiz = qid === 'new';
@@ -39,15 +44,15 @@ export default function QuizEditor() {
     quizType: quiz?.quizType || 'Graded Quiz',
     points: quiz?.points || 100,
     assignmentGroup: quiz?.assignmentGroup || 'Quizzes',
-    shuffleAnswers: quiz?.shuffleAnswers || false,
-    timeLimit: quiz?.timeLimit || 30,
-    multipleAttempts: quiz?.multipleAttempts || false,
-    attemptsAllowed: quiz?.attemptsAllowed || 1,
+    shuffleAnswers: quiz?.shuffleAnswers || true, // Default: Yes
+    timeLimit: quiz?.timeLimit || 20, // Default: 20 Minutes
+    multipleAttempts: quiz?.multipleAttempts || false, // Default: No
+    attemptsAllowed: quiz?.attemptsAllowed || 1, // Default: 1
     showCorrectAnswers: quiz?.showCorrectAnswers || 'Never',
     accessCode: quiz?.accessCode || '',
-    oneQuestionAtATime: quiz?.oneQuestionAtATime || false,
-    webcamRequired: quiz?.webcamRequired || false,
-    lockQuestionsAfterAnswering: quiz?.lockQuestionsAfterAnswering || false,
+    oneQuestionAtATime: quiz?.oneQuestionAtATime || true, // Default: Yes
+    webcamRequired: quiz?.webcamRequired || false, // Default: No
+    lockQuestionsAfterAnswering: quiz?.lockQuestionsAfterAnswering || false, // Default: No
     dueDate: quiz?.dueDate
       ? new Date(quiz.dueDate).toISOString().slice(0, 16)
       : '',
@@ -73,13 +78,13 @@ export default function QuizEditor() {
         quizType: quiz.quizType || 'Graded Quiz',
         points: quiz.points || 100,
         assignmentGroup: quiz.assignmentGroup || 'Quizzes',
-        shuffleAnswers: quiz.shuffleAnswers || false,
-        timeLimit: quiz.timeLimit || 30,
+        shuffleAnswers: quiz.shuffleAnswers || true,
+        timeLimit: quiz.timeLimit || 20,
         multipleAttempts: quiz.multipleAttempts || false,
         attemptsAllowed: quiz.attemptsAllowed || 1,
         showCorrectAnswers: quiz.showCorrectAnswers || 'Never',
         accessCode: quiz.accessCode || '',
-        oneQuestionAtATime: quiz.oneQuestionAtATime || false,
+        oneQuestionAtATime: quiz.oneQuestionAtATime || true,
         webcamRequired: quiz.webcamRequired || false,
         lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering || false,
         dueDate: quiz.dueDate
@@ -136,11 +141,19 @@ export default function QuizEditor() {
   };
 
   const handleCancel = () => {
-    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
+    if (isNewQuiz) {
+      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+    } else {
+      navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
+    }
   };
+
+  // Debug logging
+  console.log('Editor render:', { isNewQuiz, qid, quiz, quizForm });
 
   // Don't render the form if quiz doesn't exist (was deleted)
   if (!isNewQuiz && !quiz) {
+    console.log('Returning null - quiz not found and not new');
     return null;
   }
 

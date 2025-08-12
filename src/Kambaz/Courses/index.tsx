@@ -63,9 +63,17 @@ pathname.split("/")  // result:
             <Route path="/Piazza" element={<Piazza />} />
             <Route path="Zoom" element={<Zoom />} />
             <Route path="Quizzes" element={<Quizzes />} />
-            <Route path="Quizzes/:qid" element={<QuizDetails />} />
-            <Route path="Quizzes/:qid/edit" element={<QuizEditor />} />
-            <Route path="Quizzes/:qid/preview" element={<QuizPreview />} />
+            <Route
+              path="Quizzes/*"
+              element={
+                <Routes>
+                  {/* <Route path="new" element={<QuizEditor />} /> */}
+                  <Route path=":qid/preview" element={<QuizPreview />} />
+                  <Route path=":qid/edit" element={<QuizEditor />} />
+                  <Route path=":qid" element={<QuizDetails />} />
+                </Routes>
+              }
+            />
             <Route path="Grades" element={<Grades />} />
           </Routes>
         </div>

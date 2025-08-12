@@ -30,7 +30,7 @@ export default function QuizzesControls() {
           size="lg"
           variant="danger"
           className="d-flex align-items-center"
-          onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes/new`)}
+          onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes/new/edit`)}
         >
           <FaPlus className="me-2" size={16} />
           Quiz
