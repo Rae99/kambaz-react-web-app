@@ -186,11 +186,9 @@ export default function Quizzes() {
             <ListGroup.Item
               key={quiz._id}
               className="wd-quiz py-3 px-3"
-              as={isFaculty ? Link : 'div'}
-              {...(isFaculty
-                ? { to: `/Kambaz/Courses/${cid}/Quizzes/${quiz._id}` }
-                : {})}
-              style={{ cursor: isFaculty ? 'pointer' : 'not-allowed' }}
+              as={Link}
+              to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`}
+              style={{ cursor: 'pointer' }}
             >
               <div className="d-flex justify-content-between align-items-center">
                 <div
@@ -204,19 +202,9 @@ export default function Quizzes() {
                     className="d-flex flex-column"
                     style={{ minWidth: 0, flex: 1 }}
                   >
-                    {isFaculty ? (
-                      <Link
-                        to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`}
-                        className="fw-bold fs-4 text-decoration-none text-dark"
-                        style={{ cursor: 'pointer' }}
-                      >
-                        {quiz.title}
-                      </Link>
-                    ) : (
-                      <span className="fw-bold fs-4 text-decoration-none text-dark">
-                        {quiz.title}
-                      </span>
-                    )}
+                    <span className="fw-bold fs-4 text-decoration-none text-dark">
+                      {quiz.title}
+                    </span>
 
                     {/* Availability and details - single line with overflow handling */}
                     <div
