@@ -330,9 +330,9 @@ export default function Quizzes() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                closeMenu();
-                                navigate(
-                                  `/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`
+                                  closeMenu();
+                                  navigate(
+                                  `/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/edit`
                                 );
                               }}
                             >

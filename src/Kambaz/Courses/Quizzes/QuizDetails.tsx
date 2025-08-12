@@ -5,7 +5,6 @@ import { Card, Button, Badge, Row, Col, Alert } from 'react-bootstrap';
 import {
   FaEdit,
   FaTrash,
-  FaCopy,
   FaEye,
   FaUsers,
   FaClock,
@@ -64,33 +63,18 @@ export default function QuizDetails() {
     }
   };
 
-  const handleCopyQuiz = async () => {
+  const handleTogglePublish = async () => {
     try {
       if (quiz) {
-        const quizCopy = {
-          ...quiz,
-          title: `${quiz.title} (Copy)`,
-          isPublished: false,
-          _id: undefined,
-          availableDate: quiz.availableDate
-            ? new Date(quiz.availableDate).toISOString()
-            : undefined,
-          dueDate: quiz.dueDate
-            ? new Date(quiz.dueDate).toISOString()
-            : undefined,
-          untilDate: quiz.untilDate
-            ? new Date(quiz.untilDate).toISOString()
-            : undefined,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
+        const updatedQuiz = { ...quiz, isPublished: !quiz.isPublished };
+        await quizzesClient.updateQuiz(qid!, updatedQuiz as any);
 
-        await coursesClient.createQuizForCourse(cid!, quizCopy);
-        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+        const freshQuiz = await quizzesClient.findQuizById(qid!);
+        setQuiz(freshQuiz);
       }
     } catch (error) {
-      console.error('Error copying quiz:', error);
-      setError('Failed to copy quiz');
+      console.error('Error toggling quiz publish status:', error);
+      setError('Failed to update quiz publish status');
     }
   };
 
@@ -153,10 +137,7 @@ export default function QuizDetails() {
               <FaEdit className="me-2" />
               Edit Quiz
             </Button>
-            <Button variant="outline-secondary" onClick={handleCopyQuiz}>
-              <FaCopy className="me-2" />
-              Copy
-            </Button>
+
             <Button variant="outline-danger" onClick={handleDeleteQuiz}>
               <FaTrash className="me-2" />
               Delete
@@ -227,29 +208,30 @@ export default function QuizDetails() {
                 Available from: {availableDate.toLocaleDateString()} at 12:00 AM
               </span>
             )}
-            {dueDate && (
-              <span className="text-muted">
-                Due: {dueDate.toLocaleDateString()} at 11:59 PM
-              </span>
-            )}
             {untilDate && (
               <span className="text-muted">
                 Until: {untilDate.toLocaleDateString()} at 11:59 PM
+              </span>
+            )}
+            {dueDate && (
+              <span className="text-muted">
+                Due: {dueDate.toLocaleDateString()} at 11:59 PM
               </span>
             )}
           </div>
         </Card.Body>
       </Card>
 
-      {/* Faculty View - Quiz Management */}
+      {/* Faculty View - Quiz Details */}
       {isFaculty && (
         <Card className="mb-4">
           <Card.Body>
-            <h5 className="card-title">Quiz Management</h5>
+            <h5 className="card-title">Quiz Details</h5>
             <div className="d-flex gap-2 mb-3">
               <Button
                 variant={quiz.isPublished ? 'success' : 'warning'}
                 size="sm"
+                onClick={handleTogglePublish}
               >
                 {quiz.isPublished ? 'Published' : 'Draft'}
                 <span className="ms-1">{quiz.isPublished ? '✅' : '🚫'}</span>
@@ -272,90 +254,62 @@ export default function QuizDetails() {
 
             <div className="row">
               <div className="col-md-6">
-                <h6>Quiz Options</h6>
                 <ul className="list-unstyled">
-                  <li>
-                    <input
-                      type="checkbox"
-                      checked={quiz.shuffleAnswers || false}
-                      readOnly
-                      className="me-2"
-                    />
-                    Shuffle Answers
+                  <li className="mb-2">
+                    <strong>Shuffle Answers:</strong>{' '}
+                    {quiz.shuffleAnswers ? 'Yes' : 'No'}
                   </li>
-                  <li>
-                    <input
-                      type="checkbox"
-                      checked={quiz.multipleAttempts || false}
-                      readOnly
-                      className="me-2"
-                    />
-                    Allow Multiple Attempts
+                  <li className="mb-2">
+                    <strong>Allow Multiple Attempts:</strong>{' '}
+                    {quiz.multipleAttempts ? 'Yes' : 'No'}
                   </li>
-                  <li>
-                    <input
-                      type="checkbox"
-                      checked={quiz.showCorrectAnswers === 'true' || false}
-                      readOnly
-                      className="me-2"
-                    />
-                    Show Correct Answers
+                  <li className="mb-2">
+                    <strong>Show Correct Answers:</strong>{' '}
+                    {quiz.showCorrectAnswers || 'Never'}
                   </li>
-                  <li>
-                    <input
-                      type="checkbox"
-                      checked={quiz.oneQuestionAtATime || false}
-                      readOnly
-                      className="me-2"
-                    />
-                    One Question at a Time
+                  <li className="mb-2">
+                    <strong>One Question at a Time:</strong>{' '}
+                    {quiz.oneQuestionAtATime ? 'Yes' : 'No'}
                   </li>
-                  <li>
-                    <input
-                      type="checkbox"
-                      checked={quiz.webcamRequired || false}
-                      readOnly
-                      className="me-2"
-                    />
-                    Webcam Required
+                  <li className="mb-2">
+                    <strong>Webcam Required:</strong>{' '}
+                    {quiz.webcamRequired ? 'Yes' : 'No'}
                   </li>
-                  <li>
-                    <input
-                      type="checkbox"
-                      checked={quiz.lockQuestionsAfterAnswering || false}
-                      readOnly
-                      className="me-2"
-                    />
-                    Lock Questions After Answering
+                  <li className="mb-2">
+                    <strong>Lock Questions After Answering:</strong>{' '}
+                    {quiz.lockQuestionsAfterAnswering ? 'Yes' : 'No'}
                   </li>
                 </ul>
               </div>
 
               <div className="col-md-6">
-                <h6>Quiz Details</h6>
                 <p className="text-muted mb-1">
-                  Quiz Type: {quiz.quizType || 'Graded Quiz'}
+                  <strong>Quiz Type:</strong> {quiz.quizType || 'Graded Quiz'}
                 </p>
                 <p className="text-muted mb-1">
-                  Assignment Group: {quiz.assignmentGroup || 'Quizzes'}
+                  <strong>Assignment Group:</strong>{' '}
+                  {quiz.assignmentGroup || 'Quizzes'}
                 </p>
                 <p className="text-muted mb-1">
-                  Time Limit:{' '}
+                  <strong>Time Limit:</strong>{' '}
                   {quiz.timeLimit ? `${quiz.timeLimit} minutes` : 'No limit'}
                 </p>
                 <p className="text-muted mb-1">
-                  Multiple Attempts: {quiz.multipleAttempts ? 'Yes' : 'No'}
+                  <strong>Multiple Attempts:</strong>{' '}
+                  {quiz.multipleAttempts ? 'Yes' : 'No'}
                 </p>
                 {quiz.multipleAttempts && (
                   <p className="text-muted mb-1">
-                    Attempts Allowed: {quiz.attemptsAllowed || 1}
+                    <strong>How Many Attempts:</strong>{' '}
+                    {quiz.attemptsAllowed || 1}
                   </p>
                 )}
                 <p className="text-muted mb-1">
-                  Show Correct Answers: {quiz.showCorrectAnswers || 'Never'}
+                  <strong>Show Correct Answers:</strong>{' '}
+                  {quiz.showCorrectAnswers || 'Never'}
                 </p>
                 <p className="text-muted mb-0">
-                  Access Code: {quiz.accessCode || 'None'}
+                  <strong>Access Code:</strong> {quiz.accessCode || 'None'}
                 </p>
               </div>
             </div>

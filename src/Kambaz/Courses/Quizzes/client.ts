@@ -26,11 +26,6 @@ export const deleteQuiz = async (quizId: string) => {
   return response.data;
 };
 
-export const publishQuiz = async (quizId: string, isPublished: boolean) => {
-  const response = await axiosWithCredentials.put(`${QUIZZES_API}/${quizId}/publish`, { isPublished });
-  return response.data;
-};
-
 // Quiz Attempt operations
 export const submitQuizAttempt = async (attempt: Omit<QuizAttempt, '_id' | 'submittedAt'>) => {
   const response = await axiosWithCredentials.post(ATTEMPTS_API, attempt);
