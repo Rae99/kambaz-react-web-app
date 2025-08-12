@@ -67,7 +67,7 @@ export default function QuizDetails() {
     try {
       if (quiz) {
         const updatedQuiz = { ...quiz, isPublished: !quiz.isPublished };
-        await quizzesClient.updateQuiz(qid!, updatedQuiz as any);
+        await quizzesClient.updateQuiz(qid!, updatedQuiz);
 
         const freshQuiz = await quizzesClient.findQuizById(qid!);
         setQuiz(freshQuiz);

@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { QuizAttempt, QuizFormData } from "./types";
+import type { QuizAttempt, Quiz } from "./types";
 
 const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
 const QUIZZES_API = `${HTTP_SERVER}/api/quizzes`;
@@ -16,7 +16,7 @@ export const findQuizById = async (quizId: string) => {
   return response.data;
 };
 
-export const updateQuiz = async (quizId: string, quiz: QuizFormData) => {
+export const updateQuiz = async (quizId: string, quiz: Quiz) => {
   const response = await axiosWithCredentials.put(`${QUIZZES_API}/${quizId}`, quiz);
   return response.data;
 };

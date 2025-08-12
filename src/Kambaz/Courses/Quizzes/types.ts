@@ -15,13 +15,13 @@ export interface Quiz {
   oneQuestionAtATime: boolean;
   webcamRequired: boolean;
   lockQuestionsAfterAnswering: boolean;
-  availableDate?: Date;
-  dueDate?: Date;
-  untilDate?: Date;
+  availableDate?: string; // ISO 8601 格式: "2024-01-01T00:00:00.000Z"
+  dueDate?: string;       // ISO 8601 格式: "2024-01-01T00:00:00.000Z"
+  untilDate?: string;     // ISO 8601 格式: "2024-01-01T00:00:00.000Z"
   questions: Question[];
   isPublished: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;      // ISO 8601 格式
+  updatedAt: string;      // ISO 8601 格式
 }
 
 export interface Question {
@@ -53,24 +53,4 @@ export interface Answer {
   pointsEarned: number;
 }
 
-export interface QuizFormData {
-  title: string;
-  description: string;
-  quizType: string;
-  points: number;
-  assignmentGroup: string;
-  shuffleAnswers: boolean;
-  timeLimit: number;
-  multipleAttempts: boolean;
-  attemptsAllowed: number;
-  showCorrectAnswers: string;
-  accessCode: string;
-  oneQuestionAtATime: boolean;
-  webcamRequired: boolean;
-  lockQuestionsAfterAnswering: boolean;
-  availableDate?: string;
-  dueDate?: string;
-  untilDate?: string;
-  questions: Question[];
-  isPublished: boolean;
-}
+

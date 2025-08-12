@@ -6,7 +6,7 @@ import { addQuiz, updateQuiz } from './reducer';
 import * as quizzesClient from './client';
 import QuizDetailsEditor from './QuizDetailsEditor';
 import QuizQuestionsEditor from './QuizQuestionsEditor';
-import type { Quiz, QuizFormData } from './types';
+import type { Quiz } from './types';
 import * as coursesClient from '../client';
 
 export default function QuizEditor() {
@@ -32,9 +32,10 @@ export default function QuizEditor() {
   }, [quiz, isNewQuiz, cid, navigate]);
 
   // State for form fields
-  const [quizForm, setQuizForm] = useState<QuizFormData>({
+  const [quizForm, setQuizForm] = useState<Quiz>({
     title: quiz?.title || 'New Quiz',
     description: quiz?.description || 'Quiz description',
+    courseId: quiz?.courseId || cid || '',
     quizType: quiz?.quizType || 'Graded Quiz',
     points: quiz?.points || 100,
     assignmentGroup: quiz?.assignmentGroup || 'Quizzes',
@@ -58,6 +59,8 @@ export default function QuizEditor() {
       : '',
     questions: quiz?.questions || [],
     isPublished: quiz?.isPublished || false,
+    createdAt: quiz?.createdAt || new Date().toISOString(),
+    updatedAt: quiz?.updatedAt || new Date().toISOString(),
   });
 
   // Update form when quiz changes
@@ -66,6 +69,7 @@ export default function QuizEditor() {
       setQuizForm({
         title: quiz.title,
         description: quiz.description,
+        courseId: quiz.courseId,
         quizType: quiz.quizType || 'Graded Quiz',
         points: quiz.points || 100,
         assignmentGroup: quiz.assignmentGroup || 'Quizzes',
@@ -89,11 +93,13 @@ export default function QuizEditor() {
           : '',
         questions: quiz.questions,
         isPublished: quiz.isPublished,
+        createdAt: quiz.createdAt,
+        updatedAt: quiz.updatedAt,
       });
     }
   }, [quiz]);
 
-  const handleFormChange = (field: keyof QuizFormData, value: any) => {
+  const handleFormChange = (field: keyof Quiz, value: any) => {
     setQuizForm((prev) => ({
       ...prev,
       [field]: value,
@@ -101,7 +107,7 @@ export default function QuizEditor() {
   };
 
   const handleSave = async () => {
-    const quizData: QuizFormData = {
+    const quizData: Quiz = {
       ...quizForm,
       availableDate: quizForm.availableDate
         ? new Date(quizForm.availableDate).toISOString()

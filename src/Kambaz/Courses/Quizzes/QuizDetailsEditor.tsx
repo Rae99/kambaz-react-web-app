@@ -1,9 +1,9 @@
 import { Row, Col } from 'react-bootstrap';
-import type { QuizFormData } from './types';
+import type { Quiz } from './types';
 
 interface QuizDetailsEditorProps {
-  quizForm: QuizFormData;
-  onFormChange: (field: keyof QuizFormData, value: any) => void;
+  quizForm: Quiz;
+  onFormChange: (field: keyof Quiz, value: any) => void;
 }
 
 export default function QuizDetailsEditor({
