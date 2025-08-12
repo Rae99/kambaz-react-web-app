@@ -28,7 +28,7 @@ export default function QuizQuestionsEditor({
     const updatedQuestions = [...questions, newQuestion];
     onQuestionsChange?.(updatedQuestions);
 
-    // Start editing the new question
+    // Start editing the new question immediately (edit preview mode)
     setEditingQuestion(newQuestion);
     setEditingIndex(updatedQuestions.length - 1);
   };
@@ -95,7 +95,7 @@ export default function QuizQuestionsEditor({
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h4>Quiz Questions</h4>
         <div className="d-flex align-items-center gap-3">
-          <span className="text-muted">Total Points: {totalPoints}</span>
+          <span className="text-muted fw-bold">Points {totalPoints}</span>
           <Button variant="primary" onClick={handleAddQuestion}>
             <FaPlus className="me-2" />
             Add Question
@@ -161,11 +161,11 @@ export default function QuizQuestionsEditor({
                             }
                           >
                             <option value="multiple-choice">
-                              Multiple Choice
+                              Multiple choice
                             </option>
-                            <option value="true-false">True/False</option>
+                            <option value="true-false">True/false</option>
                             <option value="fill-in-the-blank">
-                              Fill in the Blank
+                              Fill in a blank
                             </option>
                           </Form.Select>
                         </Form.Group>
@@ -257,7 +257,7 @@ export default function QuizQuestionsEditor({
                     <div className="d-flex gap-2">
                       <Button variant="success" onClick={handleSaveQuestion}>
                         <FaSave className="me-2" />
-                        Save Question
+                        Save
                       </Button>
                       <Button variant="secondary" onClick={handleCancelEdit}>
                         <FaTimes className="me-2" />
@@ -275,7 +275,7 @@ export default function QuizQuestionsEditor({
                         </h6>
                         <div className="text-muted">
                           <small>
-                            Type: {question.type} | Points: {question.points}
+                            {question.type} | {question.points} pts
                           </small>
                         </div>
                       </div>
