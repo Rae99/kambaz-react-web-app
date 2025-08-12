@@ -26,6 +26,7 @@ export interface Quiz {
 
 export interface Question {
   _id?: string;
+  title?: string; // Question title
   type: 'multiple-choice' | 'true-false' | 'fill-in-the-blank';
   text: string;
   points: number;

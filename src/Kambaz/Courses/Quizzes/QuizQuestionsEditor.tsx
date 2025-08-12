@@ -2,25 +2,39 @@ import { useState } from 'react';
 import { Button, Card, Form, Row, Col } from 'react-bootstrap';
 import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes } from 'react-icons/fa';
 import type { Question } from './types';
+import MultipleChoiceEditor from './MultipleChoiceEditor';
+import TrueFalseEditor from './TrueFalseEditor';
+import FillInBlankEditor from './FillInBlankEditor';
 
 interface QuizQuestionsEditorProps {
   questions?: Question[];
   onQuestionsChange?: (questions: Question[]) => void;
+  onSaveQuiz?: () => void;
 }
 
 export default function QuizQuestionsEditor({
   questions = [],
   onQuestionsChange,
+  onSaveQuiz,
 }: QuizQuestionsEditorProps) {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
+  const [showQuestionTypeSelector, setShowQuestionTypeSelector] =
+    useState(false);
 
   const handleAddQuestion = () => {
+    setShowQuestionTypeSelector(true);
+  };
+
+  const handleCreateQuestion = async (
+    questionType: 'multiple-choice' | 'true-false' | 'fill-in-the-blank'
+  ) => {
     const newQuestion: Question = {
-      type: 'multiple-choice',
+      title: '',
+      type: questionType,
       text: '',
       points: 1,
-      options: ['', '', '', ''],
+      options: questionType === 'multiple-choice' ? ['', '', '', ''] : [],
       correctAnswer: '',
       explanation: '',
     };
@@ -31,6 +45,34 @@ export default function QuizQuestionsEditor({
     // Start editing the new question immediately (edit preview mode)
     setEditingQuestion(newQuestion);
     setEditingIndex(updatedQuestions.length - 1);
+
+    // Hide the type selector
+    setShowQuestionTypeSelector(false);
+
+    // Scroll to the new question
+    setTimeout(() => {
+      const newQuestionElement = document.getElementById(
+        `question-${updatedQuestions.length - 1}`
+      );
+      if (newQuestionElement) {
+        newQuestionElement.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      }
+    }, 100);
+
+    // 直接保存到后端
+    if (onSaveQuiz) {
+      try {
+        await onSaveQuiz();
+      } catch (error) {
+        console.error(
+          'Error saving quiz to backend after adding question:',
+          error
+        );
+      }
+    }
   };
 
   const handleEditQuestion = (question: Question, index: number) => {
@@ -38,7 +80,7 @@ export default function QuizQuestionsEditor({
     setEditingIndex(index);
   };
 
-  const handleSaveQuestion = () => {
+  const handleSaveQuestion = async () => {
     if (editingQuestion && editingIndex >= 0) {
       const updatedQuestions = [...questions];
       updatedQuestions[editingIndex] = editingQuestion;
@@ -46,6 +88,15 @@ export default function QuizQuestionsEditor({
 
       setEditingQuestion(null);
       setEditingIndex(-1);
+
+      // 直接保存到后端
+      if (onSaveQuiz) {
+        try {
+          await onSaveQuiz();
+        } catch (error) {
+          console.error('Error saving quiz to backend:', error);
+        }
+      }
     }
   };
 
@@ -54,7 +105,7 @@ export default function QuizQuestionsEditor({
     setEditingIndex(-1);
   };
 
-  const handleDeleteQuestion = (index: number) => {
+  const handleDeleteQuestion = async (index: number) => {
     if (window.confirm('Are you sure you want to delete this question?')) {
       const updatedQuestions = questions.filter((_, i) => i !== index);
       onQuestionsChange?.(updatedQuestions);
@@ -64,6 +115,15 @@ export default function QuizQuestionsEditor({
         setEditingIndex(-1);
       } else if (editingIndex > index) {
         setEditingIndex(editingIndex - 1);
+      }
+
+      // 直接保存到后端
+      if (onSaveQuiz) {
+        try {
+          await onSaveQuiz();
+        } catch (error) {
+          console.error('Error saving quiz to backend:', error);
+        }
       }
     }
   };
@@ -103,6 +163,45 @@ export default function QuizQuestionsEditor({
         </div>
       </div>
 
+      {/* Question Type Selector Modal */}
+      {showQuestionTypeSelector && (
+        <Card className="mb-3 border-primary">
+          <Card.Body className="text-center">
+            <h5 className="mb-3">Choose Question Type</h5>
+            <div className="d-flex justify-content-center gap-3">
+              <Button
+                variant="outline-primary"
+                onClick={() => handleCreateQuestion('multiple-choice')}
+                className="px-4"
+              >
+                Multiple Choice
+              </Button>
+              <Button
+                variant="outline-primary"
+                onClick={() => handleCreateQuestion('true-false')}
+                className="px-4"
+              >
+                True/False
+              </Button>
+              <Button
+                variant="outline-primary"
+                onClick={() => handleCreateQuestion('fill-in-the-blank')}
+                className="px-4"
+              >
+                Fill in the Blank
+              </Button>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => setShowQuestionTypeSelector(false)}
+              className="mt-3"
+            >
+              Cancel
+            </Button>
+          </Card.Body>
+        </Card>
+      )}
+
       {questions.length === 0 ? (
         <Card>
           <Card.Body className="text-center text-muted">
@@ -112,158 +211,41 @@ export default function QuizQuestionsEditor({
       ) : (
         <div className="questions-list">
           {questions.map((question, index) => (
-            <Card key={index} className="mb-3">
+            <Card key={index} className="mb-3" id={`question-${index}`}>
               <Card.Body>
                 {editingIndex === index ? (
-                  // Editing mode
+                  // Editing mode - render specific editor based on question type
                   <div>
-                    <Row className="mb-3">
-                      <Col md={8}>
-                        <Form.Group>
-                          <Form.Label>Question Text</Form.Label>
-                          <Form.Control
-                            as="textarea"
-                            rows={3}
-                            value={editingQuestion?.text || ''}
-                            onChange={(e) =>
-                              handleQuestionChange('text', e.target.value)
-                            }
-                            placeholder="Enter your question here..."
-                          />
-                        </Form.Group>
-                      </Col>
-                      <Col md={4}>
-                        <Form.Group>
-                          <Form.Label>Points</Form.Label>
-                          <Form.Control
-                            type="number"
-                            min="1"
-                            value={editingQuestion?.points || 1}
-                            onChange={(e) =>
-                              handleQuestionChange(
-                                'points',
-                                parseInt(e.target.value) || 1
-                              )
-                            }
-                          />
-                        </Form.Group>
-                      </Col>
-                    </Row>
-
-                    <Row className="mb-3">
-                      <Col md={6}>
-                        <Form.Group>
-                          <Form.Label>Question Type</Form.Label>
-                          <Form.Select
-                            value={editingQuestion?.type || 'multiple-choice'}
-                            onChange={(e) =>
-                              handleQuestionChange('type', e.target.value)
-                            }
-                          >
-                            <option value="multiple-choice">
-                              Multiple choice
-                            </option>
-                            <option value="true-false">True/false</option>
-                            <option value="fill-in-the-blank">
-                              Fill in a blank
-                            </option>
-                          </Form.Select>
-                        </Form.Group>
-                      </Col>
-                      <Col md={6}>
-                        <Form.Group>
-                          <Form.Label>Correct Answer</Form.Label>
-                          {editingQuestion?.type === 'multiple-choice' ? (
-                            <Form.Select
-                              value={editingQuestion?.correctAnswer || ''}
-                              onChange={(e) =>
-                                handleQuestionChange(
-                                  'correctAnswer',
-                                  e.target.value
-                                )
-                              }
-                            >
-                              <option value="">Select correct answer</option>
-                              {editingQuestion?.options?.map(
-                                (option, optIndex) => (
-                                  <option key={optIndex} value={option}>
-                                    {option || `Option ${optIndex + 1}`}
-                                  </option>
-                                )
-                              )}
-                            </Form.Select>
-                          ) : editingQuestion?.type === 'true-false' ? (
-                            <Form.Select
-                              value={editingQuestion?.correctAnswer || ''}
-                              onChange={(e) =>
-                                handleQuestionChange(
-                                  'correctAnswer',
-                                  e.target.value
-                                )
-                              }
-                            >
-                              <option value="">Select correct answer</option>
-                              <option value="true">True</option>
-                              <option value="false">False</option>
-                            </Form.Select>
-                          ) : (
-                            <Form.Control
-                              type="text"
-                              value={editingQuestion?.correctAnswer || ''}
-                              onChange={(e) =>
-                                handleQuestionChange(
-                                  'correctAnswer',
-                                  e.target.value
-                                )
-                              }
-                              placeholder="Enter correct answer"
-                            />
-                          )}
-                        </Form.Group>
-                      </Col>
-                    </Row>
-
                     {editingQuestion?.type === 'multiple-choice' && (
-                      <div className="mb-3">
-                        <Form.Label>Options</Form.Label>
-                        {editingQuestion.options?.map((option, optIndex) => (
-                          <Form.Control
-                            key={optIndex}
-                            type="text"
-                            className="mb-2"
-                            value={option}
-                            onChange={(e) =>
-                              handleOptionChange(optIndex, e.target.value)
-                            }
-                            placeholder={`Option ${optIndex + 1}`}
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    <Form.Group className="mb-3">
-                      <Form.Label>Explanation (Optional)</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={2}
-                        value={editingQuestion?.explanation || ''}
-                        onChange={(e) =>
-                          handleQuestionChange('explanation', e.target.value)
+                      <MultipleChoiceEditor
+                        question={editingQuestion}
+                        onQuestionChange={(updatedQuestion) =>
+                          setEditingQuestion(updatedQuestion)
                         }
-                        placeholder="Explain why this answer is correct..."
+                        onSave={handleSaveQuestion}
+                        onCancel={handleCancelEdit}
                       />
-                    </Form.Group>
-
-                    <div className="d-flex gap-2">
-                      <Button variant="success" onClick={handleSaveQuestion}>
-                        <FaSave className="me-2" />
-                        Save
-                      </Button>
-                      <Button variant="secondary" onClick={handleCancelEdit}>
-                        <FaTimes className="me-2" />
-                        Cancel
-                      </Button>
-                    </div>
+                    )}
+                    {editingQuestion?.type === 'true-false' && (
+                      <TrueFalseEditor
+                        question={editingQuestion}
+                        onQuestionChange={(updatedQuestion) =>
+                          setEditingQuestion(updatedQuestion)
+                        }
+                        onSave={handleSaveQuestion}
+                        onCancel={handleCancelEdit}
+                      />
+                    )}
+                    {editingQuestion?.type === 'fill-in-the-blank' && (
+                      <FillInBlankEditor
+                        question={editingQuestion}
+                        onQuestionChange={(updatedQuestion) =>
+                          setEditingQuestion(updatedQuestion)
+                        }
+                        onSave={handleSaveQuestion}
+                        onCancel={handleCancelEdit}
+                      />
+                    )}
                   </div>
                 ) : (
                   // Display mode

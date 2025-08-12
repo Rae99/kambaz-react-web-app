@@ -4,11 +4,15 @@ import type { Quiz } from './types';
 interface QuizDetailsEditorProps {
   quizForm: Quiz;
   onFormChange: (field: keyof Quiz, value: any) => void;
+  onSave?: () => void;
+  onCancel?: () => void;
 }
 
 export default function QuizDetailsEditor({
   quizForm,
   onFormChange,
+  onSave,
+  onCancel,
 }: QuizDetailsEditorProps) {
   return (
     <div className="tab-pane fade show active" id="details">
@@ -184,6 +188,22 @@ export default function QuizDetailsEditor({
           </label>
         </div>
       </div>
+
+      {/* Save and Cancel Buttons */}
+      {(onSave || onCancel) && (
+        <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+          {onCancel && (
+            <button className="btn btn-secondary" onClick={onCancel}>
+              Cancel
+            </button>
+          )}
+          {onSave && (
+            <button className="btn btn-danger" onClick={onSave}>
+              Save Quiz
+            </button>
+          )}
+        </div>
+      )}
     </div>
   );
 }

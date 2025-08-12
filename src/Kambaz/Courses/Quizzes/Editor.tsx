@@ -105,13 +105,31 @@ export default function QuizEditor() {
   }, [quiz]);
 
   const handleFormChange = (field: keyof Quiz, value: any) => {
-    setQuizForm((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    console.log('=== HANDLE FORM CHANGE ===');
+    console.log('1. field:', field);
+    console.log('2. value:', value);
+    console.log('3. previous quizForm:', quizForm);
+
+    setQuizForm((prev) => {
+      const newForm = {
+        ...prev,
+        [field]: value,
+      };
+      console.log('4. new quizForm:', newForm);
+      console.log('5. questions count in newForm:', newForm.questions?.length);
+      return newForm;
+    });
   };
 
-  const handleSave = async () => {
+  const handleSave = async (shouldNavigate: boolean = true) => {
+    console.log('=== HANDLE SAVE START ===');
+    console.log('1. shouldNavigate:', shouldNavigate);
+    console.log('2. isNewQuiz:', isNewQuiz);
+    console.log('3. cid:', cid);
+    console.log('4. qid:', qid);
+    console.log('5. quizForm.questions count:', quizForm.questions?.length);
+    console.log('6. quizForm.questions:', quizForm.questions);
+
     const quizData: Quiz = {
       ...quizForm,
       availableDate: quizForm.availableDate
@@ -125,18 +143,32 @@ export default function QuizEditor() {
         : undefined,
     };
 
+    console.log('7. quizData prepared:', quizData);
+    console.log('8. quizData.questions count:', quizData.questions?.length);
+
     try {
       if (isNewQuiz) {
+        console.log('Creating new quiz...');
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
+        console.log('Quiz created successfully:', newQuiz);
         dispatch(addQuiz(newQuiz));
       } else {
+        console.log('Updating existing quiz...');
         const updatedQuiz = await quizzesClient.updateQuiz(qid!, quizData);
         dispatch(updateQuiz(updatedQuiz));
       }
 
-      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
-    } catch (error) {
+      // Only navigate if the user explicitly saved
+      if (shouldNavigate) {
+        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+      }
+    } catch (error: any) {
       console.error('Error saving quiz:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
     }
   };
 
@@ -218,27 +250,25 @@ export default function QuizEditor() {
           <QuizDetailsEditor
             quizForm={quizForm}
             onFormChange={handleFormChange}
+            onSave={() => handleSave(true)}
+            onCancel={handleCancel}
           />
         )}
         {activeTab === 'questions' && (
           <QuizQuestionsEditor
             questions={quizForm.questions}
-            onQuestionsChange={(questions) =>
-              handleFormChange('questions', questions)
-            }
+            onQuestionsChange={(questions) => {
+              console.log('=== QUESTIONS CHANGE IN EDITOR ===');
+              console.log('1. New questions count:', questions.length);
+              console.log(
+                '2. Current quizForm.questions count:',
+                quizForm.questions?.length
+              );
+              handleFormChange('questions', questions);
+            }}
+            onSaveQuiz={() => handleSave(false)}
           />
         )}
-      </div>
-
-      <hr />
-
-      <div className="text-end">
-        <button className="btn btn-secondary me-2" onClick={handleCancel}>
-          Cancel
-        </button>
-        <button className="btn btn-danger" onClick={handleSave}>
-          Save
-        </button>
       </div>
     </div>
   );
