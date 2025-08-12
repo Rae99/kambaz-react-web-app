@@ -98,6 +98,42 @@ export default function Quizzes() {
     'name'
   );
 
+  // Helper function to render availability information
+  const renderAvailabilityInfo = (quiz: Quiz, isFaculty: boolean) => {
+    const now = new Date();
+    const availableDate = quiz.availableDate
+      ? new Date(quiz.availableDate)
+      : null;
+    const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
+
+    let availabilityStatus = '';
+    if (!availableDate) {
+      availabilityStatus = 'Not available';
+    } else if (now < availableDate) {
+      availabilityStatus = `Not available until ${availableDate.toLocaleDateString()} at 12:00am`;
+    } else if (dueDate && now > dueDate) {
+      availabilityStatus = 'Closed';
+    } else {
+      availabilityStatus = 'Available';
+    }
+
+    return (
+      <>
+        <span className="fw-bold">{availabilityStatus}</span> |{' '}
+        <span className="fw-bold">Due</span>{' '}
+        {dueDate ? dueDate.toLocaleDateString() : 'Not set'} at 11:59pm |{' '}
+        {quiz.questions.reduce((sum, q) => sum + q.points, 0)} pts |{' '}
+        {quiz.questions?.length || 0} Questions
+        {!isFaculty && (
+          <>
+            {' '}
+            | <span className="fw-bold">Score: N/A</span>
+          </>
+        )}
+      </>
+    );
+  };
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center">
@@ -215,48 +251,7 @@ export default function Quizzes() {
                         textOverflow: 'ellipsis',
                       }}
                     >
-                      {(() => {
-                        const now = new Date();
-                        const availableDate = quiz.availableDate
-                          ? new Date(quiz.availableDate)
-                          : null;
-                        const dueDate = quiz.dueDate
-                          ? new Date(quiz.dueDate)
-                          : null;
-
-                        let availabilityStatus = '';
-                        if (!availableDate) {
-                          availabilityStatus = 'Not available';
-                        } else if (now < availableDate) {
-                          availabilityStatus = `Not available until ${availableDate.toLocaleDateString()} at 12:00am`;
-                        } else if (dueDate && now > dueDate) {
-                          availabilityStatus = 'Closed';
-                        } else {
-                          availabilityStatus = 'Available';
-                        }
-
-                        return (
-                          <>
-                            <span className="fw-bold">
-                              {availabilityStatus}
-                            </span>{' '}
-                            | <span className="fw-bold">Due</span>{' '}
-                            {dueDate ? dueDate.toLocaleDateString() : 'Not set'}{' '}
-                            at 11:59pm |{' '}
-                            {quiz.questions.reduce(
-                              (sum, q) => sum + q.points,
-                              0
-                            )}{' '}
-                            pts | {quiz.questions?.length || 0} Questions
-                            {!isFaculty && (
-                              <>
-                                {' '}
-                                | <span className="fw-bold">Score: N/A</span>
-                              </>
-                            )}
-                          </>
-                        );
-                      })()}
+                      {renderAvailabilityInfo(quiz, isFaculty)}
                     </div>
                   </div>
                 </div>
