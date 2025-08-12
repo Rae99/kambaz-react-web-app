@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ListGroup, Dropdown } from 'react-bootstrap';
 import { FaRegEdit, FaTrash, FaEye, FaCopy, FaSort } from 'react-icons/fa';
@@ -17,6 +17,7 @@ import * as coursesClient from '../client';
 
 export default function Quizzes() {
   const { cid } = useParams();
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
   const { quizzes, loading } = useSelector(
@@ -264,9 +265,11 @@ export default function Quizzes() {
                     <span
                       className="me-2 fs-4"
                       style={{ cursor: 'pointer' }}
-                      onClick={() =>
-                        handlePublishQuiz(quiz._id!, quiz.isPublished)
-                      }
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        handlePublishQuiz(quiz._id!, quiz.isPublished);
+                      }}
                     >
                       {quiz.isPublished ? '✅' : '🚫'}
                     </span>
@@ -280,12 +283,17 @@ export default function Quizzes() {
                   {isFaculty ? (
                     <div className="d-flex gap-1">
                       {/* Edit icon moved to right, only for faculty */}
-                      <Link to={`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`}>
-                        <FaRegEdit
-                          className="fs-5 text-success"
-                          style={{ cursor: 'pointer' }}
-                        />
-                      </Link>
+                      <FaRegEdit
+                        className="fs-5 text-success"
+                        style={{ cursor: 'pointer' }}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          navigate(
+                            `/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`
+                          );
+                        }}
+                      />
 
                       <Dropdown>
                         <Dropdown.Toggle variant="outline-secondary" size="sm">
@@ -294,14 +302,20 @@ export default function Quizzes() {
                         </Dropdown.Toggle>
                         <Dropdown.Menu>
                           <Dropdown.Item
-                            onClick={() =>
-                              handlePublishQuiz(quiz._id!, quiz.isPublished)
-                            }
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handlePublishQuiz(quiz._id!, quiz.isPublished);
+                            }}
                           >
                             {quiz.isPublished ? 'Unpublish' : 'Publish'}
                           </Dropdown.Item>
                           <Dropdown.Item
-                            onClick={() => handleCopyQuiz(quiz._id!)}
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              handleCopyQuiz(quiz._id!);
+                            }}
                           >
                             <FaCopy className="me-2" />
                             Copy
@@ -321,7 +335,11 @@ export default function Quizzes() {
                       <FaTrash
                         className="fs-5 text-danger"
                         style={{ cursor: 'pointer' }}
-                        onClick={() => handleDeleteQuiz(quiz._id!)}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          handleDeleteQuiz(quiz._id!);
+                        }}
                       />
                     </div>
                   ) : (
