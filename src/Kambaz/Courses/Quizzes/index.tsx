@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ListGroup, Dropdown } from 'react-bootstrap';
-import { FaRegEdit, FaTrash, FaEye, FaCopy, FaSort } from 'react-icons/fa';
+import { FaRegEdit, FaCopy, FaTrash } from 'react-icons/fa';
+import { BsThreeDotsVertical } from 'react-icons/bs';
 import {
   setQuizzes,
   setLoading,
@@ -49,6 +50,7 @@ export default function Quizzes() {
     fetchQuizzes();
   }, [cid, dispatch]);
 
+  // TODO: delete log once bug fixed
   const handleDeleteQuiz = async (quizId: string) => {
     try {
       await quizzesClient.deleteQuiz(quizId);
@@ -97,6 +99,28 @@ export default function Quizzes() {
   const [sortBy, setSortBy] = useState<'name' | 'dueDate' | 'availableDate'>(
     'name'
   );
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
+  // Menu management functions
+  const toggleMenu = (quizId: string) => {
+    setOpenMenuId(openMenuId === quizId ? null : quizId);
+  };
+
+  const closeMenu = () => {
+    setOpenMenuId(null);
+  };
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      closeMenu();
+    };
+
+    if (openMenuId) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [openMenuId]);
 
   // Helper function to render availability information
   const renderAvailabilityInfo = (quiz: Quiz, isFaculty: boolean) => {
@@ -281,66 +305,78 @@ export default function Quizzes() {
 
                   {/* Role-specific Actions */}
                   {isFaculty ? (
-                    <div className="d-flex gap-1">
-                      {/* Edit icon moved to right, only for faculty */}
-                      <FaRegEdit
-                        className="fs-5 text-success"
-                        style={{ cursor: 'pointer' }}
+                    <div className="d-flex gap-1 position-relative">
+                      {/* Context Menu Button */}
+                      <button
+                        className="btn btn-outline-secondary btn-sm"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          navigate(
-                            `/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`
-                          );
+                          toggleMenu(quiz._id!);
                         }}
-                      />
+                      >
+                        <BsThreeDotsVertical />
+                      </button>
 
-                      <Dropdown>
-                        <Dropdown.Toggle variant="outline-secondary" size="sm">
-                          <FaEye className="me-1" />
-                          Preview
-                        </Dropdown.Toggle>
-                        <Dropdown.Menu>
-                          <Dropdown.Item
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handlePublishQuiz(quiz._id!, quiz.isPublished);
-                            }}
-                          >
-                            {quiz.isPublished ? 'Unpublish' : 'Publish'}
-                          </Dropdown.Item>
-                          <Dropdown.Item
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                              handleCopyQuiz(quiz._id!);
-                            }}
-                          >
-                            <FaCopy className="me-2" />
-                            Copy
-                          </Dropdown.Item>
-                          <Dropdown.Item>
-                            <FaSort className="me-2" />
-                            Sort by:{' '}
-                            {sortBy === 'name'
-                              ? 'Name'
-                              : sortBy === 'dueDate'
-                              ? 'Due Date'
-                              : 'Available Date'}
-                          </Dropdown.Item>
-                        </Dropdown.Menu>
-                      </Dropdown>
-
-                      <FaTrash
-                        className="fs-5 text-danger"
-                        style={{ cursor: 'pointer' }}
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          handleDeleteQuiz(quiz._id!);
-                        }}
-                      />
+                      {/* Custom Context Menu */}
+                      {openMenuId === quiz._id && (
+                        <div
+                          className="position-absolute top-100 end-0 mt-1 bg-white border rounded shadow-lg"
+                          style={{ zIndex: 1000 }}
+                        >
+                          <div className="p-2">
+                            <button
+                              className="btn btn-link text-decoration-none p-2 w-100 text-start"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                closeMenu();
+                                navigate(
+                                  `/Kambaz/Courses/${cid}/Quizzes/${quiz._id}`
+                                );
+                              }}
+                            >
+                              <FaRegEdit className="me-2" />
+                              Edit
+                            </button>
+                            <button
+                              className="btn btn-link text-decoration-none p-2 w-100 text-start text-danger"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                closeMenu();
+                                handleDeleteQuiz(quiz._id!);
+                              }}
+                            >
+                              <FaTrash className="me-2" />
+                              Delete
+                            </button>
+                            <button
+                              className="btn btn-link text-decoration-none p-2 w-100 text-start"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                closeMenu();
+                                handlePublishQuiz(quiz._id!, quiz.isPublished);
+                              }}
+                            >
+                              {quiz.isPublished ? 'Unpublish' : 'Publish'}
+                            </button>
+                            <button
+                              className="btn btn-link text-decoration-none p-2 w-100 text-start"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                closeMenu();
+                                handleCopyQuiz(quiz._id!);
+                              }}
+                            >
+                              <FaCopy className="me-2" />
+                              Copy
+                            </button>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <div className="d-flex gap-2">
