@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { ListGroup, Badge, Button, Dropdown } from 'react-bootstrap';
-import { BsGripVertical } from 'react-icons/bs';
+import { ListGroup, Dropdown } from 'react-bootstrap';
 import { FaRegEdit, FaTrash, FaEye, FaCopy, FaSort } from 'react-icons/fa';
 import {
   setQuizzes,

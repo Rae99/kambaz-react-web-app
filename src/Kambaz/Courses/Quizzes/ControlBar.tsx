@@ -1,10 +1,11 @@
 import { Button } from 'react-bootstrap';
 import { BsThreeDotsVertical } from 'react-icons/bs';
 import { FaSearch, FaPlus } from 'react-icons/fa';
-import { Link, useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 export default function QuizzesControls() {
   const { cid } = useParams();
+  const navigate = useNavigate();
   return (
     <div className="d-flex justify-content-between align-items-center mb-3">
       <div
@@ -25,16 +26,15 @@ export default function QuizzesControls() {
       </div>
 
       <div className="d-flex gap-2">
-        <Link to={`/Kambaz/Courses/${cid}/Quizzes/new`}>
-          <Button
-            size="lg"
-            variant="danger"
-            className="d-flex align-items-center"
-          >
-            <FaPlus className="me-2" size={16} />
-            Quiz
-          </Button>
-        </Link>
+        <Button
+          size="lg"
+          variant="danger"
+          className="d-flex align-items-center"
+          onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes/new`)}
+        >
+          <FaPlus className="me-2" size={16} />
+          Quiz
+        </Button>
         <button className="btn btn-outline-secondary btn-lg">
           <BsThreeDotsVertical size={16} />
         </button>

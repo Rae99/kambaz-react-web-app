@@ -15,9 +15,11 @@ import QuizPreview from './Quizzes/QuizPreview';
 import Grades from './Grades';
 import { useSelector } from 'react-redux';
 import { useParams, useLocation } from 'react-router-dom';
+import { CiDroplet } from 'react-icons/ci';
 
 export default function Courses() {
   const { allCourses } = useSelector((state: any) => state.courseReducer);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
   const { cid } = useParams();
   const course = allCourses.find((course: any) => course._id === cid);
   const { pathname } = useLocation();
@@ -33,10 +35,14 @@ export default function Courses() {
 pathname.split("/")  // result:
 ["", "Kambaz", "Courses", "1234", "Quizzes", "new"] */}
         </h2>
-        {pathname.split('/')[4] === 'Quizzes' && (
+        {pathname.includes(`/Courses/${cid}`) && (
           <button className="btn btn-outline-secondary btn-sm">
             <i className="fas fa-user me-2"></i>
-            Student View
+            {currentUser?.role === 'FACULTY' ||
+            currentUser?.role === 'ADMIN' ||
+            currentUser?.role === 'TA'
+              ? 'Faculty View'
+              : 'Student View'}
           </button>
         )}
       </div>
