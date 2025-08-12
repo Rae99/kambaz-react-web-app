@@ -38,21 +38,21 @@ export default function QuizEditor() {
 
   // State for form fields
   const [quizForm, setQuizForm] = useState<Quiz>({
-    title: quiz?.title || 'New Quiz',
-    description: quiz?.description || 'Quiz description',
+    title: quiz?.title ?? 'New Quiz',
+    description: quiz?.description ?? 'Quiz description',
     courseId: quiz?.courseId || cid || '',
-    quizType: quiz?.quizType || 'Graded Quiz',
-    points: quiz?.points || 100,
-    assignmentGroup: quiz?.assignmentGroup || 'Quizzes',
-    shuffleAnswers: quiz?.shuffleAnswers || true, // Default: Yes
-    timeLimit: quiz?.timeLimit || 20, // Default: 20 Minutes
-    multipleAttempts: quiz?.multipleAttempts || false, // Default: No
-    attemptsAllowed: quiz?.attemptsAllowed || 1, // Default: 1
-    showCorrectAnswers: quiz?.showCorrectAnswers || 'Never',
-    accessCode: quiz?.accessCode || '',
-    oneQuestionAtATime: quiz?.oneQuestionAtATime || true, // Default: Yes
-    webcamRequired: quiz?.webcamRequired || false, // Default: No
-    lockQuestionsAfterAnswering: quiz?.lockQuestionsAfterAnswering || false, // Default: No
+    quizType: quiz?.quizType ?? 'Graded Quiz',
+    points: quiz?.points ?? 100,
+    assignmentGroup: quiz?.assignmentGroup ?? 'Quizzes',
+    shuffleAnswers: quiz?.shuffleAnswers ?? true, // Default: Yes
+    timeLimit: quiz?.timeLimit ?? 20, // Default: 20 Minutes
+    multipleAttempts: quiz?.multipleAttempts ?? false, // Default: No
+    attemptsAllowed: quiz?.attemptsAllowed ?? 1, // Default: 1
+    showCorrectAnswers: quiz?.showCorrectAnswers ?? 'Never',
+    accessCode: quiz?.accessCode ?? '',
+    oneQuestionAtATime: quiz?.oneQuestionAtATime ?? true, // Default: Yes
+    webcamRequired: quiz?.webcamRequired ?? false, // Default: No
+    lockQuestionsAfterAnswering: quiz?.lockQuestionsAfterAnswering ?? false, // Default: No
     dueDate: quiz?.dueDate
       ? new Date(quiz.dueDate).toISOString().slice(0, 16)
       : '',
@@ -62,10 +62,10 @@ export default function QuizEditor() {
     untilDate: quiz?.untilDate
       ? new Date(quiz.untilDate).toISOString().slice(0, 16)
       : '',
-    questions: quiz?.questions || [],
-    isPublished: quiz?.isPublished || false,
-    createdAt: quiz?.createdAt || new Date().toISOString(),
-    updatedAt: quiz?.updatedAt || new Date().toISOString(),
+    questions: quiz?.questions ?? [],
+    isPublished: quiz?.isPublished ?? false,
+    createdAt: quiz?.createdAt ?? new Date().toISOString(),
+    updatedAt: quiz?.updatedAt ?? new Date().toISOString(),
   });
 
   // Update form when quiz changes
@@ -75,18 +75,18 @@ export default function QuizEditor() {
         title: quiz.title,
         description: quiz.description,
         courseId: quiz.courseId,
-        quizType: quiz.quizType || 'Graded Quiz',
-        points: quiz.points || 100,
-        assignmentGroup: quiz.assignmentGroup || 'Quizzes',
-        shuffleAnswers: quiz.shuffleAnswers || true,
-        timeLimit: quiz.timeLimit || 20,
-        multipleAttempts: quiz.multipleAttempts || false,
-        attemptsAllowed: quiz.attemptsAllowed || 1,
-        showCorrectAnswers: quiz.showCorrectAnswers || 'Never',
-        accessCode: quiz.accessCode || '',
-        oneQuestionAtATime: quiz.oneQuestionAtATime || true,
-        webcamRequired: quiz.webcamRequired || false,
-        lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering || false,
+        quizType: quiz.quizType ?? 'Graded Quiz',
+        points: quiz.points ?? 100,
+        assignmentGroup: quiz.assignmentGroup ?? 'Quizzes',
+        shuffleAnswers: quiz.shuffleAnswers ?? true,
+        timeLimit: quiz.timeLimit ?? 20,
+        multipleAttempts: quiz.multipleAttempts ?? false,
+        attemptsAllowed: quiz.attemptsAllowed ?? 1,
+        showCorrectAnswers: quiz.showCorrectAnswers ?? 'Never',
+        accessCode: quiz.accessCode ?? '',
+        oneQuestionAtATime: quiz.oneQuestionAtATime ?? true,
+        webcamRequired: quiz.webcamRequired ?? false,
+        lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering ?? false,
         dueDate: quiz.dueDate
           ? new Date(quiz.dueDate).toISOString().slice(0, 16)
           : '',
