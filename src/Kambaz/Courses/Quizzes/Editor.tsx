@@ -130,7 +130,7 @@ export default function QuizEditor() {
   };
 
   const handleCancel = () => {
-    navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
   };
 
   // Don't render the form if quiz doesn't exist (was deleted)

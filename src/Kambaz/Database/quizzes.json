@@ -1,224 +1,385 @@
-[
-  {
-    "_id": "quiz001",
-    "title": "Introduction to HTML",
-    "description": "Basic HTML concepts and structure. This quiz covers fundamental HTML elements, tags, and document structure.",
-    "courseId": "RS101",
-    "timeLimit": 30,
-    "availableDate": "2024-01-15T00:00:00.000Z",
-    "dueDate": "2024-01-22T23:59:00.000Z",
-    "isPublished": true,
-    "questions": [
-      {
-        "_id": "q001",
-        "type": "multiple-choice",
-        "text": "What does HTML stand for?",
-        "points": 5,
-        "options": [
-          "HyperText Markup Language",
-          "High Tech Modern Language",
-          "Home Tool Markup Language",
-          "Hyperlink and Text Markup Language"
-        ],
-        "correctAnswer": "HyperText Markup Language",
-        "explanation": "HTML stands for HyperText Markup Language, which is the standard markup language for creating web pages."
-      },
-      {
-        "_id": "q002",
-        "type": "true-false",
-        "text": "HTML is a programming language.",
-        "points": 3,
-        "options": [],
-        "correctAnswer": "false",
-        "explanation": "HTML is a markup language, not a programming language. It describes the structure of web content."
-      },
-      {
-        "_id": "q003",
-        "type": "fill-in-the-blank",
-        "text": "The root element of an HTML document is the _____ tag.",
-        "points": 4,
-        "options": [],
-        "correctAnswer": "html",
-        "explanation": "The <html> tag is the root element that contains all other HTML elements."
-      }
-    ],
-    "createdAt": "2024-01-10T10:00:00.000Z",
-    "updatedAt": "2024-01-15T09:30:00.000Z"
-  },
-  {
-    "_id": "quiz002",
-    "title": "CSS Fundamentals",
-    "description": "Learn about CSS selectors, properties, and basic styling techniques. This quiz tests your understanding of Cascading Style Sheets.",
-    "courseId": "RS101",
-    "timeLimit": 45,
-    "availableDate": "2024-01-20T00:00:00.000Z",
-    "dueDate": "2024-01-27T23:59:00.000Z",
-    "isPublished": false,
-    "questions": [
-      {
-        "_id": "q004",
-        "type": "multiple-choice",
-        "text": "Which CSS property controls the text color?",
-        "points": 5,
-        "options": [
-          "text-color",
-          "color",
-          "font-color",
-          "foreground-color"
-        ],
-        "correctAnswer": "color",
-        "explanation": "The 'color' property sets the color of text in CSS."
-      },
-      {
-        "_id": "q005",
-        "type": "multiple-choice",
-        "text": "What is the correct CSS syntax for changing the font?",
-        "points": 5,
-        "options": [
-          "font-family: Arial;",
-          "font: Arial;",
-          "font-family = Arial;",
-          "font-family: Arial"
-        ],
-        "correctAnswer": "font-family: Arial;",
-        "explanation": "CSS properties use a colon (:) to separate the property from its value, and end with a semicolon (;)."
-      }
-    ],
-    "createdAt": "2024-01-12T14:00:00.000Z",
-    "updatedAt": "2024-01-20T11:15:00.000Z"
-  },
-  {
-    "_id": "quiz003",
-    "title": "JavaScript Basics",
-    "description": "Test your knowledge of JavaScript fundamentals including variables, functions, and basic syntax.",
-    "courseId": "RS101",
-    "timeLimit": 60,
-    "availableDate": "2024-01-25T00:00:00.000Z",
-    "dueDate": "2024-02-01T23:59:00.000Z",
-    "isPublished": true,
-    "questions": [
-      {
-        "_id": "q006",
-        "type": "multiple-choice",
-        "text": "How do you declare a variable in JavaScript?",
-        "points": 5,
-        "options": [
-          "var myVariable;",
-          "variable myVariable;",
-          "v myVariable;",
-          "declare myVariable;"
-        ],
-        "correctAnswer": "var myVariable;",
-        "explanation": "JavaScript uses 'var', 'let', or 'const' to declare variables."
-      },
-      {
-        "_id": "q007",
-        "type": "true-false",
-        "text": "JavaScript is case-sensitive.",
-        "points": 3,
-        "options": [],
-        "correctAnswer": "true",
-        "explanation": "Yes, JavaScript is case-sensitive. 'myVariable' and 'MyVariable' are different variables."
-      },
-      {
-        "_id": "q008",
-        "type": "fill-in-the-blank",
-        "text": "The _____ keyword is used to declare a constant in JavaScript.",
-        "points": 4,
-        "options": [],
-        "correctAnswer": "const",
-        "explanation": "The 'const' keyword declares a constant that cannot be reassigned."
-      },
-      {
-        "_id": "q009",
-        "type": "multiple-choice",
-        "text": "What is the result of 2 + '2' in JavaScript?",
-        "points": 6,
-        "options": [
-          "4",
-          "22",
-          "NaN",
-          "Error"
-        ],
-        "correctAnswer": "22",
-        "explanation": "JavaScript performs type coercion, converting the number 2 to a string and concatenating them, resulting in '22'."
-      }
-    ],
-    "createdAt": "2024-01-15T16:00:00.000Z",
-    "updatedAt": "2024-01-25T13:45:00.000Z"
-  },
-  {
-    "_id": "quiz004",
-    "title": "React Components",
-    "description": "Test your understanding of React components, props, and state management.",
-    "courseId": "RS101",
-    "timeLimit": 40,
-    "availableDate": "2024-02-01T00:00:00.000Z",
-    "dueDate": "2024-02-08T23:59:00.000Z",
-    "isPublished": false,
-    "questions": [
-      {
-        "_id": "q010",
-        "type": "multiple-choice",
-        "text": "What is a React component?",
-        "points": 5,
-        "options": [
-          "A JavaScript function that returns HTML",
-          "A CSS file",
-          "A database table",
-          "A server endpoint"
-        ],
-        "correctAnswer": "A JavaScript function that returns HTML",
-        "explanation": "React components are JavaScript functions that return JSX (HTML-like syntax) to describe what should appear on the screen."
-      },
-      {
-        "_id": "q011",
-        "type": "true-false",
-        "text": "Props in React are read-only.",
-        "points": 3,
-        "options": [],
-        "correctAnswer": "true",
-        "explanation": "Props are read-only and cannot be modified by the component. They are passed down from parent components."
-      }
-    ],
-    "createdAt": "2024-01-18T09:00:00.000Z",
-    "updatedAt": "2024-02-01T10:20:00.000Z"
-  },
-  {
-    "_id": "quiz005",
-    "title": "Database Design",
-    "description": "Fundamentals of database design, normalization, and SQL basics.",
-    "courseId": "RS101",
-    "timeLimit": 50,
-    "availableDate": "2024-01-30T00:00:00.000Z",
-    "dueDate": "2024-02-06T23:59:00.000Z",
-    "isPublished": true,
-    "questions": [
-      {
-        "_id": "q012",
-        "type": "multiple-choice",
-        "text": "What is a primary key?",
-        "points": 5,
-        "options": [
-          "A field that can contain duplicate values",
-          "A field that uniquely identifies each record",
-          "A field that stores dates",
-          "A field that contains text only"
-        ],
-        "correctAnswer": "A field that uniquely identifies each record",
-        "explanation": "A primary key is a field that uniquely identifies each record in a database table."
-      },
-      {
-        "_id": "q013",
-        "type": "fill-in-the-blank",
-        "text": "The process of organizing data to reduce redundancy is called _____.",
-        "points": 4,
-        "options": [],
-        "correctAnswer": "normalization",
-        "explanation": "Normalization is the process of organizing data in a database to reduce redundancy and improve data integrity."
-      }
-    ],
-    "createdAt": "2024-01-20T11:00:00.000Z",
-    "updatedAt": "2024-01-30T15:30:00.000Z"
-  }
-]
+[{
+  "_id": "quiz001",
+  "title": "Introduction to HTML",
+  "description": "Basic HTML concepts and structure. This quiz covers fundamental HTML elements, tags, and document structure.",
+  "courseId": "RS101",
+  "timeLimit": 30,
+  "availableDate": "2024-01-15T00:00:00.000Z",
+  "dueDate": "2024-01-22T23:59:00.000Z",
+  "isPublished": true,
+  "questions": [
+    {
+      "_id": "q001",
+      "type": "multiple-choice",
+      "text": "What does HTML stand for?",
+      "points": 5,
+      "options": [
+        "HyperText Markup Language",
+        "High Tech Modern Language",
+        "Home Tool Markup Language",
+        "Hyperlink and Text Markup Language"
+      ],
+      "correctAnswer": "HyperText Markup Language",
+      "explanation": "HTML stands for HyperText Markup Language, which is the standard markup language for creating web pages."
+    },
+    {
+      "_id": "q002",
+      "type": "true-false",
+      "text": "HTML is a programming language.",
+      "points": 3,
+      "options": [],
+      "correctAnswer": "false",
+      "explanation": "HTML is a markup language, not a programming language. It describes the structure of web content."
+    },
+    {
+      "_id": "q003",
+      "type": "fill-in-the-blank",
+      "text": "The root element of an HTML document is the _____ tag.",
+      "points": 4,
+      "options": [],
+      "correctAnswer": "html",
+      "explanation": "The <html> tag is the root element that contains all other HTML elements."
+    }
+  ],
+  "createdAt": "2024-01-10T10:00:00.000Z",
+  "updatedAt": "2024-01-15T09:30:00.000Z"
+},
+{
+  "_id": "quiz002",
+  "title": "CSS Fundamentals",
+  "description": "Learn about CSS selectors, properties, and basic styling techniques. This quiz tests your understanding of Cascading Style Sheets.",
+  "courseId": "RS101",
+  "timeLimit": 45,
+  "availableDate": "2024-01-20T00:00:00.000Z",
+  "dueDate": "2024-01-27T23:59:00.000Z",
+  "isPublished": false,
+  "questions": [
+    {
+      "_id": "q004",
+      "type": "multiple-choice",
+      "text": "Which CSS property controls the text color?",
+      "points": 5,
+      "options": [
+        "text-color",
+        "color",
+        "font-color",
+        "foreground-color"
+      ],
+      "correctAnswer": "color",
+      "explanation": "The 'color' property sets the color of text in CSS."
+    },
+    {
+      "_id": "q005",
+      "type": "multiple-choice",
+      "text": "What is the correct CSS syntax for changing the font?",
+      "points": 5,
+      "options": [
+        "font-family: Arial;",
+        "font: Arial;",
+        "font-family = Arial;",
+        "font-family: Arial"
+      ],
+      "correctAnswer": "font-family: Arial;",
+      "explanation": "CSS properties use a colon (:) to separate the property from its value, and end with a semicolon (;)."
+    }
+  ],
+  "createdAt": "2024-01-12T14:00:00.000Z",
+  "updatedAt": "2024-01-20T11:15:00.000Z"
+},
+{
+  "_id": "quiz003",
+  "title": "JavaScript Basics",
+  "description": "Test your knowledge of JavaScript fundamentals including variables, functions, and basic syntax.",
+  "courseId": "RS101",
+  "timeLimit": 60,
+  "availableDate": "2024-01-25T00:00:00.000Z",
+  "dueDate": "2024-02-01T23:59:00.000Z",
+  "isPublished": true,
+  "questions": [
+    {
+      "_id": "q006",
+      "type": "multiple-choice",
+      "text": "How do you declare a variable in JavaScript?",
+      "points": 5,
+      "options": [
+        "var myVariable;",
+        "variable myVariable;",
+        "v myVariable;",
+        "declare myVariable;"
+      ],
+      "correctAnswer": "var myVariable;",
+      "explanation": "JavaScript uses 'var', 'let', or 'const' to declare variables."
+    },
+    {
+      "_id": "q007",
+      "type": "true-false",
+      "text": "JavaScript is case-sensitive.",
+      "points": 3,
+      "options": [],
+      "correctAnswer": "true",
+      "explanation": "Yes, JavaScript is case-sensitive. 'myVariable' and 'MyVariable' are different variables."
+    },
+    {
+      "_id": "q008",
+      "type": "fill-in-the-blank",
+      "text": "The _____ keyword is used to declare a constant in JavaScript.",
+      "points": 4,
+      "options": [],
+      "correctAnswer": "const",
+      "explanation": "The 'const' keyword declares a constant that cannot be reassigned."
+    },
+    {
+      "_id": "q009",
+      "type": "multiple-choice",
+      "text": "What is the result of 2 + '2' in JavaScript?",
+      "points": 6,
+      "options": [
+        "4",
+        "22",
+        "NaN",
+        "Error"
+      ],
+      "correctAnswer": "22",
+      "explanation": "JavaScript performs type coercion, converting the number 2 to a string and concatenating them, resulting in '22'."
+    }
+  ],
+  "createdAt": "2024-01-15T16:00:00.000Z",
+  "updatedAt": "2024-01-25T13:45:00.000Z"
+},
+{
+  "_id": "quiz004",
+  "title": "React Components",
+  "description": "Test your understanding of React components, props, and state management.",
+  "courseId": "RS101",
+  "timeLimit": 40,
+  "availableDate": "2024-02-01T00:00:00.000Z",
+  "dueDate": "2024-02-08T23:59:00.000Z",
+  "isPublished": false,
+  "questions": [
+    {
+      "_id": "q010",
+      "type": "multiple-choice",
+      "text": "What is a React component?",
+      "points": 5,
+      "options": [
+        "A JavaScript function that returns HTML",
+        "A CSS file",
+        "A database table",
+        "A server endpoint"
+      ],
+      "correctAnswer": "A JavaScript function that returns HTML",
+      "explanation": "React components are JavaScript functions that return JSX (HTML-like syntax) to describe what should appear on the screen."
+    },
+    {
+      "_id": "q011",
+      "type": "true-false",
+      "text": "Props in React are read-only.",
+      "points": 3,
+      "options": [],
+      "correctAnswer": "true",
+      "explanation": "Props are read-only and cannot be modified by the component. They are passed down from parent components."
+    }
+  ],
+  "createdAt": "2024-01-18T09:00:00.000Z",
+  "updatedAt": "2024-02-01T10:20:00.000Z"
+},
+{
+  "_id": "quiz005",
+  "title": "Database Design",
+  "description": "Fundamentals of database design, normalization, and SQL basics.",
+  "courseId": "RS101",
+  "timeLimit": 50,
+  "availableDate": "2025-09-30T00:00:00.000Z",
+  "dueDate": "2026-02-06T23:59:00.000Z",
+  "isPublished": true,
+  "questions": [
+    {
+      "_id": "q012",
+      "type": "multiple-choice",
+      "text": "What is a primary key?",
+      "points": 5,
+      "options": [
+        "A field that can contain duplicate values",
+        "A field that uniquely identifies each record",
+        "A field that stores dates",
+        "A field that contains text only"
+      ],
+      "correctAnswer": "A field that uniquely identifies each record",
+      "explanation": "A primary key is a field that uniquely identifies each record in a database table."
+    },
+    {
+      "_id": "q013",
+      "type": "fill-in-the-blank",
+      "text": "The process of organizing data to reduce redundancy is called _____.",
+      "points": 4,
+      "options": [],
+      "correctAnswer": "normalization",
+      "explanation": "Normalization is the process of organizing data in a database to reduce redundancy and improve data integrity."
+    }
+  ],
+  "createdAt": "2024-01-20T11:00:00.000Z",
+  "updatedAt": "2024-01-30T15:30:00.000Z"
+},
+{
+  "_id": "quiz006",
+  "title": "Future Quiz - Not Available Yet",
+  "description": "This quiz will be available in the future. Students cannot see it yet.",
+  "courseId": "RS101",
+  "timeLimit": 30,
+  "availableDate": "2024-12-01T00:00:00.000Z",
+  "dueDate": "2025-12-15T23:59:00.000Z",
+  "isPublished": true,
+  "questions": [
+    {
+      "_id": "q014",
+      "type": "multiple-choice",
+      "text": "This question will be available later",
+      "points": 10,
+      "options": [
+        "Option A",
+        "Option B",
+        "Option C",
+        "Option D"
+      ],
+      "correctAnswer": "Option A",
+      "explanation": "This is a future question"
+    }
+  ],
+  "createdAt": "2024-01-25T10:00:00.000Z",
+  "updatedAt": "2024-01-25T10:00:00.000Z"
+},
+{
+  "_id": "quiz007",
+  "title": "Currently Available Quiz",
+  "description": "This quiz is currently available for students to take.",
+  "courseId": "RS101",
+  "timeLimit": 25,
+  "availableDate": "2024-01-01T00:00:00.000Z",
+  "dueDate": "2024-12-31T23:59:00.000Z",
+  "isPublished": true,
+  "questions": [
+    {
+      "_id": "q015",
+      "type": "true-false",
+      "text": "This quiz is currently available",
+      "points": 5,
+      "options": [],
+      "correctAnswer": "true",
+      "explanation": "Yes, this quiz is currently available"
+    },
+    {
+      "_id": "q016",
+      "type": "multiple-choice",
+      "text": "How many questions are in this quiz?",
+      "points": 5,
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "correctAnswer": "2",
+      "explanation": "This quiz has 2 questions"
+    }
+  ],
+  "createdAt": "2024-01-01T09:00:00.000Z",
+  "updatedAt": "2024-01-01T09:00:00.000Z"
+},
+{
+  "_id": "quiz008",
+  "title": "Quiz with Until Date",
+  "description": "This quiz has both available date and until date for testing the complete availability logic.",
+  "courseId": "RS101",
+  "timeLimit": 35,
+  "availableDate": "2024-01-10T00:00:00.000Z",
+  "dueDate": "2024-01-20T23:59:00.000Z",
+  "untilDate": "2024-01-25T23:59:00.000Z",
+  "isPublished": true,
+  "questions": [
+    {
+      "_id": "q017",
+      "type": "fill-in-the-blank",
+      "text": "This quiz tests the _____ date logic",
+      "points": 8,
+      "options": [],
+      "correctAnswer": "until",
+      "explanation": "This quiz tests the until date logic"
+    }
+  ],
+  "createdAt": "2024-01-05T14:00:00.000Z",
+  "updatedAt": "2024-01-10T11:00:00.000Z"
+},
+{
+  "_id": "quiz009",
+  "title": "High Points Quiz",
+  "description": "A quiz with many questions and high total points for testing the points display.",
+  "courseId": "RS101",
+  "timeLimit": 90,
+  "availableDate": "2024-01-01T00:00:00.000Z",
+  "dueDate": "2024-12-31T23:59:00.000Z",
+  "isPublished": true,
+  "questions": [
+    {
+      "_id": "q018",
+      "type": "multiple-choice",
+      "text": "Question 1 worth 20 points",
+      "points": 20,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "correctAnswer": "A",
+      "explanation": "This question is worth 20 points"
+    },
+    {
+      "_id": "q019",
+      "type": "multiple-choice",
+      "text": "Question 2 worth 25 points",
+      "points": 25,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "correctAnswer": "B",
+      "explanation": "This question is worth 25 points"
+    },
+    {
+      "_id": "q020",
+      "type": "multiple-choice",
+      "text": "Question 3 worth 30 points",
+      "points": 30,
+      "options": [
+        "A",
+        "B",
+        "C",
+        "D"
+      ],
+      "correctAnswer": "C",
+      "explanation": "This question is worth 30 points"
+    },
+    {
+      "_id": "q021",
+      "type": "true-false",
+      "text": "Question 4 worth 15 points",
+      "points": 15,
+      "options": [],
+      "correctAnswer": "true",
+      "explanation": "This question is worth 15 points"
+    },
+    {
+      "_id": "q022",
+      "type": "fill-in-the-blank",
+      "text": "Question 5 worth 10 points",
+      "points": 10,
+      "options": [],
+      "correctAnswer": "final",
+      "explanation": "This question is worth 10 points"
+    }
+  ],
+  "createdAt": "2024-01-01T08:00:00.000Z",
+  "updatedAt": "2024-01-01T08:00:00.000Z"
+}]
