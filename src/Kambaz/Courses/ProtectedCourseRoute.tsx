@@ -32,3 +32,34 @@ export default function ProtectedCourseRoute({
   // If enrolled, render the children (course content)
   return <>{children}</>;
 }
+
+// New component to protect faculty-only routes
+export function FacultyProtectedRoute({ children }: { children: ReactNode }) {
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+  // Check if user is faculty (has elevated permissions)
+  const isFaculty =
+    currentUser?.role === 'FACULTY' ||
+    currentUser?.role === 'ADMIN' ||
+    currentUser?.role === 'TA';
+
+  if (!isFaculty) {
+    return <Navigate to="/Kambaz/Dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}
+
+// New component to protect student-only routes
+export function StudentProtectedRoute({ children }: { children: ReactNode }) {
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+  // Check if user is a student
+  const isStudent = currentUser?.role === 'STUDENT';
+
+  if (!isStudent) {
+    return <Navigate to="/Kambaz/Dashboard" replace />;
+  }
+
+  return <>{children}</>;
+}

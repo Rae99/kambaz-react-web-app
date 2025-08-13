@@ -12,10 +12,15 @@ import Quizzes from './Quizzes';
 import QuizEditor from './Quizzes/Editor';
 import QuizDetails from './Quizzes/QuizDetails';
 import QuizPreview from './Quizzes/QuizPreview';
+import StudentQuiz from './Quizzes/StudentQuiz';
 import Grades from './Grades';
 import { useSelector } from 'react-redux';
 import { useParams, useLocation } from 'react-router-dom';
 import { CiDroplet } from 'react-icons/ci';
+import ProtectedCourseRoute, {
+  FacultyProtectedRoute,
+  StudentProtectedRoute,
+} from './ProtectedCourseRoute';
 
 export default function Courses() {
   const { allCourses } = useSelector((state: any) => state.courseReducer);
@@ -67,9 +72,38 @@ pathname.split("/")  // result:
               path="Quizzes/*"
               element={
                 <Routes>
-                  {/* <Route path="new" element={<QuizEditor />} /> */}
-                  <Route path=":qid/preview" element={<QuizPreview />} />
-                  <Route path=":qid/edit" element={<QuizEditor />} />
+                  <Route
+                    path=":qid/edit"
+                    element={
+                      <FacultyProtectedRoute>
+                        <QuizEditor />
+                      </FacultyProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path=":qid/preview"
+                    element={
+                      <FacultyProtectedRoute>
+                        <QuizPreview />
+                      </FacultyProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path=":qid/take"
+                    element={
+                      <StudentProtectedRoute>
+                        <StudentQuiz mode="take" />
+                      </StudentProtectedRoute>
+                    }
+                  />
+                  <Route
+                    path=":qid/review/:attemptId"
+                    element={
+                      <StudentProtectedRoute>
+                        <StudentQuiz mode="review" />
+                      </StudentProtectedRoute>
+                    }
+                  />
                   <Route path=":qid" element={<QuizDetails />} />
                 </Routes>
               }

@@ -39,12 +39,14 @@ export interface QuizAttempt {
   _id?: string;
   quizId: string;
   studentId: string;
-  courseId: string;
-  answers: Answer[];
+  courseId?: string;
+  answers: { [questionId: string]: string | string[] } | Answer[];
   score: number;
   totalPoints: number;
+  isCompleted?: boolean;
   submittedAt: Date;
-  timeSpent: number; // in minutes
+  attemptNumber?: number;
+  timeSpent?: number; // in minutes
 }
 
 export interface Answer {

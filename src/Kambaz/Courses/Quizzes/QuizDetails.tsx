@@ -143,7 +143,7 @@ export default function QuizDetails() {
             </Button>
           </div>
         )}
-          </div>
+      </div>
 
       {/* Quiz Information Cards */}
       <Row className="mb-4">
@@ -326,7 +326,13 @@ export default function QuizDetails() {
                 <p className="text-success mb-3">
                   This quiz is currently available for you to take.
                 </p>
-                <Button variant="primary" size="lg">
+                <Button
+                  variant="primary"
+                  size="lg"
+                  onClick={() =>
+                    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/take`)
+                  }
+                >
                   Start Quiz
                 </Button>
                 <div className="mt-3">

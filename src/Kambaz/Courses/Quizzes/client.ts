@@ -51,3 +51,14 @@ export const findQuizAttemptsByCourse = async (courseId: string) => {
   const response = await axiosWithCredentials.get(`${ATTEMPTS_API}/course/${courseId}`);
   return response.data;
 };
+
+// Additional functions for StudentQuiz component
+export const getStudentAttempts = async (quizId: string, studentId: string) => {
+  const response = await axiosWithCredentials.get(`${ATTEMPTS_API}/quiz/${quizId}/student/${studentId}`);
+  return response.data;
+};
+
+export const saveStudentAttempt = async (attempt: QuizAttempt) => {
+  const response = await axiosWithCredentials.post(ATTEMPTS_API, attempt);
+  return response.data;
+};

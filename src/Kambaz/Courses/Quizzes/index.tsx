@@ -16,6 +16,63 @@ import type { Quiz } from './types';
 import QuizzesControls from './ControlBar';
 import * as coursesClient from '../client';
 
+// Check if quiz is available for students to take
+export const isQuizAvailableForStudent = (quiz: Quiz): boolean => {
+  if (!quiz.isPublished) {
+    return false;
+  }
+
+  const now = new Date();
+  const availableDate = quiz.availableDate
+    ? new Date(quiz.availableDate)
+    : null;
+  const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
+  const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
+
+  // Check if quiz is within its available time window
+  if (availableDate && now < availableDate) {
+    return false; // Not yet available
+  }
+
+  if (untilDate && now > untilDate) {
+    return false; // Past the until date
+  }
+
+  if (dueDate && now > dueDate) {
+    return false; // Past the due date
+  }
+
+  return true; // Quiz is available
+};
+
+// Get the reason why a quiz is not available
+export const getQuizAvailabilityReason = (quiz: Quiz): string => {
+  if (!quiz.isPublished) {
+    return 'Quiz not published';
+  }
+
+  const now = new Date();
+  const availableDate = quiz.availableDate
+    ? new Date(quiz.availableDate)
+    : null;
+  const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
+  const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
+
+  if (availableDate && now < availableDate) {
+    return `Available from ${availableDate.toLocaleDateString()}`;
+  }
+
+  if (untilDate && now > untilDate) {
+    return 'Quiz closed';
+  }
+
+  if (dueDate && now > dueDate) {
+    return 'Due date passed';
+  }
+
+  return 'Quiz not available';
+};
+
 export default function Quizzes() {
   const { cid } = useParams();
   const navigate = useNavigate();
@@ -30,6 +87,19 @@ export default function Quizzes() {
     currentUser?.role === 'FACULTY' ||
     currentUser?.role === 'ADMIN' ||
     currentUser?.role === 'TA';
+
+  // Filter quizzes based on user role
+  const getFilteredQuizzes = (allQuizzes: Quiz[]) => {
+    if (isFaculty) {
+      // Faculty can see all quizzes
+      return allQuizzes.filter((quiz: Quiz) => quiz.courseId === cid);
+    } else {
+      // Students can only see published quizzes
+      return allQuizzes.filter(
+        (quiz: Quiz) => quiz.courseId === cid && quiz.isPublished
+      );
+    }
+  };
 
   useEffect(() => {
     const fetchQuizzes = async () => {
@@ -124,22 +194,33 @@ export default function Quizzes() {
 
   // Helper function to render availability information
   const renderAvailabilityInfo = (quiz: Quiz, isFaculty: boolean) => {
-    const now = new Date();
-    const availableDate = quiz.availableDate
-      ? new Date(quiz.availableDate)
-      : null;
-    const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
+    const isAvailable = isQuizAvailableForStudent(quiz);
 
     let availabilityStatus = '';
-    if (!availableDate) {
-      availabilityStatus = 'Not available';
-    } else if (now < availableDate) {
-      availabilityStatus = `Not available until ${availableDate.toLocaleDateString()} at 12:00am`;
-    } else if (dueDate && now > dueDate) {
-      availabilityStatus = 'Closed';
+    if (!quiz.isPublished) {
+      availabilityStatus = 'Not published';
+    } else if (!isAvailable) {
+      const now = new Date();
+      const availableDate = quiz.availableDate
+        ? new Date(quiz.availableDate)
+        : null;
+      const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
+      const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
+
+      if (availableDate && now < availableDate) {
+        availabilityStatus = `Not available until ${availableDate.toLocaleDateString()} at 12:00am`;
+      } else if (untilDate && now > untilDate) {
+        availabilityStatus = 'Closed';
+      } else if (dueDate && now > dueDate) {
+        availabilityStatus = 'Closed';
+      } else {
+        availabilityStatus = 'Not available';
+      }
     } else {
       availabilityStatus = 'Available';
     }
+
+    const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
 
     return (
       <>
@@ -176,9 +257,7 @@ export default function Quizzes() {
     );
   }
 
-  const courseQuizzes = (quizzes || []).filter(
-    (quiz: Quiz) => quiz.courseId === cid
-  );
+  const courseQuizzes = getFilteredQuizzes(quizzes || []);
 
   const sortedQuizzes = [...courseQuizzes].sort((a, b) => {
     switch (sortBy) {
@@ -284,8 +363,8 @@ export default function Quizzes() {
                   className="d-flex align-items-center gap-2"
                   style={{ flexShrink: 0 }}
                 >
-                  {/* Publish/Unpublish Status - clickable for faculty */}
-                  {isFaculty ? (
+                  {/* Publish/Unpublish Status - only show for faculty */}
+                  {isFaculty && (
                     <span
                       className="me-2 fs-4"
                       style={{ cursor: 'pointer' }}
@@ -295,10 +374,6 @@ export default function Quizzes() {
                         handlePublishQuiz(quiz._id!, quiz.isPublished);
                       }}
                     >
-                      {quiz.isPublished ? '✅' : '🚫'}
-                    </span>
-                  ) : (
-                    <span className="me-2 fs-4">
                       {quiz.isPublished ? '✅' : '🚫'}
                     </span>
                   )}
@@ -330,8 +405,8 @@ export default function Quizzes() {
                               onClick={(e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
-                                  closeMenu();
-                                  navigate(
+                                closeMenu();
+                                navigate(
                                   `/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/edit`
                                 );
                               }}
@@ -380,9 +455,28 @@ export default function Quizzes() {
                     </div>
                   ) : (
                     <div className="d-flex gap-2">
-                      <button className="btn btn-primary btn-sm">
-                        Start Quiz
-                      </button>
+                      {isQuizAvailableForStudent(quiz) ? (
+                        <button
+                          className="btn btn-primary btn-sm"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            navigate(
+                              `/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/take`
+                            );
+                          }}
+                        >
+                          Start Quiz
+                        </button>
+                      ) : (
+                        <button
+                          className="btn btn-secondary btn-sm"
+                          disabled
+                          title={getQuizAvailabilityReason(quiz)}
+                        >
+                          Quiz Not Available
+                        </button>
+                      )}
                       <button className="btn btn-outline-info btn-sm">
                         View Previous Attempts
                       </button>
