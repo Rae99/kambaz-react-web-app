@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
 import { addQuiz, updateQuiz } from './reducer';
 import * as quizzesClient from './client';
@@ -20,16 +20,49 @@ export default function QuizEditor() {
   const [activeTab, setActiveTab] = useState<'details' | 'questions'>(
     'details'
   );
+  const [fetchState, setFetchState] = useState<
+    'idle' | 'loading' | 'ok' | 'notfound' | 'error'
+  >('idle');
+  const hasHydratedRef = useRef(false);
 
   const quiz = isNewQuiz ? null : quizzes.find((q: Quiz) => q._id === qid);
 
-  // Navigate back to Quizzes if the quiz doesn't exist (was deleted)
+  // 1) 拉取 + 标记加载状态
   useEffect(() => {
-    if (!isNewQuiz && !quiz) {
-      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+    if (isNewQuiz) return;
+    if (quiz) {
+      setFetchState('ok');
       return;
     }
-  }, [quiz, isNewQuiz, cid, navigate]);
+
+    let cancelled = false;
+    setFetchState('loading');
+    (async () => {
+      try {
+        const data = await quizzesClient.findQuizById(qid!);
+        if (cancelled) return;
+        if (data) {
+          dispatch(updateQuiz(data)); // 或 upsert
+          setFetchState('ok');
+        } else {
+          setFetchState('notfound');
+        }
+      } catch {
+        setFetchState('error');
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [isNewQuiz, qid, quiz, dispatch]);
+
+  // 2) 重定向逻辑（只在确认后端没有数据时才跳转）
+  useEffect(() => {
+    if (isNewQuiz) return;
+    if (fetchState === 'notfound') {
+      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+    }
+  }, [isNewQuiz, fetchState, cid, navigate]);
 
   // State for form fields
   const [quizForm, setQuizForm] = useState<Quiz>({
@@ -63,42 +96,45 @@ export default function QuizEditor() {
     updatedAt: quiz?.updatedAt ?? new Date().toISOString(),
   });
 
-  // Update form when quiz changes (only on initial load)
+  // 3) 只灌一次表单（避免被覆盖）
   useEffect(() => {
-    if (quiz && quizForm.questions.length === 0) {
-      // Only update if quizForm.questions is empty (initial load)
-      setQuizForm({
-        title: quiz.title,
-        description: quiz.description,
-        courseId: quiz.courseId,
-        quizType: quiz.quizType ?? 'Graded Quiz',
-        points: quiz.points ?? 100,
-        assignmentGroup: quiz.assignmentGroup ?? 'Quizzes',
-        shuffleAnswers: quiz.shuffleAnswers ?? true,
-        timeLimit: quiz.timeLimit ?? 20,
-        multipleAttempts: quiz.multipleAttempts ?? false,
-        attemptsAllowed: quiz.attemptsAllowed ?? 1,
-        showCorrectAnswers: quiz.showCorrectAnswers ?? 'Never',
-        accessCode: quiz.accessCode ?? '',
-        oneQuestionAtATime: quiz.oneQuestionAtATime ?? true,
-        webcamRequired: quiz.webcamRequired ?? false,
-        lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering ?? false,
-        dueDate: quiz.dueDate
-          ? new Date(quiz.dueDate).toISOString().slice(0, 16)
-          : '',
-        availableDate: quiz.availableDate
-          ? new Date(quiz.availableDate).toISOString().slice(0, 16)
-          : '',
-        untilDate: quiz.untilDate
-          ? new Date(quiz.untilDate).toISOString().slice(0, 16)
-          : '',
-        questions: quiz.questions,
-        isPublished: quiz.isPublished,
-        createdAt: quiz.createdAt,
-        updatedAt: quiz.updatedAt,
-      });
-    }
-  }, [quiz, quizForm.questions.length]);
+    if (isNewQuiz) return;
+    if (!quiz) return;
+    if (hasHydratedRef.current) return;
+
+    setQuizForm({
+      title: quiz.title ?? 'New Quiz',
+      description: quiz.description ?? 'Quiz description',
+      courseId: quiz.courseId || cid || '',
+      quizType: quiz.quizType ?? 'Graded Quiz',
+      points: quiz.points ?? 100,
+      assignmentGroup: quiz.assignmentGroup ?? 'Quizzes',
+      shuffleAnswers: quiz.shuffleAnswers ?? true,
+      timeLimit: quiz.timeLimit ?? 20,
+      multipleAttempts: quiz.multipleAttempts ?? false,
+      attemptsAllowed: quiz.attemptsAllowed ?? 1,
+      showCorrectAnswers: quiz.showCorrectAnswers ?? 'Never',
+      accessCode: quiz.accessCode ?? '',
+      oneQuestionAtATime: quiz.oneQuestionAtATime ?? true,
+      webcamRequired: quiz.webcamRequired ?? false,
+      lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering ?? false,
+      dueDate: quiz.dueDate
+        ? new Date(quiz.dueDate).toISOString().slice(0, 16)
+        : '',
+      availableDate: quiz.availableDate
+        ? new Date(quiz.availableDate).toISOString().slice(0, 16)
+        : '',
+      untilDate: quiz.untilDate
+        ? new Date(quiz.untilDate).toISOString().slice(0, 16)
+        : '',
+      questions: quiz.questions ?? [],
+      isPublished: quiz.isPublished ?? false,
+      createdAt: quiz.createdAt ?? new Date().toISOString(),
+      updatedAt: quiz.updatedAt ?? new Date().toISOString(),
+    });
+
+    hasHydratedRef.current = true;
+  }, [isNewQuiz, quiz, cid]);
 
   const handleFormChange = (field: keyof Quiz, value: any) => {
     setQuizForm((prev) => {
@@ -156,9 +192,28 @@ export default function QuizEditor() {
     }
   };
 
-  // Don't render the form if quiz doesn't exist (was deleted)
-  if (!isNewQuiz && !quiz) {
-    return null;
+  // Show loading state while fetching quiz
+  if (!isNewQuiz && fetchState === 'loading') {
+    return (
+      <div className="container">
+        <div className="d-flex justify-content-center">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (!isNewQuiz && fetchState === 'error') {
+    return (
+      <div className="container">
+        <div className="alert alert-danger">
+          Error loading quiz. Please try again.
+        </div>
+      </div>
+    );
   }
 
   return (
