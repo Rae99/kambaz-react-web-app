@@ -194,33 +194,22 @@ export default function Quizzes() {
 
   // Helper function to render availability information
   const renderAvailabilityInfo = (quiz: Quiz, isFaculty: boolean) => {
-    const isAvailable = isQuizAvailableForStudent(quiz);
+    const now = new Date();
+    const availableDate = quiz.availableDate
+      ? new Date(quiz.availableDate)
+      : null;
+    const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
 
     let availabilityStatus = '';
-    if (!quiz.isPublished) {
-      availabilityStatus = 'Not published';
-    } else if (!isAvailable) {
-      const now = new Date();
-      const availableDate = quiz.availableDate
-        ? new Date(quiz.availableDate)
-        : null;
-      const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
-      const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
-
-      if (availableDate && now < availableDate) {
-        availabilityStatus = `Not available until ${availableDate.toLocaleDateString()} at 12:00am`;
-      } else if (untilDate && now > untilDate) {
-        availabilityStatus = 'Closed';
-      } else if (dueDate && now > dueDate) {
-        availabilityStatus = 'Closed';
-      } else {
-        availabilityStatus = 'Not available';
-      }
+    if (!availableDate) {
+      availabilityStatus = 'Not available';
+    } else if (now < availableDate) {
+      availabilityStatus = `Not available until ${availableDate.toLocaleDateString()} at 12:00am`;
+    } else if (dueDate && now > dueDate) {
+      availabilityStatus = 'Closed';
     } else {
       availabilityStatus = 'Available';
     }
-
-    const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
 
     return (
       <>
