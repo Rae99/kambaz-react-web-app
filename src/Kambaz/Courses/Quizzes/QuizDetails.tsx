@@ -30,6 +30,12 @@ export default function QuizDetails() {
   useEffect(() => {
     const fetchQuiz = async () => {
       if (qid) {
+        // Special case: if qid is 'new', redirect to editor
+        if (qid === 'new') {
+          navigate(`/Kambaz/Courses/${cid}/Quizzes/new/edit`);
+          return;
+        }
+
         try {
           setLoading(true);
           const quizData = await quizzesClient.findQuizById(qid);
@@ -44,7 +50,7 @@ export default function QuizDetails() {
     };
 
     fetchQuiz();
-  }, [qid]);
+  }, [qid, cid, navigate]);
 
   const handleEditQuiz = () => {
     navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit`);

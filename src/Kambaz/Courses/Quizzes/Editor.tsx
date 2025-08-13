@@ -29,7 +29,12 @@ export default function QuizEditor() {
 
   // 1) Fetch + mark loading state
   useEffect(() => {
-    if (isNewQuiz) return;
+    if (isNewQuiz) {
+      // For new quiz, don't fetch data, just set state to ok
+      setFetchState('ok');
+      return;
+    }
+
     if (quiz) {
       setFetchState('ok');
       return;
@@ -147,7 +152,7 @@ export default function QuizEditor() {
     });
   };
 
-  const handleSave = async (shouldNavigate: boolean = true) => {
+  const handleSave = async () => {
     const quizData: Quiz = {
       ...quizForm,
       availableDate: quizForm.availableDate
@@ -165,14 +170,18 @@ export default function QuizEditor() {
       if (isNewQuiz) {
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
         dispatch(addQuiz(newQuiz));
+
+        // Navigate back to quiz list after creating new quiz
+        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+
+        // If you want to navigate to the newly created quiz's details page, uncomment the following line
+        // navigate(`/Kambaz/Courses/${cid}/Quizzes/${newQuiz._id}`);
       } else {
         const updatedQuiz = await quizzesClient.updateQuiz(qid!, quizData);
         dispatch(updateQuiz(updatedQuiz));
-      }
 
-      // Only navigate if the user explicitly saved
-      if (shouldNavigate) {
-        navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
+        // Navigate back to quiz list after updating existing quiz
+        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
       }
     } catch (error: any) {
       console.error('Error saving quiz:', error);
@@ -277,7 +286,7 @@ export default function QuizEditor() {
           <QuizDetailsEditor
             quizForm={quizForm}
             onFormChange={handleFormChange}
-            onSave={() => handleSave(true)}
+            onSave={() => handleSave()}
             onCancel={handleCancel}
           />
         )}
@@ -287,7 +296,7 @@ export default function QuizEditor() {
             onQuestionsChange={(questions) => {
               handleFormChange('questions', questions);
             }}
-            onSave={() => handleSave(true)}
+            onSave={() => handleSave()}
             onCancel={handleCancel}
           />
         )}
