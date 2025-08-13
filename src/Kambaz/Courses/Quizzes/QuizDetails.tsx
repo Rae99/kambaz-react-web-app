@@ -12,6 +12,7 @@ import {
 } from 'react-icons/fa';
 import * as quizzesClient from './client';
 import type { Quiz } from './types';
+import StudentQuizActionSection from './StudentQuizActionSection';
 
 export default function QuizDetails() {
   const { cid, qid } = useParams();
@@ -327,48 +328,7 @@ export default function QuizDetails() {
         <Card className="mb-4">
           <Card.Body>
             <h5 className="card-title">Take Quiz</h5>
-            {availabilityStatus === 'Available' ? (
-              <div>
-                <p className="text-success mb-3">
-                  This quiz is currently available for you to take.
-                </p>
-                <Button
-                  variant="primary"
-                  size="lg"
-                  onClick={() =>
-                    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/take`)
-                  }
-                >
-                  Start Quiz
-                </Button>
-                <div className="mt-3">
-                  <small className="text-muted">
-                    • You have{' '}
-                    {quiz.timeLimit
-                      ? `${quiz.timeLimit} minutes`
-                      : 'unlimited time'}{' '}
-                    to complete this quiz •{' '}
-                    {quiz.multipleAttempts
-                      ? 'Multiple attempts are allowed'
-                      : 'Only one attempt is allowed'}
-                    • Total points: {totalPoints}
-                  </small>
-                </div>
-              </div>
-            ) : (
-              <div>
-                <p className="text-muted mb-3">
-                  {availabilityStatus === 'Not available'
-                    ? 'This quiz is not yet available for students.'
-                    : availabilityStatus === 'Closed'
-                    ? 'This quiz is no longer available.'
-                    : 'This quiz will be available soon.'}
-                </p>
-                <Button variant="secondary" size="lg" disabled>
-                  Quiz Not Available
-                </Button>
-              </div>
-            )}
+            <StudentQuizActionSection quiz={quiz} />
           </Card.Body>
         </Card>
       )}

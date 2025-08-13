@@ -73,6 +73,40 @@ export const getQuizAvailabilityReason = (quiz: Quiz): string => {
   return 'Quiz not available';
 };
 
+// Check if student can take the quiz (considering attempt limits)
+export const canStudentTakeQuiz = async (
+  quiz: Quiz,
+  studentId: string
+): Promise<{ canTake: boolean; reason?: string }> => {
+  // First check basic availability
+  if (!isQuizAvailableForStudent(quiz)) {
+    return { canTake: false, reason: getQuizAvailabilityReason(quiz) };
+  }
+
+  // Check attempt limits
+  if (quiz.multipleAttempts && quiz.attemptsAllowed) {
+    try {
+      const attempts = await quizzesClient.getStudentAttempts(
+        quiz._id!,
+        studentId
+      );
+      const currentAttemptNumber = attempts.length + 1;
+
+      if (currentAttemptNumber > quiz.attemptsAllowed) {
+        return {
+          canTake: false,
+          reason: `You have exceeded the maximum attempts (${quiz.attemptsAllowed}) for this quiz.`,
+        };
+      }
+    } catch (error) {
+      console.error('Error checking student attempts:', error);
+      return { canTake: false, reason: 'Unable to verify attempt limits' };
+    }
+  }
+
+  return { canTake: true };
+};
+
 export default function Quizzes() {
   const { cid } = useParams();
   const navigate = useNavigate();
@@ -186,16 +220,23 @@ export default function Quizzes() {
       ? new Date(quiz.availableDate)
       : null;
     const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
+    const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
 
     let availabilityStatus = '';
+    let availabilityVariant = 'secondary';
+
     if (!availableDate) {
       availabilityStatus = 'Not available';
+      availabilityVariant = 'secondary';
     } else if (now < availableDate) {
-      availabilityStatus = `Not available until ${availableDate.toLocaleDateString()} at 12:00am`;
+      availabilityStatus = `Not available until ${availableDate.toLocaleDateString()}`;
+      availabilityVariant = 'warning';
     } else if (dueDate && now > dueDate) {
       availabilityStatus = 'Closed';
+      availabilityVariant = 'danger';
     } else {
       availabilityStatus = 'Available';
+      availabilityVariant = 'success';
     }
 
     return (
@@ -208,7 +249,7 @@ export default function Quizzes() {
         {!isFaculty && (
           <>
             {' '}
-            | <span className="fw-bold">Score: N/A</span>
+            | <StudentScore quiz={quiz} />
           </>
         )}
       </>
@@ -434,18 +475,7 @@ export default function Quizzes() {
                   ) : (
                     <div className="d-flex gap-2">
                       {isQuizAvailableForStudent(quiz) ? (
-                        <button
-                          className="btn btn-primary btn-sm"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            navigate(
-                              `/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/take`
-                            );
-                          }}
-                        >
-                          Start Quiz
-                        </button>
+                        <QuizActionButton quiz={quiz} />
                       ) : (
                         <button
                           className="btn btn-secondary btn-sm"
@@ -455,9 +485,6 @@ export default function Quizzes() {
                           Quiz Not Available
                         </button>
                       )}
-                      <button className="btn btn-outline-info btn-sm">
-                        View Previous Attempts
-                      </button>
                     </div>
                   )}
                 </div>
@@ -469,3 +496,116 @@ export default function Quizzes() {
     </div>
   );
 }
+
+// Component to handle quiz action buttons with attempt limit checking
+const QuizActionButton = ({ quiz }: { quiz: Quiz }) => {
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const navigate = useNavigate();
+  const { cid } = useParams();
+  const [canTake, setCanTake] = useState<boolean | null>(null);
+  const [reason, setReason] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkAttempts = async () => {
+      if (currentUser?._id) {
+        try {
+          const result = await canStudentTakeQuiz(quiz, currentUser._id);
+          setCanTake(result.canTake);
+          setReason(result.reason || '');
+        } catch (error) {
+          console.error('Error checking attempts:', error);
+          setCanTake(false);
+          setReason('Unable to verify attempt limits');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    checkAttempts();
+  }, [quiz, currentUser?._id]);
+
+  if (loading) {
+    return (
+      <button className="btn btn-secondary btn-sm" disabled>
+        Checking...
+      </button>
+    );
+  }
+
+  if (canTake) {
+    return (
+      <button
+        className="btn btn-primary btn-sm"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          navigate(`/Kambaz/Courses/${cid}/Quizzes/${quiz._id}/take`);
+        }}
+      >
+        Start Quiz
+      </button>
+    );
+  }
+
+  return (
+    <button className="btn btn-warning btn-sm" disabled title={reason}>
+      {reason.includes('exceeded')
+        ? 'Max Attempts Reached'
+        : 'Cannot Take Quiz'}
+    </button>
+  );
+};
+
+// Component to display student's score for a quiz
+const StudentScore = ({ quiz }: { quiz: Quiz }) => {
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+  const [score, setScore] = useState<string>('N/A');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchScore = async () => {
+      if (
+        (currentUser?._id && currentUser?.role === 'STUDENT') ||
+        currentUser?.role === 'USER'
+      ) {
+        try {
+          const attempts = await quizzesClient.getStudentAttempts(
+            quiz._id!,
+            currentUser._id
+          );
+          if (attempts.length > 0) {
+            // Get the last completed attempt
+            const lastAttempt = attempts
+              .filter((attempt: any) => attempt.isCompleted)
+              .sort(
+                (a: any, b: any) =>
+                  new Date(b.submittedAt).getTime() -
+                  new Date(a.submittedAt).getTime()
+              )[0];
+
+            if (lastAttempt) {
+              setScore(`${lastAttempt.score}/${lastAttempt.totalPoints}`);
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching score:', error);
+          setScore('Error');
+        } finally {
+          setLoading(false);
+        }
+      } else {
+        setLoading(false);
+      }
+    };
+
+    fetchScore();
+  }, [quiz._id, currentUser?._id, currentUser?.role]);
+
+  if (loading) {
+    return <span className="fw-bold">Loading...</span>;
+  }
+
+  return <span className="fw-bold">Score: {score}</span>;
+};
