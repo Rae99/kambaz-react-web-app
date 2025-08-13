@@ -15,10 +15,6 @@ export default function QuizEditor() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  console.log('QuizEditor params:', params);
-  console.log('QuizEditor cid:', cid);
-  console.log('QuizEditor qid:', qid);
-
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const isNewQuiz = qid === 'new';
   const [activeTab, setActiveTab] = useState<'details' | 'questions'>(
@@ -30,7 +26,6 @@ export default function QuizEditor() {
   // Navigate back to Quizzes if the quiz doesn't exist (was deleted)
   useEffect(() => {
     if (!isNewQuiz && !quiz) {
-      console.log('Quiz not found, navigating back to Quizzes');
       navigate(`/Kambaz/Courses/${cid}/Quizzes`);
       return;
     }
@@ -106,31 +101,17 @@ export default function QuizEditor() {
   }, [quiz, quizForm.questions.length]);
 
   const handleFormChange = (field: keyof Quiz, value: any) => {
-    console.log('=== HANDLE FORM CHANGE ===');
-    console.log('1. field:', field);
-    console.log('2. value:', value);
-    console.log('3. previous quizForm:', quizForm);
-
     setQuizForm((prev) => {
       const newForm = {
         ...prev,
         [field]: value,
       };
-      console.log('4. new quizForm:', newForm);
-      console.log('5. questions count in newForm:', newForm.questions?.length);
+
       return newForm;
     });
   };
 
   const handleSave = async (shouldNavigate: boolean = true) => {
-    console.log('=== HANDLE SAVE START ===');
-    console.log('1. shouldNavigate:', shouldNavigate);
-    console.log('2. isNewQuiz:', isNewQuiz);
-    console.log('3. cid:', cid);
-    console.log('4. qid:', qid);
-    console.log('5. quizForm.questions count:', quizForm.questions?.length);
-    console.log('6. quizForm.questions:', quizForm.questions);
-
     const quizData: Quiz = {
       ...quizForm,
       availableDate: quizForm.availableDate
@@ -144,24 +125,18 @@ export default function QuizEditor() {
         : undefined,
     };
 
-    console.log('7. quizData prepared:', quizData);
-    console.log('8. quizData.questions count:', quizData.questions?.length);
-
     try {
       if (isNewQuiz) {
-        console.log('Creating new quiz...');
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
-        console.log('Quiz created successfully:', newQuiz);
         dispatch(addQuiz(newQuiz));
       } else {
-        console.log('Updating existing quiz...');
         const updatedQuiz = await quizzesClient.updateQuiz(qid!, quizData);
         dispatch(updateQuiz(updatedQuiz));
       }
 
       // Only navigate if the user explicitly saved
       if (shouldNavigate) {
-        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+        navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
       }
     } catch (error: any) {
       console.error('Error saving quiz:', error);
@@ -181,12 +156,8 @@ export default function QuizEditor() {
     }
   };
 
-  // Debug logging
-  console.log('Editor render:', { isNewQuiz, qid, quiz, quizForm });
-
   // Don't render the form if quiz doesn't exist (was deleted)
   if (!isNewQuiz && !quiz) {
-    console.log('Returning null - quiz not found and not new');
     return null;
   }
 
@@ -259,12 +230,6 @@ export default function QuizEditor() {
           <QuizQuestionsEditor
             questions={quizForm.questions}
             onQuestionsChange={(questions) => {
-              console.log('=== QUESTIONS CHANGE IN EDITOR ===');
-              console.log('1. New questions count:', questions.length);
-              console.log(
-                '2. Current quizForm.questions count:',
-                quizForm.questions?.length
-              );
               handleFormChange('questions', questions);
             }}
             onSave={() => handleSave(true)}
