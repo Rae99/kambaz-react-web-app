@@ -88,19 +88,6 @@ export default function Quizzes() {
     currentUser?.role === 'ADMIN' ||
     currentUser?.role === 'TA';
 
-  // Filter quizzes based on user role
-  const getFilteredQuizzes = (allQuizzes: Quiz[]) => {
-    if (isFaculty) {
-      // Faculty can see all quizzes
-      return allQuizzes.filter((quiz: Quiz) => quiz.courseId === cid);
-    } else {
-      // Students can only see published quizzes
-      return allQuizzes.filter(
-        (quiz: Quiz) => quiz.courseId === cid && quiz.isPublished
-      );
-    }
-  };
-
   useEffect(() => {
     const fetchQuizzes = async () => {
       if (cid) {
@@ -246,7 +233,9 @@ export default function Quizzes() {
     );
   }
 
-  const courseQuizzes = getFilteredQuizzes(quizzes || []);
+  const courseQuizzes = (quizzes || []).filter(
+    (quiz: Quiz) => quiz.courseId === cid
+  );
 
   const sortedQuizzes = [...courseQuizzes].sort((a, b) => {
     switch (sortBy) {
