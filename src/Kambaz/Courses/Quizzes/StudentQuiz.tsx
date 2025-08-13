@@ -139,11 +139,7 @@ export default function StudentQuiz({
 
   const checkQuizAvailability = async (quizData: Quiz) => {
     try {
-      const result = await canStudentTakeQuiz(
-        quizData,
-        currentUser?._id!,
-        quizzesClient.getStudentAttempts
-      );
+      const result = await canStudentTakeQuiz(quizData, currentUser?._id!);
 
       if (!result.canTake) {
         setError(result.reason || 'Quiz is not available');
@@ -172,26 +168,47 @@ export default function StudentQuiz({
     questionId: string,
     answer: string | string[]
   ) => {
-    // Store answers using array index for better compatibility
-    const answerKey = questionId.startsWith('question_')
-      ? questionId
-      : `question_${currentQuestionIndex}`;
+    // Use the same key logic as the rest of the component
+    const currentQuestion = quiz?.questions[currentQuestionIndex];
+    const answerKey =
+      currentQuestion?._id || `question_${currentQuestionIndex}`;
+
+    console.log('handleAnswerChange called:', {
+      questionId,
+      answer,
+      currentQuestionIndex,
+      currentQuestionId: currentQuestion?._id,
+      answerKey,
+      currentAnswers: quizAttempt.answers,
+    });
 
     const newAnswers = {
       ...quizAttempt.answers,
       [answerKey]: answer,
     };
 
-    setQuizAttempt((prev) => ({
-      ...prev,
-      answers: newAnswers,
-    }));
+    console.log('New answers object:', newAnswers);
+
+    setQuizAttempt((prev) => {
+      const updated = {
+        ...prev,
+        answers: newAnswers,
+      };
+      console.log('Updated quizAttempt:', updated);
+      return updated;
+    });
 
     // Auto-save answers as student progresses (using saveQuizProgress, not submit)
     if (qid) {
+      console.log('Auto-saving answers:', {
+        qid,
+        newAnswers,
+        timeSpent: getTimeSpent(),
+      });
       quizzesClient
         .saveQuizProgress(qid, newAnswers, getTimeSpent())
         .then((savedAttempt) => {
+          console.log('Auto-save successful:', savedAttempt);
           setQuizAttempt(savedAttempt);
         })
         .catch((error) => {
@@ -219,15 +236,29 @@ export default function StudentQuiz({
       console.log('Current attempt ID:', quizAttempt._id);
       console.log('Current attempt state:', quizAttempt);
 
+      // Check if all questions are answered
+      const totalQuestions = quiz?.questions?.length || 0;
+      const answeredQuestions = Object.keys(quizAttempt.answers).length;
+
+      if (answeredQuestions < totalQuestions) {
+        setError(
+          `Please answer all ${totalQuestions} questions before submitting. You have answered ${answeredQuestions} questions.`
+        );
+        return;
+      }
+
       // Prepare answers with question context for better backend processing
       const answersWithContext =
-        quiz?.questions?.map((question, index) => ({
-          questionIndex: index,
-          questionText: question.text,
-          userAnswer: quizAttempt.answers[`question_${index}`] || '',
-          correctAnswer: question.correctAnswer,
-          points: question.points,
-        })) || [];
+        quiz?.questions?.map((question, index) => {
+          const questionId = question._id || `question_${index}`;
+          return {
+            questionIndex: index,
+            questionText: question.text,
+            userAnswer: quizAttempt.answers[questionId] || '',
+            correctAnswer: question.correctAnswer,
+            points: question.points,
+          };
+        }) || [];
 
       console.log('Answers with context:', answersWithContext);
 
@@ -270,6 +301,15 @@ export default function StudentQuiz({
     setQuizAttempt(attempt);
     setMode('review');
   };
+
+  // Debug logging for review mode
+  useEffect(() => {
+    if (mode === 'review' && quizAttempt.isCompleted) {
+      console.log('Review mode - quizAttempt:', quizAttempt);
+      console.log('Review mode - quizAttempt.answers:', quizAttempt.answers);
+      console.log('Review mode - quiz:', quiz);
+    }
+  }, [mode, quizAttempt, quiz]);
 
   if (loading) {
     return (
@@ -362,9 +402,20 @@ export default function StudentQuiz({
           <Card.Body>
             <h5 className="card-title">Question Review</h5>
             {quiz.questions.map((question: Question, index: number) => {
-              // Use array index as question ID if _id is undefined
-              const questionId = question._id || `question_${index}`;
+              // Use index-based keys to match the database format
+              const questionId = `question_${index}`;
               const userAnswer = quizAttempt.answers[questionId];
+
+              // Debug logging for each question
+              console.log(`Question ${index + 1} debug:`, {
+                questionId,
+                question_id_from_db: question._id,
+                userAnswer,
+                allAnswerKeys: Object.keys(quizAttempt.answers),
+                correctAnswer: question.correctAnswer,
+                points: question.points,
+              });
+
               const isCorrect = Array.isArray(question.correctAnswer)
                 ? Array.isArray(userAnswer) &&
                   userAnswer.length === question.correctAnswer.length &&
@@ -606,7 +657,10 @@ export default function StudentQuiz({
                 <Button
                   variant="success"
                   onClick={handleSubmitQuiz}
-                  disabled={false} // Allow submission even if not all questions answered
+                  disabled={
+                    Object.keys(quizAttempt.answers).length <
+                    (quiz?.questions?.length || 0)
+                  }
                 >
                   Submit Quiz
                 </Button>
