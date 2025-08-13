@@ -68,9 +68,10 @@ export default function QuizEditor() {
     updatedAt: quiz?.updatedAt ?? new Date().toISOString(),
   });
 
-  // Update form when quiz changes
+  // Update form when quiz changes (only on initial load)
   useEffect(() => {
-    if (quiz) {
+    if (quiz && quizForm.questions.length === 0) {
+      // Only update if quizForm.questions is empty (initial load)
       setQuizForm({
         title: quiz.title,
         description: quiz.description,
@@ -102,7 +103,7 @@ export default function QuizEditor() {
         updatedAt: quiz.updatedAt,
       });
     }
-  }, [quiz]);
+  }, [quiz, quizForm.questions.length]);
 
   const handleFormChange = (field: keyof Quiz, value: any) => {
     console.log('=== HANDLE FORM CHANGE ===');
@@ -266,6 +267,8 @@ export default function QuizEditor() {
               );
               handleFormChange('questions', questions);
             }}
+            onSave={() => handleSave(true)}
+            onCancel={handleCancel}
           />
         )}
       </div>

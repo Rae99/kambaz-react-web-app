@@ -9,12 +9,15 @@ import FillInBlankEditor from './FillInBlankEditor';
 interface QuizQuestionsEditorProps {
   questions?: Question[];
   onQuestionsChange?: (questions: Question[]) => void;
+  onSave?: () => void;
+  onCancel?: () => void;
 }
 
 export default function QuizQuestionsEditor({
   questions = [],
   onQuestionsChange,
-  onSaveQuiz,
+  onSave,
+  onCancel,
 }: QuizQuestionsEditorProps) {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
@@ -303,6 +306,22 @@ export default function QuizQuestionsEditor({
               </Card.Body>
             </Card>
           ))}
+        </div>
+      )}
+
+      {/* Save/Cancel Buttons */}
+      {(onSave || onCancel) && (
+        <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+          {onCancel && (
+            <Button variant="secondary" onClick={onCancel}>
+              Cancel
+            </Button>
+          )}
+          {onSave && (
+            <Button variant="danger" onClick={onSave}>
+              Save Quiz
+            </Button>
+          )}
         </div>
       )}
     </div>
