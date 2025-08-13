@@ -17,7 +17,7 @@ import type { Quiz, Question } from './types';
 import { isQuizAvailableForStudent, getQuizAvailabilityReason } from './index';
 
 // Student-specific function for comprehensive availability check
-export const canStudentTakeQuiz = async (
+const canStudentTakeQuiz = async (
   quiz: Quiz,
   studentId: string,
   getStudentAttempts: (quizId: string, studentId: string) => Promise<any[]>
@@ -89,9 +89,25 @@ export default function StudentQuiz({
   });
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [existingAttempts, setExistingAttempts] = useState<QuizAttempt[]>([]);
+  const [startTime, setStartTime] = useState<Date | null>(null);
 
   // Check if user is student
   const isStudent = currentUser?.role === 'STUDENT';
+
+  // Start timer when quiz begins
+  useEffect(() => {
+    if (mode === 'take' && !startTime) {
+      setStartTime(new Date());
+    }
+  }, [mode, startTime]);
+
+  // Calculate time spent
+  const getTimeSpent = () => {
+    if (!startTime) return 0;
+    const now = new Date();
+    const diffMs = now.getTime() - startTime.getTime();
+    return Math.round(diffMs / 1000 / 60); // Convert to minutes
+  };
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -99,6 +115,16 @@ export default function StudentQuiz({
         try {
           setLoading(true);
           const quizData = await quizzesClient.findQuizById(qid);
+          console.log('Backend sent quiz data:', quizData);
+          console.log(
+            'Questions with IDs:',
+            quizData.questions?.map((q: Question, i: number) => ({
+              index: i,
+              id: q._id,
+              text: q.text?.substring(0, 50),
+            }))
+          );
+
           setQuiz(quizData);
 
           // Check if student can take this quiz
@@ -113,6 +139,20 @@ export default function StudentQuiz({
               0
             ),
           }));
+
+          // Load existing attempts for this student
+          if (currentUser?._id) {
+            try {
+              const attempts = await quizzesClient.getStudentAttempts(
+                qid,
+                currentUser._id
+              );
+              setExistingAttempts(attempts);
+            } catch (error) {
+              console.error('Failed to load attempts:', error);
+              // Don't show error for attempts loading
+            }
+          }
         } catch (error) {
           console.error('Error fetching quiz:', error);
           setError('Failed to fetch quiz details');
@@ -123,7 +163,7 @@ export default function StudentQuiz({
     };
 
     fetchQuiz();
-  }, [qid, mode]);
+  }, [qid, mode, currentUser?._id]);
 
   const checkQuizAvailability = async (quizData: Quiz) => {
     try {
@@ -160,13 +200,33 @@ export default function StudentQuiz({
     questionId: string,
     answer: string | string[]
   ) => {
+    // Store answers using array index for better compatibility
+    const answerKey = questionId.startsWith('question_')
+      ? questionId
+      : `question_${currentQuestionIndex}`;
+
+    const newAnswers = {
+      ...quizAttempt.answers,
+      [answerKey]: answer,
+    };
+
     setQuizAttempt((prev) => ({
       ...prev,
-      answers: {
-        ...prev.answers,
-        [questionId]: answer,
-      },
+      answers: newAnswers,
     }));
+
+    // Auto-save answers as student progresses (using saveQuizProgress, not submit)
+    if (qid) {
+      quizzesClient
+        .saveQuizProgress(qid, newAnswers, getTimeSpent())
+        .then((savedAttempt) => {
+          setQuizAttempt(savedAttempt);
+        })
+        .catch((error) => {
+          console.error('Auto-save failed:', error);
+          // Don't show error to user for auto-save failures
+        });
+    }
   };
 
   const handleNextQuestion = () => {
@@ -182,49 +242,46 @@ export default function StudentQuiz({
   };
 
   const handleSubmitQuiz = async () => {
-    // Calculate score based on answers
-    let score = 0;
-    quiz?.questions.forEach((question: Question) => {
-      const userAnswer = quizAttempt.answers[question._id || ''];
-      if (userAnswer) {
-        if (Array.isArray(question.correctAnswer)) {
-          // Multiple correct answers
-          if (
-            Array.isArray(userAnswer) &&
-            userAnswer.length === question.correctAnswer.length &&
-            userAnswer.every((ans) => question.correctAnswer.includes(ans))
-          ) {
-            score += question.points;
-          }
-        } else {
-          // Single correct answer
-          if (userAnswer === question.correctAnswer) {
-            score += question.points;
-          }
-        }
-      }
-    });
-
-    const finalAttempt = {
-      ...quizAttempt,
-      score,
-      isCompleted: true,
-      submittedAt: new Date(),
-    };
-
     try {
-      // Save attempt to backend
-      const savedAttempt = await quizzesClient.saveStudentAttempt(finalAttempt);
+      console.log('Submitting quiz with answers:', quizAttempt.answers);
+      console.log('Current attempt ID:', quizAttempt._id);
+      console.log('Current attempt state:', quizAttempt);
+
+      // Prepare answers with question context for better backend processing
+      const answersWithContext =
+        quiz?.questions?.map((question, index) => ({
+          questionIndex: index,
+          questionText: question.text,
+          userAnswer: quizAttempt.answers[`question_${index}`] || '',
+          correctAnswer: question.correctAnswer,
+          points: question.points,
+        })) || [];
+
+      console.log('Answers with context:', answersWithContext);
+
+      // Use the new submit API for final submission
+      const savedAttempt = await quizzesClient.submitQuizAttempt(
+        qid!,
+        answersWithContext
+      );
+
+      console.log('Quiz submitted successfully:', savedAttempt);
+
+      // Update local state with the submitted attempt
       setQuizAttempt(savedAttempt);
+
+      // Navigate to review mode to show results
+      setMode('review');
     } catch (error) {
-      console.error('Error saving attempt:', error);
-      setError('Failed to save your quiz attempt');
+      console.error('Error submitting quiz:', error);
+      setError('Failed to submit your quiz');
     }
   };
 
   const handleTakeQuiz = () => {
     setMode('take');
     setCurrentQuestionIndex(0);
+    setStartTime(new Date()); // Reset timer for new attempt
     setQuizAttempt({
       studentId: currentUser?._id || '',
       quizId: qid || '',
@@ -307,7 +364,10 @@ export default function StudentQuiz({
                 }
               />
               <p className="text-muted">
-                Submitted: {quizAttempt.submittedAt.toLocaleString()}
+                Submitted:{' '}
+                {quizAttempt.submittedAt
+                  ? new Date(quizAttempt.submittedAt).toLocaleString()
+                  : 'Not submitted'}
               </p>
             </div>
           </Card.Body>
@@ -317,7 +377,9 @@ export default function StudentQuiz({
           <Card.Body>
             <h5 className="card-title">Question Review</h5>
             {quiz.questions.map((question: Question, index: number) => {
-              const userAnswer = quizAttempt.answers[question._id || ''];
+              // Use array index as question ID if _id is undefined
+              const questionId = question._id || `question_${index}`;
+              const userAnswer = quizAttempt.answers[questionId];
               const isCorrect = Array.isArray(question.correctAnswer)
                 ? Array.isArray(userAnswer) &&
                   userAnswer.length === question.correctAnswer.length &&
@@ -325,6 +387,15 @@ export default function StudentQuiz({
                     question.correctAnswer.includes(ans)
                   )
                 : userAnswer === question.correctAnswer;
+
+              // Debug logging
+              console.log(`Question ${index + 1}:`, {
+                questionId,
+                userAnswer,
+                correctAnswer: question.correctAnswer,
+                isCorrect,
+                points: question.points,
+              });
 
               return (
                 <div
@@ -399,8 +470,12 @@ export default function StudentQuiz({
 
   // If taking quiz, show the quiz interface
   if (mode === 'take') {
-    const currentQuestion = quiz.questions[currentQuestionIndex];
-    const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
+    const currentQuestion = quiz?.questions?.[currentQuestionIndex];
+    const currentQuestionId =
+      currentQuestion?._id || `question_${currentQuestionIndex}`;
+    const progress = quiz?.questions?.length
+      ? ((currentQuestionIndex + 1) / quiz.questions.length) * 100
+      : 0;
 
     return (
       <div className="student-quiz-taking">
@@ -424,12 +499,16 @@ export default function StudentQuiz({
           <Card.Body>
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="card-title mb-0">
-                Question {currentQuestionIndex + 1} of {quiz.questions.length}
+                Question {currentQuestionIndex + 1} of{' '}
+                {quiz?.questions?.length || 0}
               </h5>
-              <div className="text-muted">
-                {quizAttempt.answers[currentQuestion?._id || '']
-                  ? 'Answered'
-                  : 'Not answered'}
+              <div className="d-flex align-items-center gap-3">
+                <span className="text-muted">
+                  {quizAttempt.answers[currentQuestionId]
+                    ? 'Answered'
+                    : 'Not answered'}
+                </span>
+                <span className="text-info">⏱️ Time: {getTimeSpent()} min</span>
               </div>
             </div>
 
@@ -448,16 +527,15 @@ export default function StudentQuiz({
                           <input
                             className="form-check-input"
                             type="radio"
-                            name={`question-${currentQuestion._id}`}
+                            name={`question-${currentQuestionId}`}
                             id={`option-${optionIndex}`}
                             value={option}
                             checked={
-                              quizAttempt.answers[currentQuestion._id || ''] ===
-                              option
+                              quizAttempt.answers[currentQuestionId] === option
                             }
                             onChange={(e) =>
                               handleAnswerChange(
-                                currentQuestion._id || '',
+                                currentQuestionId,
                                 e.target.value
                               )
                             }
@@ -480,18 +558,14 @@ export default function StudentQuiz({
                     <input
                       className="form-check-input"
                       type="radio"
-                      name={`question-${currentQuestion._id}`}
+                      name={`question-${currentQuestionId}`}
                       id="true-option"
                       value="true"
                       checked={
-                        quizAttempt.answers[currentQuestion._id || ''] ===
-                        'true'
+                        quizAttempt.answers[currentQuestionId] === 'true'
                       }
                       onChange={(e) =>
-                        handleAnswerChange(
-                          currentQuestion._id || '',
-                          e.target.value
-                        )
+                        handleAnswerChange(currentQuestionId, e.target.value)
                       }
                     />
                     <label className="form-check-label" htmlFor="true-option">
@@ -502,18 +576,14 @@ export default function StudentQuiz({
                     <input
                       className="form-check-input"
                       type="radio"
-                      name={`question-${currentQuestion._id}`}
+                      name={`question-${currentQuestionId}`}
                       id="false-option"
                       value="false"
                       checked={
-                        quizAttempt.answers[currentQuestion._id || ''] ===
-                        'false'
+                        quizAttempt.answers[currentQuestionId] === 'false'
                       }
                       onChange={(e) =>
-                        handleAnswerChange(
-                          currentQuestion._id || '',
-                          e.target.value
-                        )
+                        handleAnswerChange(currentQuestionId, e.target.value)
                       }
                     />
                     <label className="form-check-label" htmlFor="false-option">
@@ -529,12 +599,9 @@ export default function StudentQuiz({
                     type="text"
                     className="form-control"
                     placeholder="Enter your answer"
-                    value={quizAttempt.answers[currentQuestion._id || ''] || ''}
+                    value={quizAttempt.answers[currentQuestionId] || ''}
                     onChange={(e) =>
-                      handleAnswerChange(
-                        currentQuestion._id || '',
-                        e.target.value
-                      )
+                      handleAnswerChange(currentQuestionId, e.target.value)
                     }
                   />
                 </div>
@@ -550,14 +617,11 @@ export default function StudentQuiz({
                 Previous
               </Button>
 
-              {currentQuestionIndex === quiz.questions.length - 1 ? (
+              {currentQuestionIndex === (quiz?.questions?.length || 0) - 1 ? (
                 <Button
                   variant="success"
                   onClick={handleSubmitQuiz}
-                  disabled={
-                    Object.keys(quizAttempt.answers).length <
-                    quiz.questions.length
-                  }
+                  disabled={false} // Allow submission even if not all questions answered
                 >
                   Submit Quiz
                 </Button>
@@ -565,7 +629,7 @@ export default function StudentQuiz({
                 <Button
                   variant="primary"
                   onClick={handleNextQuestion}
-                  disabled={!quizAttempt.answers[currentQuestion._id || '']}
+                  disabled={!quizAttempt.answers[currentQuestionId]}
                 >
                   Next
                 </Button>
@@ -578,21 +642,30 @@ export default function StudentQuiz({
           <Card.Body>
             <h6>Quiz Progress</h6>
             <div className="d-flex flex-wrap gap-2">
-              {quiz.questions.map((question: Question, index: number) => (
-                <Button
-                  key={question._id || index}
-                  variant={
-                    quizAttempt.answers[question._id || '']
-                      ? 'success'
-                      : 'outline-secondary'
-                  }
-                  size="sm"
-                  onClick={() => setCurrentQuestionIndex(index)}
-                  className={currentQuestionIndex === index ? 'fw-bold' : ''}
-                >
-                  {index + 1}
-                </Button>
-              ))}
+              {(quiz?.questions || []).map(
+                (question: Question, index: number) => {
+                  const questionId = question._id || `question_${index}`;
+                  return (
+                    <Button
+                      key={questionId}
+                      variant={
+                        quizAttempt.answers[questionId]
+                          ? 'success'
+                          : currentQuestionIndex === index
+                          ? 'primary'
+                          : 'outline-secondary'
+                      }
+                      size="sm"
+                      onClick={() => setCurrentQuestionIndex(index)}
+                      className={
+                        currentQuestionIndex === index ? 'fw-bold' : ''
+                      }
+                    >
+                      {index + 1}
+                    </Button>
+                  );
+                }
+              )}
             </div>
           </Card.Body>
         </Card>
@@ -690,7 +763,9 @@ export default function StudentQuiz({
                     Attempt #{attempt.attemptNumber}
                   </span>
                   <span className="text-muted ms-3">
-                    {attempt.submittedAt.toLocaleString()}
+                    {attempt.submittedAt
+                      ? new Date(attempt.submittedAt).toLocaleString()
+                      : 'Not submitted'}
                   </span>
                 </div>
                 <div>

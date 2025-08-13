@@ -27,7 +27,7 @@ export const deleteQuiz = async (quizId: string) => {
 };
 
 // Quiz Attempt operations
-export const submitQuizAttempt = async (attempt: Omit<QuizAttempt, '_id' | 'submittedAt'>) => {
+export const createQuizAttempt = async (attempt: Omit<QuizAttempt, '_id' | 'submittedAt'>) => {
   const response = await axiosWithCredentials.post(ATTEMPTS_API, attempt);
   return response.data;
 };
@@ -58,6 +58,24 @@ export const getStudentAttempts = async (quizId: string, studentId: string) => {
   return response.data;
 };
 
+// New simplified API for saving quiz progress
+export const saveQuizProgress = async (quizId: string, answers: any, timeSpent?: number) => {
+  const response = await axiosWithCredentials.put(`${ATTEMPTS_API}/quiz/${quizId}`, {
+    answers,
+    timeSpent
+  });
+  return response.data;
+};
+
+// Submit quiz (final submission)
+export const submitQuizAttempt = async (quizId: string, answers: any) => {
+  const response = await axiosWithCredentials.post(`${ATTEMPTS_API}/quiz/${quizId}/submit`, {
+    answers
+  });
+  return response.data;
+};
+
+// Legacy function - keeping for backward compatibility but prefer saveQuizProgress
 export const saveStudentAttempt = async (attempt: QuizAttempt) => {
   const response = await axiosWithCredentials.post(ATTEMPTS_API, attempt);
   return response.data;
