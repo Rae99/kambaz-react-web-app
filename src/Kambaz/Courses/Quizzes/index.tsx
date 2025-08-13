@@ -84,24 +84,37 @@ export const canStudentTakeQuiz = async (
   }
 
   // Check attempt limits
-  if (quiz.multipleAttempts && quiz.attemptsAllowed) {
-    try {
-      const attempts = await quizzesClient.getStudentAttempts(
-        quiz._id!,
-        studentId
-      );
-      const currentAttemptNumber = attempts.length + 1;
+  try {
+    const attempts = await quizzesClient.getStudentAttempts(
+      quiz._id!,
+      studentId
+    );
+    const existingAttempts = attempts.filter(
+      (attempt: any) => attempt.isCompleted
+    );
 
+    if (quiz.multipleAttempts && quiz.attemptsAllowed) {
+      // Multiple attempts allowed - check against limit
+      const currentAttemptNumber = existingAttempts.length + 1;
       if (currentAttemptNumber > quiz.attemptsAllowed) {
         return {
           canTake: false,
           reason: `You have exceeded the maximum attempts (${quiz.attemptsAllowed}) for this quiz.`,
         };
       }
-    } catch (error) {
-      console.error('Error checking student attempts:', error);
-      return { canTake: false, reason: 'Unable to verify attempt limits' };
+    } else {
+      // Only one attempt allowed - check if student has already taken it
+      if (existingAttempts.length > 0) {
+        return {
+          canTake: false,
+          reason:
+            'You have already taken this quiz. Only one attempt is allowed.',
+        };
+      }
     }
+  } catch (error) {
+    console.error('Error checking student attempts:', error);
+    return { canTake: false, reason: 'Unable to verify attempt limits' };
   }
 
   return { canTake: true };
@@ -551,9 +564,7 @@ const QuizActionButton = ({ quiz }: { quiz: Quiz }) => {
 
   return (
     <button className="btn btn-warning btn-sm" disabled title={reason}>
-      {reason.includes('exceeded')
-        ? 'Max Attempts Reached'
-        : 'Cannot Take Quiz'}
+      {reason?.includes('exceeded') ? 'Max Attempts Reached' : 'Already Taken'}
     </button>
   );
 };

@@ -14,39 +14,11 @@ import * as quizzesClient from './client';
 import type { Quiz, Question } from './types';
 
 // Import availability functions from parent component
-import { isQuizAvailableForStudent, getQuizAvailabilityReason } from './index';
-
-// Student-specific function for comprehensive availability check
-const canStudentTakeQuiz = async (
-  quiz: Quiz,
-  studentId: string,
-  getStudentAttempts: (quizId: string, studentId: string) => Promise<any[]>
-): Promise<{ canTake: boolean; reason?: string }> => {
-  // First check basic availability
-  if (!isQuizAvailableForStudent(quiz)) {
-    return { canTake: false, reason: getQuizAvailabilityReason(quiz) };
-  }
-
-  // Check attempt limits
-  if (quiz.multipleAttempts) {
-    try {
-      const attempts = await getStudentAttempts(quiz._id!, studentId);
-      const currentAttemptNumber = attempts.length + 1;
-
-      if (currentAttemptNumber > quiz.attemptsAllowed) {
-        return {
-          canTake: false,
-          reason: `You have exceeded the maximum attempts (${quiz.attemptsAllowed}) for this quiz.`,
-        };
-      }
-    } catch (error) {
-      console.error('Error checking student attempts:', error);
-      return { canTake: false, reason: 'Unable to verify attempt limits' };
-    }
-  }
-
-  return { canTake: true };
-};
+import {
+  isQuizAvailableForStudent,
+  getQuizAvailabilityReason,
+  canStudentTakeQuiz,
+} from './index';
 
 interface QuizAttempt {
   _id?: string;
@@ -323,19 +295,32 @@ export default function StudentQuiz({
 
   // If reviewing, show the attempt results
   if (mode === 'review' && quizAttempt.isCompleted) {
+    // Check if student can take the quiz again
+    const canTakeAgain = quiz.multipleAttempts
+      ? existingAttempts.length < quiz.attemptsAllowed
+      : existingAttempts.length === 0;
+
     return (
       <div className="student-quiz-review">
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1>Quiz Results - {quiz.title}</h1>
           <div>
-            <Button
-              variant="outline-primary"
-              onClick={handleTakeQuiz}
-              className="me-2"
-            >
-              <FaPlay className="me-2" />
-              Take Quiz Again
-            </Button>
+            {canTakeAgain ? (
+              <Button
+                variant="outline-primary"
+                onClick={handleTakeQuiz}
+                className="me-2"
+              >
+                <FaPlay className="me-2" />
+                Take Quiz Again
+              </Button>
+            ) : (
+              <Button variant="warning" disabled className="me-2">
+                {quiz.multipleAttempts
+                  ? 'Max Attempts Reached'
+                  : 'Already Taken'}
+              </Button>
+            )}
             <Button
               variant="outline-secondary"
               onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes`)}

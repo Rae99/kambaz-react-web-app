@@ -88,6 +88,8 @@ const StudentQuizActionSection = ({ quiz }: StudentQuizActionSectionProps) => {
       <Button variant="warning" size="lg" disabled title={reason}>
         {reason?.includes('exceeded')
           ? 'Max Attempts Reached'
+          : reason?.includes('already taken')
+          ? 'Already Taken'
           : 'Cannot Take Quiz'}
       </Button>
       <div className="mt-3">
