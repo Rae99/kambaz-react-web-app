@@ -27,7 +27,7 @@ export default function QuizEditor() {
 
   const quiz = isNewQuiz ? null : quizzes.find((q: Quiz) => q._id === qid);
 
-  // 1) 拉取 + 标记加载状态
+  // 1) Fetch + mark loading state
   useEffect(() => {
     if (isNewQuiz) return;
     if (quiz) {
@@ -56,7 +56,7 @@ export default function QuizEditor() {
     };
   }, [isNewQuiz, qid, quiz, dispatch]);
 
-  // 2) 重定向逻辑（只在确认后端没有数据时才跳转）
+  // 2) Redirect logic (only redirect when backend confirms no data)
   useEffect(() => {
     if (isNewQuiz) return;
     if (fetchState === 'notfound') {
@@ -96,7 +96,7 @@ export default function QuizEditor() {
     updatedAt: quiz?.updatedAt ?? new Date().toISOString(),
   });
 
-  // 3) 只灌一次表单（避免被覆盖）
+  // 3) Hydrate form only once (avoid being overwritten)
   useEffect(() => {
     if (isNewQuiz) return;
     if (!quiz) return;
