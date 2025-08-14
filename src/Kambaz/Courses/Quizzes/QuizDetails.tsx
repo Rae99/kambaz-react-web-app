@@ -127,9 +127,17 @@ export default function QuizDetails() {
     availabilityVariant = 'success';
   }
 
-  // Use quiz.points as primary source, fallback to calculated points from questions
-  const totalPoints =
-    quiz.points || quiz.questions.reduce((sum, q) => sum + q.points, 0);
+  // Use quiz.points directly - keep it simple
+  const totalPoints = quiz.points || 0;
+
+  // Debug logging for totalPoints calculation
+  console.log('QuizDetails - totalPoints calculation:', {
+    quizId: quiz._id,
+    quizTitle: quiz.title,
+    quizPoints: quiz.points,
+    questionsCount: quiz.questions?.length,
+    finalTotalPoints: totalPoints,
+  });
 
   return (
     <div className="quiz-details">
