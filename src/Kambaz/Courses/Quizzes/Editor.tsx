@@ -1,4 +1,11 @@
-import { useParams, useNavigate } from 'react-router-dom';
+import {
+  useParams,
+  useNavigate,
+  useLocation,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect, useRef } from 'react';
 import { Button } from 'react-bootstrap';
@@ -13,13 +20,17 @@ export default function QuizEditor() {
   const params = useParams();
   const { cid, qid } = params;
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
 
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const isNewQuiz = qid === 'new';
-  const [activeTab, setActiveTab] = useState<'details' | 'questions'>(
-    'details'
-  );
+
+  // Determine active tab from URL
+  const activeTab = location.pathname.includes('/questions')
+    ? 'questions'
+    : 'details';
+
   const [fetchState, setFetchState] = useState<
     'idle' | 'loading' | 'ok' | 'notfound' | 'error'
   >('idle');
@@ -171,17 +182,12 @@ export default function QuizEditor() {
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
         dispatch(addQuiz(newQuiz));
 
-        // Navigate back to quiz list after creating new quiz
-        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
-
-        // If you want to navigate to the newly created quiz's details page, uncomment the following line
-        // navigate(`/Kambaz/Courses/${cid}/Quizzes/${newQuiz._id}`);
+        navigate(`/Kambaz/Courses/${cid}/Quizzes/${newQuiz._id}`);
       } else {
         const updatedQuiz = await quizzesClient.updateQuiz(qid!, quizData);
         dispatch(updateQuiz(updatedQuiz));
 
-        // Navigate back to quiz list after updating existing quiz
-        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+        navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
       }
     } catch (error: any) {
       console.error('Error saving quiz:', error);
@@ -260,7 +266,7 @@ export default function QuizEditor() {
             href="#details"
             onClick={(e) => {
               e.preventDefault();
-              setActiveTab('details');
+              navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`);
             }}
           >
             Details
@@ -272,7 +278,7 @@ export default function QuizEditor() {
             href="#questions"
             onClick={(e) => {
               e.preventDefault();
-              setActiveTab('questions');
+              navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/questions`);
             }}
           >
             Questions
@@ -281,26 +287,34 @@ export default function QuizEditor() {
       </ul>
 
       {/* Tab Content */}
-      <div className="tab-content">
-        {activeTab === 'details' && (
-          <QuizDetailsEditor
-            quizForm={quizForm}
-            onFormChange={handleFormChange}
-            onSave={() => handleSave()}
-            onCancel={handleCancel}
-          />
-        )}
-        {activeTab === 'questions' && (
-          <QuizQuestionsEditor
-            questions={quizForm.questions}
-            onQuestionsChange={(questions) => {
-              handleFormChange('questions', questions);
-            }}
-            onSave={() => handleSave()}
-            onCancel={handleCancel}
-          />
-        )}
-      </div>
+      <Routes>
+        <Route
+          path="details"
+          element={
+            <QuizDetailsEditor
+              quizForm={quizForm}
+              onFormChange={handleFormChange}
+              onSave={() => handleSave()}
+              onCancel={handleCancel}
+            />
+          }
+        />
+        <Route
+          path="questions"
+          element={
+            <QuizQuestionsEditor
+              questions={quizForm.questions}
+              onQuestionsChange={(questions) => {
+                handleFormChange('questions', questions);
+              }}
+              onSave={() => handleSave()}
+              onCancel={handleCancel}
+            />
+          }
+        />
+        <Route path="*" element={<Navigate to="details" replace />} />
+        <Route path="" element={<Navigate to="details" replace />} />
+      </Routes>
     </div>
   );
 }

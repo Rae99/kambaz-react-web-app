@@ -343,7 +343,12 @@ export default function QuizDetails() {
               {quiz.questions.length !== 1 ? 's' : ''}
               worth {totalPoints} total point{totalPoints !== 1 ? 's' : ''}.
             </p>
-            <Button variant="outline-primary" onClick={handleEditQuiz}>
+            <Button
+              variant="outline-primary"
+              onClick={() =>
+                navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/questions`)
+              }
+            >
               <FaEdit className="me-2" />
               Edit Questions
             </Button>

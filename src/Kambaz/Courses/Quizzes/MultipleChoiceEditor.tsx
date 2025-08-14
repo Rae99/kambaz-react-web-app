@@ -120,6 +120,19 @@ export default function MultipleChoiceEditor({
           />
         </Form.Group>
 
+        <Form.Group className="mb-3">
+          <Form.Label>Explanation (Optional)</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={question.explanation || ''}
+            onChange={(e) =>
+              handleQuestionChange('explanation', e.target.value)
+            }
+            placeholder="Explain why this answer is correct..."
+          />
+        </Form.Group>
+
         <div className="mb-3">
           <div className="d-flex justify-content-between align-items-center mb-2">
             <Form.Label className="mb-0">Choices</Form.Label>

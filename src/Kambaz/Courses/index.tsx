@@ -73,7 +73,7 @@ pathname.split("/")  // result:
               element={
                 <Routes>
                   <Route
-                    path=":qid/edit"
+                    path=":qid/edit/*"
                     element={
                       <FacultyProtectedRoute>
                         <QuizEditor />

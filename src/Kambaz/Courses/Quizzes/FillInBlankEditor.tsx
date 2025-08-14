@@ -16,8 +16,11 @@ export default function FillInBlankEditor({
   onSave,
   onCancel,
 }: FillInBlankEditorProps) {
+  
   const [answers, setAnswers] = useState<string[]>(
-    question.options && question.options.length > 0 ? question.options : ['']
+    Array.isArray(question.correctAnswer) && question.correctAnswer.length > 0
+      ? question.correctAnswer
+      : ['']
   );
 
   const handleQuestionChange = (field: keyof Question, value: any) => {
@@ -32,10 +35,11 @@ export default function FillInBlankEditor({
     newAnswers[index] = value;
     setAnswers(newAnswers);
 
-    // Update the question with new answers
+    // Update the question with new answers in correctAnswer field
     onQuestionChange({
       ...question,
-      options: newAnswers,
+      correctAnswer: newAnswers,
+      options: [], // Clear options field for fill-in-blank questions
     });
   };
 
@@ -44,7 +48,8 @@ export default function FillInBlankEditor({
     setAnswers(newAnswers);
     onQuestionChange({
       ...question,
-      options: newAnswers,
+      correctAnswer: newAnswers,
+      options: [], // Clear options field for fill-in-blank questions
     });
   };
 
@@ -55,7 +60,8 @@ export default function FillInBlankEditor({
       setAnswers(newAnswers);
       onQuestionChange({
         ...question,
-        options: newAnswers,
+        correctAnswer: newAnswers,
+        options: [], // Clear options field for fill-in-blank questions
       });
     }
   };
@@ -100,6 +106,19 @@ export default function FillInBlankEditor({
             value={question.text || ''}
             onChange={(e) => handleQuestionChange('text', e.target.value)}
             placeholder="Enter your question here... (use ___ for blank spaces)"
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
+          <Form.Label>Explanation (Optional)</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={question.explanation || ''}
+            onChange={(e) =>
+              handleQuestionChange('explanation', e.target.value)
+            }
+            placeholder="Explain why this answer is correct..."
           />
         </Form.Group>
 

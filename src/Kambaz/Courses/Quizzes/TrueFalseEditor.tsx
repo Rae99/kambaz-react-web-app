@@ -74,6 +74,19 @@ export default function TrueFalseEditor({
         </Form.Group>
 
         <Form.Group className="mb-3">
+          <Form.Label>Explanation (Optional)</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={3}
+            value={question.explanation || ''}
+            onChange={(e) =>
+              handleQuestionChange('explanation', e.target.value)
+            }
+            placeholder="Explain why this answer is correct..."
+          />
+        </Form.Group>
+
+        <Form.Group className="mb-3">
           <Form.Label>Correct Answer</Form.Label>
           <div>
             <Form.Check

@@ -288,7 +288,9 @@ export default function QuizQuestionsEditor({
                         <small className="text-muted">
                           Correct Answer:{' '}
                           <span className="text-success">
-                            {question.correctAnswer}
+                            {Array.isArray(question.correctAnswer)
+                              ? question.correctAnswer.join(' / ')
+                              : question.correctAnswer}
                           </span>
                         </small>
                       </div>
