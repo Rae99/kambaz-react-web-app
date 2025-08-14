@@ -13,6 +13,7 @@ import {
 import * as quizzesClient from './client';
 import type { Quiz } from './types';
 import StudentQuizActionSection from './StudentQuizActionSection';
+import StudentLastAttempt from './StudentLastAttempt';
 
 export default function QuizDetails() {
   const { cid, qid } = useParams();
@@ -126,7 +127,9 @@ export default function QuizDetails() {
     availabilityVariant = 'success';
   }
 
-  const totalPoints = quiz.questions.reduce((sum, q) => sum + q.points, 0);
+  // Use quiz.points as primary source, fallback to calculated points from questions
+  const totalPoints =
+    quiz.points || quiz.questions.reduce((sum, q) => sum + q.points, 0);
 
   return (
     <div className="quiz-details">
@@ -242,20 +245,6 @@ export default function QuizDetails() {
                 {quiz.isPublished ? 'Published' : 'Draft'}
                 <span className="ms-1">{quiz.isPublished ? '✅' : '🚫'}</span>
               </Button>
-              <Button
-                variant="outline-primary"
-                size="sm"
-                onClick={() =>
-                  navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/preview`)
-                }
-              >
-                <FaEye className="me-1" />
-                Preview
-              </Button>
-              <Button variant="outline-secondary" size="sm">
-                <FaUsers className="me-1" />
-                View Attempts
-              </Button>
             </div>
 
             <div className="row">
@@ -333,6 +322,16 @@ export default function QuizDetails() {
         </Card>
       )}
 
+      {/* Student View - View Last Attempt */}
+      {!isFaculty && (
+        <Card className="mb-4">
+          <Card.Body>
+            <h5 className="card-title">Previous Attempt</h5>
+            <StudentLastAttempt quiz={quiz} />
+          </Card.Body>
+        </Card>
+      )}
+
       {/* Questions Preview (Faculty only) */}
       {isFaculty && quiz.questions && quiz.questions.length > 0 && (
         <Card>
@@ -340,18 +339,31 @@ export default function QuizDetails() {
             <h5 className="card-title">Questions Preview</h5>
             <p className="text-muted">
               This quiz contains {quiz.questions.length} question
-              {quiz.questions.length !== 1 ? 's' : ''}
-              worth {totalPoints} total point{totalPoints !== 1 ? 's' : ''}.
+              {quiz.questions.length !== 1 ? 's' : ''} worth {totalPoints} total
+              point{totalPoints !== 1 ? 's' : ''}.
             </p>
-            <Button
-              variant="outline-primary"
-              onClick={() =>
-                navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/questions`)
-              }
-            >
-              <FaEdit className="me-2" />
-              Edit Questions
-            </Button>
+            <div className="d-flex gap-2">
+              <Button
+                variant="outline-primary"
+                onClick={() =>
+                  navigate(
+                    `/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/questions`
+                  )
+                }
+              >
+                <FaEdit className="me-2" />
+                Edit Questions
+              </Button>
+              <Button
+                variant="outline-primary"
+                onClick={() =>
+                  navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/preview`)
+                }
+              >
+                <FaEye className="me-2" />
+                Preview
+              </Button>
+            </div>
           </Card.Body>
         </Card>
       )}

@@ -62,6 +62,7 @@ export default function StudentQuiz({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [existingAttempts, setExistingAttempts] = useState<QuizAttempt[]>([]);
   const [startTime, setStartTime] = useState<Date | null>(null);
+  const [currentTime, setCurrentTime] = useState<Date>(new Date());
 
   // Check if user is student
   const isStudent = currentUser?.role === 'STUDENT';
@@ -73,12 +74,46 @@ export default function StudentQuiz({
     }
   }, [mode, startTime]);
 
-  // Calculate time spent
+  // Update current time every second for real-time timer
+  useEffect(() => {
+    if (mode === 'take' && startTime) {
+      const timer = setInterval(() => {
+        setCurrentTime(new Date());
+      }, 1000);
+      return () => clearInterval(timer);
+    }
+  }, [mode, startTime]);
+
+  // Auto-submit when time runs out
+  useEffect(() => {
+    if (mode === 'take' && quiz?.timeLimit && startTime) {
+      const timeSpent = getTimeSpent();
+      const timeLimitSeconds = quiz.timeLimit * 60;
+
+      if (timeSpent >= timeLimitSeconds) {
+        // Time's up! Auto-submit the quiz
+        handleSubmitQuiz();
+      }
+    }
+  }, [currentTime, quiz?.timeLimit, startTime, mode]);
+
+  // Calculate time spent in seconds (matching backend schema)
   const getTimeSpent = () => {
     if (!startTime) return 0;
-    const now = new Date();
-    const diffMs = now.getTime() - startTime.getTime();
-    return Math.round(diffMs / 1000 / 60); // Convert to minutes
+    const diffMs = currentTime.getTime() - startTime.getTime();
+    return Math.round(diffMs / 1000); // Convert to seconds
+  };
+
+  // Calculate remaining time
+  const getRemainingTime = () => {
+    if (!quiz?.timeLimit || !startTime) return null;
+    const timeSpent = getTimeSpent();
+    const remainingSeconds = quiz.timeLimit * 60 - timeSpent;
+    if (remainingSeconds <= 0) return 0;
+
+    const minutes = Math.floor(remainingSeconds / 60);
+    const seconds = remainingSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
 
   useEffect(() => {
@@ -265,7 +300,8 @@ export default function StudentQuiz({
       // Use the new submit API for final submission
       const savedAttempt = await quizzesClient.submitQuizAttempt(
         qid!,
-        answersWithContext
+        answersWithContext,
+        getTimeSpent() // Pass time spent in seconds
       );
 
       console.log('Quiz submitted successfully:', savedAttempt);
@@ -533,6 +569,14 @@ export default function StudentQuiz({
 
         <Card className="mb-4">
           <Card.Body>
+            {/* Time warning alert */}
+            {quiz.timeLimit && getTimeSpent() > quiz.timeLimit * 60 * 0.8 && (
+              <Alert variant="warning" className="mb-3">
+                ⚠️ <strong>Time Warning:</strong> You have less than 20% of your
+                time remaining!
+              </Alert>
+            )}
+
             <div className="d-flex justify-content-between align-items-center mb-3">
               <h5 className="card-title mb-0">
                 Question {currentQuestionIndex + 1} of{' '}
@@ -544,7 +588,15 @@ export default function StudentQuiz({
                     ? 'Answered'
                     : 'Not answered'}
                 </span>
-                <span className="text-info">⏱️ Time: {getTimeSpent()} min</span>
+                <span className="text-info">
+                  ⏱️ Time: {Math.floor(getTimeSpent() / 60)}:
+                  {(getTimeSpent() % 60).toString().padStart(2, '0')}
+                </span>
+                {quiz.timeLimit && (
+                  <span className="text-warning">
+                    ⏳ Remaining: {getRemainingTime()}
+                  </span>
+                )}
               </div>
             </div>
 

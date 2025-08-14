@@ -68,9 +68,10 @@ export const saveQuizProgress = async (quizId: string, answers: any, timeSpent?:
 };
 
 // Submit quiz (final submission)
-export const submitQuizAttempt = async (quizId: string, answers: any) => {
+export const submitQuizAttempt = async (quizId: string, answers: any, timeSpent?: number) => {
   const response = await axiosWithCredentials.post(`${ATTEMPTS_API}/quiz/${quizId}/submit`, {
-    answers
+    answers,
+    timeSpent
   });
   return response.data;
 };

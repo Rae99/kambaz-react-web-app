@@ -44,9 +44,12 @@ export interface QuizAttempt {
   score: number;
   totalPoints: number;
   isCompleted?: boolean;
-  submittedAt: Date;
+  submittedAt?: Date;
   attemptNumber?: number;
-  timeSpent?: number; // in minutes
+  startedAt?: Date;
+  timeSpent?: number; // in seconds (matching backend)
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export interface Answer {
