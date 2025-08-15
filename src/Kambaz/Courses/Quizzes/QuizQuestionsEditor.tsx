@@ -10,6 +10,7 @@ interface QuizQuestionsEditorProps {
   questions?: Question[];
   onQuestionsChange?: (questions: Question[]) => void;
   onSave?: () => void;
+  onSaveAndPublish?: () => void;
   onCancel?: () => void;
 }
 
@@ -17,6 +18,7 @@ export default function QuizQuestionsEditor({
   questions = [],
   onQuestionsChange,
   onSave,
+  onSaveAndPublish,
   onCancel,
 }: QuizQuestionsEditorProps) {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
@@ -312,7 +314,7 @@ export default function QuizQuestionsEditor({
       )}
 
       {/* Save/Cancel Buttons */}
-      {(onSave || onCancel) && (
+      {(onSave || onSaveAndPublish || onCancel) && (
         <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
           {onCancel && (
             <Button variant="secondary" onClick={onCancel}>
@@ -320,8 +322,13 @@ export default function QuizQuestionsEditor({
             </Button>
           )}
           {onSave && (
-            <Button variant="danger" onClick={onSave}>
+            <Button variant="primary" onClick={onSave}>
               Save Quiz
+            </Button>
+          )}
+          {onSaveAndPublish && (
+            <Button variant="success" onClick={onSaveAndPublish}>
+              Save & Publish
             </Button>
           )}
         </div>

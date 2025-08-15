@@ -11,6 +11,7 @@ export interface Quiz {
   multipleAttempts: boolean;
   attemptsAllowed: number;
   showCorrectAnswers: string;
+  customShowDate?: string;
   accessCode: string;
   oneQuestionAtATime: boolean;
   webcamRequired: boolean;

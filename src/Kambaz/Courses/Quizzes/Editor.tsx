@@ -92,7 +92,8 @@ export default function QuizEditor() {
     timeLimit: quiz?.timeLimit ?? 20, // Default: 20 Minutes
     multipleAttempts: quiz?.multipleAttempts ?? false, // Default: No
     attemptsAllowed: quiz?.attemptsAllowed ?? 1, // Default: 1
-    showCorrectAnswers: quiz?.showCorrectAnswers ?? 'Never',
+    showCorrectAnswers: quiz?.showCorrectAnswers ?? 'never',
+    customShowDate: quiz?.customShowDate || '',
     accessCode: quiz?.accessCode ?? '',
     oneQuestionAtATime: quiz?.oneQuestionAtATime ?? true, // Default: Yes
     webcamRequired: quiz?.webcamRequired ?? false, // Default: No
@@ -129,7 +130,8 @@ export default function QuizEditor() {
       timeLimit: quiz.timeLimit ?? 20,
       multipleAttempts: quiz.multipleAttempts ?? false,
       attemptsAllowed: quiz.attemptsAllowed ?? 1,
-      showCorrectAnswers: quiz.showCorrectAnswers ?? 'Never',
+      showCorrectAnswers: quiz.showCorrectAnswers ?? 'never',
+      customShowDate: quiz.customShowDate || '',
       accessCode: quiz.accessCode ?? '',
       oneQuestionAtATime: quiz.oneQuestionAtATime ?? true,
       webcamRequired: quiz.webcamRequired ?? false,
@@ -164,20 +166,8 @@ export default function QuizEditor() {
   };
 
   const handleSave = async () => {
-    const quizData: Quiz = {
-      ...quizForm,
-      availableDate: quizForm.availableDate
-        ? new Date(quizForm.availableDate).toISOString()
-        : new Date().toISOString(),
-      dueDate: quizForm.dueDate
-        ? new Date(quizForm.dueDate).toISOString()
-        : undefined,
-      untilDate: quizForm.untilDate
-        ? new Date(quizForm.untilDate).toISOString()
-        : undefined,
-    };
-
     try {
+      const quizData = { ...quizForm };
       if (isNewQuiz) {
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
         dispatch(addQuiz(newQuiz));
@@ -199,12 +189,32 @@ export default function QuizEditor() {
     }
   };
 
-  const handleCancel = () => {
-    if (isNewQuiz) {
-      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
-    } else {
-      navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
+  const handleSaveAndPublish = async () => {
+    try {
+      const quizData = { ...quizForm, isPublished: true };
+      if (isNewQuiz) {
+        const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
+        dispatch(addQuiz(newQuiz));
+        // Navigate to quiz list after save and publish
+        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+      } else {
+        const updatedQuiz = await quizzesClient.updateQuiz(qid!, quizData);
+        dispatch(updateQuiz(updatedQuiz));
+        // Navigate to quiz list after save and publish
+        navigate(`/Kambaz/Courses/${cid}/Quizzes`);
+      }
+    } catch (error: any) {
+      console.error('Error saving and publishing quiz:', error);
+      console.error('Error details:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+      });
     }
+  };
+
+  const handleCancel = () => {
+    navigate(`/Kambaz/Courses/${cid}/Quizzes`);
   };
 
   // Show loading state while fetching quiz
@@ -294,7 +304,8 @@ export default function QuizEditor() {
             <QuizDetailsEditor
               quizForm={quizForm}
               onFormChange={handleFormChange}
-              onSave={() => handleSave()}
+              onSave={handleSave}
+              onSaveAndPublish={handleSaveAndPublish}
               onCancel={handleCancel}
             />
           }
@@ -307,7 +318,8 @@ export default function QuizEditor() {
               onQuestionsChange={(questions) => {
                 handleFormChange('questions', questions);
               }}
-              onSave={() => handleSave()}
+              onSave={handleSave}
+              onSaveAndPublish={handleSaveAndPublish}
               onCancel={handleCancel}
             />
           }
