@@ -79,7 +79,14 @@ export default function QuizQuestionsEditor({
         break;
       case 'fill-in-the-blank':
         baseQuestion.options = [];
-        baseQuestion.correctAnswer = [''];
+        baseQuestion.correctAnswer = [];
+        baseQuestion.blanks = [
+          {
+            id: 'blank1',
+            options: ['', '', ''],
+            correctAnswer: '',
+          },
+        ];
         break;
     }
 
@@ -251,13 +258,23 @@ export default function QuizQuestionsEditor({
                     {question.type === 'fill-in-the-blank' && (
                       <div className="ms-3">
                         <small className="text-muted">
-                          Correct Answer:{' '}
-                          <span className="text-success">
-                            {Array.isArray(question.correctAnswer)
-                              ? question.correctAnswer.join(' / ')
-                              : question.correctAnswer}
-                          </span>
+                          Blanks: {question.blanks?.length || 0}
                         </small>
+                        {question.blanks && question.blanks.length > 0 && (
+                          <div className="ms-3 mt-1">
+                            {question.blanks.map((blank, index) => (
+                              <div key={blank.id} className="mb-1">
+                                <small className="text-muted">
+                                  <strong>Blank {index + 1}:</strong>{' '}
+                                  {blank.options.length} options, correct:{' '}
+                                  <span className="text-success">
+                                    {blank.correctAnswer || 'Not set'}
+                                  </span>
+                                </small>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
 

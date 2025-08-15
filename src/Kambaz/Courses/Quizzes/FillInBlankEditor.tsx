@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Form, Button, Row, Col, Card } from 'react-bootstrap';
 import { FaPlus, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
-import type { Question } from './types';
+import type { Question, BlankOption } from './types';
 
 interface FillInBlankEditorProps {
   question: Question;
@@ -20,10 +20,16 @@ export default function FillInBlankEditor({
   onSave,
   onCancel,
 }: FillInBlankEditorProps) {
-  const [answers, setAnswers] = useState<string[]>(
-    Array.isArray(question.correctAnswer) && question.correctAnswer.length > 0
-      ? question.correctAnswer
-      : ['']
+  const [blanks, setBlanks] = useState<BlankOption[]>(
+    question.blanks && question.blanks.length > 0
+      ? question.blanks
+      : [
+          {
+            id: 'blank1',
+            options: ['', '', ''],
+            correctAnswer: '',
+          },
+        ]
   );
 
   const handleQuestionChange = (field: keyof Question, value: any) => {
@@ -33,40 +39,86 @@ export default function FillInBlankEditor({
     });
   };
 
-  const handleAnswerChange = (index: number, value: string) => {
-    const newAnswers = [...answers];
-    newAnswers[index] = value;
-    setAnswers(newAnswers);
-
-    // Update the question with new answers in correctAnswer field
+  const addBlank = () => {
+    const newBlankId = `blank${blanks.length + 1}`;
+    const newBlanks = [
+      ...blanks,
+      {
+        id: newBlankId,
+        options: ['', '', ''],
+        correctAnswer: '',
+      },
+    ];
+    setBlanks(newBlanks);
     onQuestionChange({
       ...question,
-      correctAnswer: newAnswers,
-      options: [], // Clear options field for fill-in-blank questions
+      blanks: newBlanks,
     });
   };
 
-  const addAnswer = () => {
-    const newAnswers = [...answers, ''];
-    setAnswers(newAnswers);
-    onQuestionChange({
-      ...question,
-      correctAnswer: newAnswers,
-      options: [], // Clear options field for fill-in-blank questions
-    });
-  };
-
-  const removeAnswer = (index: number) => {
-    if (answers.length > 1) {
-      // Keep at least 1 answer
-      const newAnswers = answers.filter((_, i) => i !== index);
-      setAnswers(newAnswers);
+  const removeBlank = (index: number) => {
+    if (blanks.length > 1) {
+      const newBlanks = blanks.filter((_, i) => i !== index);
+      setBlanks(newBlanks);
       onQuestionChange({
         ...question,
-        correctAnswer: newAnswers,
-        options: [], // Clear options field for fill-in-blank questions
+        blanks: newBlanks,
       });
     }
+  };
+
+  const updateBlankOption = (
+    blankIndex: number,
+    optionIndex: number,
+    value: string
+  ) => {
+    const newBlanks = [...blanks];
+    newBlanks[blankIndex].options[optionIndex] = value;
+    setBlanks(newBlanks);
+    onQuestionChange({
+      ...question,
+      blanks: newBlanks,
+    });
+  };
+
+  const addOptionToBlank = (blankIndex: number) => {
+    const newBlanks = [...blanks];
+    newBlanks[blankIndex].options.push('');
+    setBlanks(newBlanks);
+    onQuestionChange({
+      ...question,
+      blanks: newBlanks,
+    });
+  };
+
+  const removeOptionFromBlank = (blankIndex: number, optionIndex: number) => {
+    const newBlanks = [...blanks];
+    if (newBlanks[blankIndex].options.length > 2) {
+      // Keep at least 2 options
+      // If removing the correct answer, clear it
+      if (
+        newBlanks[blankIndex].correctAnswer ===
+        newBlanks[blankIndex].options[optionIndex]
+      ) {
+        newBlanks[blankIndex].correctAnswer = '';
+      }
+      newBlanks[blankIndex].options.splice(optionIndex, 1);
+      setBlanks(newBlanks);
+      onQuestionChange({
+        ...question,
+        blanks: newBlanks,
+      });
+    }
+  };
+
+  const setCorrectAnswer = (blankIndex: number, correctAnswer: string) => {
+    const newBlanks = [...blanks];
+    newBlanks[blankIndex].correctAnswer = correctAnswer;
+    setBlanks(newBlanks);
+    onQuestionChange({
+      ...question,
+      blanks: newBlanks,
+    });
   };
 
   return (
@@ -150,35 +202,103 @@ export default function FillInBlankEditor({
 
         <div className="mb-3">
           <div className="d-flex justify-content-between align-items-center mb-2">
-            <Form.Label className="mb-0">Possible Correct Answers</Form.Label>
-            <Button variant="outline-primary" size="sm" onClick={addAnswer}>
+            <Form.Label className="mb-0">Blanks</Form.Label>
+            <Button variant="outline-primary" size="sm" onClick={addBlank}>
               <FaPlus className="me-1" />
-              Add Answer
+              Add Blank
             </Button>
           </div>
 
-          <small className="text-muted mb-2 d-block">
-            Add multiple possible correct answers. Answers are case insensitive.
+          <small className="text-muted mb-3 d-block">
+            Each blank will be a dropdown for students to select from. Configure
+            the options and correct answer for each blank.
           </small>
 
-          {answers.map((answer, index) => (
-            <div key={index} className="d-flex align-items-center mb-2">
-              <Form.Control
-                type="text"
-                value={answer}
-                onChange={(e) => handleAnswerChange(index, e.target.value)}
-                placeholder={`Answer ${index + 1}`}
-                className="me-2"
-              />
-              <Button
-                variant="outline-danger"
-                size="sm"
-                onClick={() => removeAnswer(index)}
-                disabled={answers.length <= 1}
-              >
-                <FaTrash />
-              </Button>
-            </div>
+          {blanks.map((blank, blankIndex) => (
+            <Card key={blank.id} className="mb-3 border-secondary">
+              <Card.Body>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h6 className="mb-0">Blank {blankIndex + 1}</h6>
+                  <Button
+                    variant="outline-danger"
+                    size="sm"
+                    onClick={() => removeBlank(blankIndex)}
+                    disabled={blanks.length <= 1}
+                  >
+                    <FaTrash className="me-1" />
+                    Remove Blank
+                  </Button>
+                </div>
+
+                <div className="mb-3">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <Form.Label className="mb-0">
+                      Options for this blank
+                    </Form.Label>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => addOptionToBlank(blankIndex)}
+                    >
+                      <FaPlus className="me-1" />
+                      Add Option
+                    </Button>
+                  </div>
+
+                  {blank.options.map((option, optionIndex) => (
+                    <div
+                      key={optionIndex}
+                      className="d-flex align-items-center mb-2"
+                    >
+                      <Form.Control
+                        type="text"
+                        value={option}
+                        onChange={(e) =>
+                          updateBlankOption(
+                            blankIndex,
+                            optionIndex,
+                            e.target.value
+                          )
+                        }
+                        placeholder={`Option ${optionIndex + 1}`}
+                        className="me-2"
+                      />
+                      <Button
+                        variant="outline-danger"
+                        size="sm"
+                        onClick={() =>
+                          removeOptionFromBlank(blankIndex, optionIndex)
+                        }
+                        disabled={blank.options.length <= 2}
+                      >
+                        <FaTrash />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+
+                <Form.Group>
+                  <Form.Label>Correct Answer for this blank</Form.Label>
+                  <Form.Select
+                    value={blank.correctAnswer}
+                    onChange={(e) =>
+                      setCorrectAnswer(blankIndex, e.target.value)
+                    }
+                  >
+                    <option value="">Select correct answer...</option>
+                    {blank.options.map((option, optionIndex) => (
+                      <option
+                        key={optionIndex}
+                        value={option}
+                        disabled={!option.trim()}
+                      >
+                        {option || `Option ${optionIndex + 1}`}
+                      </option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </Card.Body>
+            </Card>
           ))}
         </div>
 

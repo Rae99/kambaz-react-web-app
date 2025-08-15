@@ -37,7 +37,14 @@
       "text": "The root element of an HTML document is the _____ tag.",
       "points": 4,
       "options": [],
-      "correctAnswer": "html",
+      "correctAnswer": [],
+      "blanks": [
+        {
+          "id": "blank1",
+          "options": ["html", "body", "head", "div"],
+          "correctAnswer": "html"
+        }
+      ],
       "explanation": "The <html> tag is the root element that contains all other HTML elements."
     }
   ],
@@ -125,7 +132,14 @@
       "text": "The _____ keyword is used to declare a constant in JavaScript.",
       "points": 4,
       "options": [],
-      "correctAnswer": "const",
+      "correctAnswer": [],
+      "blanks": [
+        {
+          "id": "blank1",
+          "options": ["const", "let", "var", "function"],
+          "correctAnswer": "const"
+        }
+      ],
       "explanation": "The 'const' keyword declares a constant that cannot be reassigned."
     },
     {
@@ -213,7 +227,14 @@
       "text": "The process of organizing data to reduce redundancy is called _____.",
       "points": 4,
       "options": [],
-      "correctAnswer": "normalization",
+      "correctAnswer": [],
+      "blanks": [
+        {
+          "id": "blank1",
+          "options": ["normalization", "optimization", "organization", "standardization"],
+          "correctAnswer": "normalization"
+        }
+      ],
       "explanation": "Normalization is the process of organizing data in a database to reduce redundancy and improve data integrity."
     }
   ],
@@ -302,7 +323,14 @@
       "text": "This quiz tests the _____ date logic",
       "points": 8,
       "options": [],
-      "correctAnswer": "until",
+      "correctAnswer": [],
+      "blanks": [
+        {
+          "id": "blank1",
+          "options": ["until", "due", "available", "start"],
+          "correctAnswer": "until"
+        }
+      ],
       "explanation": "This quiz tests the until date logic"
     }
   ],
@@ -373,10 +401,17 @@
     {
       "_id": "q022",
       "type": "fill-in-the-blank",
-      "text": "Question 5 worth 10 points",
+      "text": "Question 5 worth 10 points _____ exam",
       "points": 10,
       "options": [],
-      "correctAnswer": "final",
+      "correctAnswer": [],
+      "blanks": [
+        {
+          "id": "blank1",
+          "options": ["final", "midterm", "quiz", "practice"],
+          "correctAnswer": "final"
+        }
+      ],
       "explanation": "This question is worth 10 points"
     }
   ],

@@ -34,6 +34,14 @@ export interface Question {
   options?: string[]; // for multiple choice
   correctAnswer: string | string[]; // single answer or array for multiple correct answers
   explanation?: string;
+  // New fields for fill-in-the-blank
+  blanks?: BlankOption[]; // For fill-in-the-blank questions
+}
+
+export interface BlankOption {
+  id: string; // unique identifier for the blank
+  options: string[]; // dropdown options for this blank
+  correctAnswer: string; // which option is correct for this blank
 }
 
 export interface QuizAttempt {
