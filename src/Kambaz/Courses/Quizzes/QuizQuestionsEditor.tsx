@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Button, Card, Form, Row, Col } from 'react-bootstrap';
-import { FaPlus, FaTrash, FaEdit, FaSave, FaTimes } from 'react-icons/fa';
+import { Button, Card } from 'react-bootstrap';
+import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
 import type { Question } from './types';
 import MultipleChoiceEditor from './MultipleChoiceEditor';
 import TrueFalseEditor from './TrueFalseEditor';
@@ -23,22 +23,15 @@ export default function QuizQuestionsEditor({
 }: QuizQuestionsEditorProps) {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
-  const [showQuestionTypeSelector, setShowQuestionTypeSelector] =
-    useState(false);
 
   const handleAddQuestion = () => {
-    setShowQuestionTypeSelector(true);
-  };
-
-  const handleCreateQuestion = async (
-    questionType: 'multiple-choice' | 'true-false' | 'fill-in-the-blank'
-  ) => {
+    // Default to multiple choice question
     const newQuestion: Question = {
       title: '',
-      type: questionType,
+      type: 'multiple-choice',
       text: '',
       points: 1,
-      options: questionType === 'multiple-choice' ? ['', '', '', ''] : [],
+      options: ['', '', '', ''],
       correctAnswer: '',
       explanation: '',
     };
@@ -46,12 +39,9 @@ export default function QuizQuestionsEditor({
     const updatedQuestions = [...questions, newQuestion];
     onQuestionsChange?.(updatedQuestions);
 
-    // Start editing the new question immediately (edit preview mode)
+    // Start editing the new question immediately
     setEditingQuestion(newQuestion);
     setEditingIndex(updatedQuestions.length - 1);
-
-    // Hide the type selector
-    setShowQuestionTypeSelector(false);
 
     // Scroll to the new question
     setTimeout(() => {
@@ -65,6 +55,35 @@ export default function QuizQuestionsEditor({
         });
       }
     }, 100);
+  };
+
+  const handleQuestionTypeChange = (
+    newType: 'multiple-choice' | 'true-false' | 'fill-in-the-blank'
+  ) => {
+    if (!editingQuestion) return;
+
+    const baseQuestion = {
+      ...editingQuestion,
+      type: newType,
+    };
+
+    // Simple default values based on new type
+    switch (newType) {
+      case 'multiple-choice':
+        baseQuestion.options = ['', '', '', ''];
+        baseQuestion.correctAnswer = '';
+        break;
+      case 'true-false':
+        baseQuestion.options = [];
+        baseQuestion.correctAnswer = 'true';
+        break;
+      case 'fill-in-the-blank':
+        baseQuestion.options = [];
+        baseQuestion.correctAnswer = [''];
+        break;
+    }
+
+    setEditingQuestion(baseQuestion);
   };
 
   const handleEditQuestion = (question: Question, index: number) => {
@@ -102,26 +121,6 @@ export default function QuizQuestionsEditor({
     }
   };
 
-  const handleQuestionChange = (field: keyof Question, value: any) => {
-    if (editingQuestion) {
-      setEditingQuestion({
-        ...editingQuestion,
-        [field]: value,
-      });
-    }
-  };
-
-  const handleOptionChange = (optionIndex: number, value: string) => {
-    if (editingQuestion && editingQuestion.options) {
-      const updatedOptions = [...editingQuestion.options];
-      updatedOptions[optionIndex] = value;
-      setEditingQuestion({
-        ...editingQuestion,
-        options: updatedOptions,
-      });
-    }
-  };
-
   const totalPoints = questions.reduce((sum, q) => sum + q.points, 0);
 
   return (
@@ -136,45 +135,6 @@ export default function QuizQuestionsEditor({
           </Button>
         </div>
       </div>
-
-      {/* Question Type Selector Modal */}
-      {showQuestionTypeSelector && (
-        <Card className="mb-3 border-primary">
-          <Card.Body className="text-center">
-            <h5 className="mb-3">Choose Question Type</h5>
-            <div className="d-flex justify-content-center gap-3">
-              <Button
-                variant="outline-primary"
-                onClick={() => handleCreateQuestion('multiple-choice')}
-                className="px-4"
-              >
-                Multiple Choice
-              </Button>
-              <Button
-                variant="outline-primary"
-                onClick={() => handleCreateQuestion('true-false')}
-                className="px-4"
-              >
-                True/False
-              </Button>
-              <Button
-                variant="outline-primary"
-                onClick={() => handleCreateQuestion('fill-in-the-blank')}
-                className="px-4"
-              >
-                Fill in the Blank
-              </Button>
-            </div>
-            <Button
-              variant="secondary"
-              onClick={() => setShowQuestionTypeSelector(false)}
-              className="mt-3"
-            >
-              Cancel
-            </Button>
-          </Card.Body>
-        </Card>
-      )}
 
       {questions.length === 0 ? (
         <Card>
@@ -196,6 +156,7 @@ export default function QuizQuestionsEditor({
                         onQuestionChange={(updatedQuestion) =>
                           setEditingQuestion(updatedQuestion)
                         }
+                        onQuestionTypeChange={handleQuestionTypeChange}
                         onSave={handleSaveQuestion}
                         onCancel={handleCancelEdit}
                       />
@@ -206,6 +167,7 @@ export default function QuizQuestionsEditor({
                         onQuestionChange={(updatedQuestion) =>
                           setEditingQuestion(updatedQuestion)
                         }
+                        onQuestionTypeChange={handleQuestionTypeChange}
                         onSave={handleSaveQuestion}
                         onCancel={handleCancelEdit}
                       />
@@ -216,6 +178,7 @@ export default function QuizQuestionsEditor({
                         onQuestionChange={(updatedQuestion) =>
                           setEditingQuestion(updatedQuestion)
                         }
+                        onQuestionTypeChange={handleQuestionTypeChange}
                         onSave={handleSaveQuestion}
                         onCancel={handleCancelEdit}
                       />

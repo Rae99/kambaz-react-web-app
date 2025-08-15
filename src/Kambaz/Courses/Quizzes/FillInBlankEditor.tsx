@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Form, Button, Row, Col, Card } from 'react-bootstrap';
 import { FaPlus, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
 import type { Question } from './types';
@@ -6,6 +6,9 @@ import type { Question } from './types';
 interface FillInBlankEditorProps {
   question: Question;
   onQuestionChange: (question: Question) => void;
+  onQuestionTypeChange: (
+    newType: 'multiple-choice' | 'true-false' | 'fill-in-the-blank'
+  ) => void;
   onSave: () => void;
   onCancel: () => void;
 }
@@ -13,10 +16,10 @@ interface FillInBlankEditorProps {
 export default function FillInBlankEditor({
   question,
   onQuestionChange,
+  onQuestionTypeChange,
   onSave,
   onCancel,
 }: FillInBlankEditorProps) {
-  
   const [answers, setAnswers] = useState<string[]>(
     Array.isArray(question.correctAnswer) && question.correctAnswer.length > 0
       ? question.correctAnswer
@@ -70,6 +73,29 @@ export default function FillInBlankEditor({
     <Card className="mb-3">
       <Card.Body>
         <h5>Fill in the Blank Question Editor</h5>
+
+        <Row className="mb-3">
+          <Col md={6}>
+            <Form.Group>
+              <Form.Label>Question Type</Form.Label>
+              <Form.Select
+                value={question.type}
+                onChange={(e) =>
+                  onQuestionTypeChange(
+                    e.target.value as
+                      | 'multiple-choice'
+                      | 'true-false'
+                      | 'fill-in-the-blank'
+                  )
+                }
+              >
+                <option value="multiple-choice">Multiple Choice</option>
+                <option value="true-false">True/False</option>
+                <option value="fill-in-the-blank">Fill in the Blank</option>
+              </Form.Select>
+            </Form.Group>
+          </Col>
+        </Row>
 
         <Row className="mb-3">
           <Col md={8}>
