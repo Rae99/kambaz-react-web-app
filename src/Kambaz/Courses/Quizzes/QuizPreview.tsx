@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Card, Button, Alert, ProgressBar, Badge } from 'react-bootstrap';
-import { FaEdit, FaEye, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaEdit, FaCheck, FaTimes } from 'react-icons/fa';
 import * as quizzesClient from './client';
 import type { Quiz, Question } from './types';
 
@@ -33,6 +33,28 @@ export default function QuizPreview() {
     currentUser?.role === 'FACULTY' ||
     currentUser?.role === 'ADMIN' ||
     currentUser?.role === 'TA';
+
+  // Helper function to check if a question is fully answered
+  const isQuestionAnswered = (question: Question): boolean => {
+    const answer = quizAttempt.answers[question._id || ''];
+
+    if (question.type === 'fill-in-the-blank' && question.blanks) {
+      // For fill-in-the-blank, check if all blanks have answers
+      const userAnswers = (answer as string[]) || [];
+      return question.blanks.every(
+        (_, index) => userAnswers[index] && userAnswers[index].trim() !== ''
+      );
+    }
+
+    // For other question types, just check if answer exists
+    return !!answer;
+  };
+
+  // Helper function to check if all questions are answered
+  const areAllQuestionsAnswered = (): boolean => {
+    if (!quiz) return false;
+    return quiz.questions.every((question) => isQuestionAnswered(question));
+  };
 
   useEffect(() => {
     const fetchQuiz = async () => {
@@ -73,6 +95,26 @@ export default function QuizPreview() {
     }));
   };
 
+  const handleBlankAnswerChange = (
+    questionId: string,
+    blankIndex: number,
+    answer: string
+  ) => {
+    setQuizAttempt((prev) => {
+      const currentAnswers = (prev.answers[questionId] as string[]) || [];
+      const newAnswers = [...currentAnswers];
+      newAnswers[blankIndex] = answer;
+
+      return {
+        ...prev,
+        answers: {
+          ...prev.answers,
+          [questionId]: newAnswers,
+        },
+      };
+    });
+  };
+
   const handleNextQuestion = () => {
     if (currentQuestionIndex < (quiz?.questions.length || 0) - 1) {
       setCurrentQuestionIndex((prev) => prev + 1);
@@ -90,9 +132,24 @@ export default function QuizPreview() {
     let score = 0;
     quiz?.questions.forEach((question: Question) => {
       const userAnswer = quizAttempt.answers[question._id || ''];
+
       if (userAnswer) {
-        if (Array.isArray(question.correctAnswer)) {
-          // Multiple correct answers
+        if (question.type === 'fill-in-the-blank' && question.blanks) {
+          // New fill-in-the-blank with dropdown selections
+          if (
+            Array.isArray(userAnswer) &&
+            userAnswer.length === question.blanks.length
+          ) {
+            // Check if all blanks are answered correctly
+            const allCorrect = question.blanks.every(
+              (blank, index) => userAnswer[index] === blank.correctAnswer
+            );
+            if (allCorrect) {
+              score += question.points;
+            }
+          }
+        } else if (Array.isArray(question.correctAnswer)) {
+          // Multiple correct answers (legacy or other types)
           if (
             Array.isArray(userAnswer) &&
             userAnswer.length === question.correctAnswer.length &&
@@ -189,13 +246,27 @@ export default function QuizPreview() {
             <h5 className="card-title">Question Review</h5>
             {quiz.questions.map((question: Question, index: number) => {
               const userAnswer = quizAttempt.answers[question._id || ''];
-              const isCorrect = Array.isArray(question.correctAnswer)
-                ? Array.isArray(userAnswer) &&
+
+              // Calculate correctness based on question type
+              let isCorrect = false;
+              if (question.type === 'fill-in-the-blank' && question.blanks) {
+                // For fill-in-the-blank, check if all blanks are answered correctly
+                const userAnswers = (userAnswer as string[]) || [];
+                isCorrect = question.blanks.every(
+                  (blank, index) => userAnswers[index] === blank.correctAnswer
+                );
+              } else if (Array.isArray(question.correctAnswer)) {
+                // For multiple-choice with multiple correct answers
+                isCorrect =
+                  Array.isArray(userAnswer) &&
                   userAnswer.length === question.correctAnswer.length &&
                   userAnswer.every((ans) =>
                     question.correctAnswer.includes(ans)
-                  )
-                : userAnswer === question.correctAnswer;
+                  );
+              } else {
+                // For single-answer questions (true/false, single multiple-choice)
+                isCorrect = userAnswer === question.correctAnswer;
+              }
 
               return (
                 <div
@@ -235,14 +306,36 @@ export default function QuizPreview() {
                     </div>
                   )}
 
-                  {question.type === 'fill-in-the-blank' && (
+                  {question.type === 'fill-in-the-blank' && question.blanks && (
                     <div>
-                      <p className="text-muted mb-1">
-                        Your answer: {userAnswer}
-                      </p>
-                      <p className="text-muted mb-0">
-                        Correct answer: {question.correctAnswer}
-                      </p>
+                      <p className="text-muted mb-1">Your answers:</p>
+                      {question.blanks.map((blank, blankIndex) => {
+                        const userAnswers = (userAnswer as string[]) || [];
+                        const userBlankAnswer =
+                          userAnswers[blankIndex] || 'Not answered';
+                        const isBlankCorrect =
+                          userBlankAnswer === blank.correctAnswer;
+
+                        return (
+                          <div key={blank.id} className="ms-3 mb-2">
+                            <span className="fw-semibold">
+                              Blank {blankIndex + 1}:
+                            </span>
+                            <span
+                              className={`ms-2 ${
+                                isBlankCorrect ? 'text-success' : 'text-danger'
+                              }`}
+                            >
+                              {userBlankAnswer}
+                            </span>
+                            {!isBlankCorrect && (
+                              <span className="text-muted ms-2">
+                                (Correct: {blank.correctAnswer})
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -365,22 +458,42 @@ export default function QuizPreview() {
               </div>
             )}
 
-            {currentQuestion?.type === 'fill-in-the-blank' && (
-              <div>
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Enter your answer"
-                  value={quizAttempt.answers[currentQuestion._id || ''] || ''}
-                  onChange={(e) =>
-                    handleAnswerChange(
-                      currentQuestion._id || '',
-                      e.target.value
-                    )
-                  }
-                />
-              </div>
-            )}
+            {currentQuestion?.type === 'fill-in-the-blank' &&
+              currentQuestion.blanks && (
+                <div>
+                  {currentQuestion.blanks.map((blank, blankIndex) => (
+                    <div key={blank.id} className="mb-3">
+                      <label className="form-label">
+                        Blank {blankIndex + 1}:
+                      </label>
+                      <select
+                        className="form-select"
+                        value={
+                          (
+                            quizAttempt.answers[
+                              currentQuestion._id || ''
+                            ] as string[]
+                          )?.[blankIndex] || ''
+                        }
+                        onChange={(e) =>
+                          handleBlankAnswerChange(
+                            currentQuestion._id || '',
+                            blankIndex,
+                            e.target.value
+                          )
+                        }
+                      >
+                        <option value="">Select an answer...</option>
+                        {blank.options.map((option, optionIndex) => (
+                          <option key={optionIndex} value={option}>
+                            {option}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  ))}
+                </div>
+              )}
           </div>
 
           <div className="d-flex justify-content-between">
@@ -396,10 +509,7 @@ export default function QuizPreview() {
               <Button
                 variant="success"
                 onClick={handleSubmitQuiz}
-                disabled={
-                  Object.keys(quizAttempt.answers).length <
-                  quiz.questions.length
-                }
+                disabled={!areAllQuestionsAnswered()}
               >
                 Submit Quiz
               </Button>
@@ -407,7 +517,7 @@ export default function QuizPreview() {
               <Button
                 variant="primary"
                 onClick={handleNextQuestion}
-                disabled={!quizAttempt.answers[currentQuestion._id || '']}
+                disabled={!isQuestionAnswered(currentQuestion)}
               >
                 Next
               </Button>
