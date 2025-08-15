@@ -150,6 +150,14 @@ export default function QuizDetails() {
 
         {isFaculty && (
           <div className="d-flex gap-2">
+            <Button
+              variant={quiz.isPublished ? 'success' : 'warning'}
+              size="lg"
+              onClick={handleTogglePublish}
+              className="px-4"
+            >
+              {quiz.isPublished ? 'Click to Unpublish' : 'Click to Publish'}
+            </Button>
             <Button variant="outline-primary" onClick={handleEditQuiz}>
               <FaEdit className="me-2" />
               Edit Quiz
@@ -244,15 +252,21 @@ export default function QuizDetails() {
         <Card className="mb-4">
           <Card.Body>
             <h5 className="card-title">Quiz Details</h5>
-            <div className="d-flex gap-2 mb-3">
-              <Button
-                variant={quiz.isPublished ? 'success' : 'warning'}
-                size="sm"
-                onClick={handleTogglePublish}
-              >
-                {quiz.isPublished ? 'Published' : 'Draft'}
-                <span className="ms-1">{quiz.isPublished ? '✅' : '🚫'}</span>
-              </Button>
+            <div className="mb-3">
+              <p className="mb-2">
+                <strong>Status:</strong>{' '}
+                <Badge
+                  bg={quiz.isPublished ? 'success' : 'warning'}
+                  className="ms-2"
+                >
+                  {quiz.isPublished ? 'Published' : 'Draft'}
+                </Badge>
+              </p>
+              <p className="text-muted mb-0">
+                {quiz.isPublished
+                  ? 'This quiz is currently published and available to students.'
+                  : 'Click Publish to publish. Button becomes Unpublish to unpublish.'}
+              </p>
             </div>
 
             <div className="row">
@@ -302,7 +316,7 @@ export default function QuizDetails() {
                   {quiz.multipleAttempts ? 'Yes' : 'No'}
                 </p>
                 {quiz.multipleAttempts && (
-                  <p className="text-muted mb-1">
+                  <p className="mb-1">
                     <strong>How Many Attempts:</strong>{' '}
                     {quiz.attemptsAllowed || 1}
                   </p>
