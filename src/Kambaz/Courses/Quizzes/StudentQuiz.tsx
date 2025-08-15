@@ -67,6 +67,41 @@ export default function StudentQuiz({
   // Check if user is student
   const isStudent = currentUser?.role === 'STUDENT';
 
+  // Helper function to check if a question is fully answered
+  const isQuestionAnswered = (question: Question): boolean => {
+    const currentQuestionId = question?._id || `question_${currentQuestionIndex}`;
+    const answer = quizAttempt.answers[currentQuestionId];
+    
+    if (question.type === 'fill-in-the-blank' && question.blanks) {
+      // For fill-in-the-blank, check if all blanks have answers
+      const userAnswers = answer as string[] || [];
+      return question.blanks.every((_, index) => 
+        userAnswers[index] && userAnswers[index].trim() !== ''
+      );
+    }
+    
+    // For other question types, just check if answer exists
+    return !!answer;
+  };
+
+  // Helper function to check if all questions are answered
+  const areAllQuestionsAnswered = (): boolean => {
+    if (!quiz) return false;
+    return quiz.questions.every((question, index) => {
+      const questionId = question._id || `question_${index}`;
+      const answer = quizAttempt.answers[questionId];
+      
+      if (question.type === 'fill-in-the-blank' && question.blanks) {
+        const userAnswers = answer as string[] || [];
+        return question.blanks.every((_, blankIndex) => 
+          userAnswers[blankIndex] && userAnswers[blankIndex].trim() !== ''
+        );
+      }
+      
+      return !!answer;
+    });
+  };
+
   // Start timer when quiz begins
   useEffect(() => {
     if (mode === 'take' && !startTime) {
@@ -249,6 +284,42 @@ export default function StudentQuiz({
         .catch((error) => {
           console.error('Auto-save failed:', error);
           // Don't show error to user for auto-save failures
+        });
+    }
+  };
+
+  const handleBlankAnswerChange = (
+    questionId: string,
+    blankIndex: number,
+    answer: string
+  ) => {
+    const currentQuestion = quiz?.questions[currentQuestionIndex];
+    const answerKey =
+      currentQuestion?._id || `question_${currentQuestionIndex}`;
+
+    const currentAnswers = (quizAttempt.answers[answerKey] as string[]) || [];
+    const newAnswers = [...currentAnswers];
+    newAnswers[blankIndex] = answer;
+
+    const updatedAnswers = {
+      ...quizAttempt.answers,
+      [answerKey]: newAnswers,
+    };
+
+    setQuizAttempt((prev) => ({
+      ...prev,
+      answers: updatedAnswers,
+    }));
+
+    // Auto-save answers
+    if (qid) {
+      quizzesClient
+        .saveQuizProgress(qid, updatedAnswers, getTimeSpent())
+        .then((savedAttempt) => {
+          setQuizAttempt(savedAttempt);
+        })
+        .catch((error) => {
+          console.error('Auto-save failed:', error);
         });
     }
   };
@@ -518,17 +589,28 @@ export default function StudentQuiz({
                     </div>
                   )}
 
-                  {question.type === 'fill-in-the-blank' && (
+                  {question.type === 'fill-in-the-blank' && question.blanks && (
                     <div>
-                      <p className="text-muted mb-1">
-                        <strong>Your answer:</strong> {userAnswer}
-                      </p>
-                      <p className="text-muted mb-0">
-                        <strong>Correct answer:</strong>{' '}
-                        {Array.isArray(question.correctAnswer)
-                          ? question.correctAnswer.join(', ')
-                          : question.correctAnswer}
-                      </p>
+                      <p className="text-muted mb-1">Your answers:</p>
+                      {question.blanks.map((blank, blankIndex) => {
+                        const userAnswers = userAnswer as string[] || [];
+                        const userBlankAnswer = userAnswers[blankIndex] || 'Not answered';
+                        const isBlankCorrect = userBlankAnswer === blank.correctAnswer;
+                        
+                        return (
+                          <div key={blank.id} className="ms-3 mb-2">
+                            <span className="fw-semibold">Blank {blankIndex + 1}:</span>
+                            <span className={`ms-2 ${isBlankCorrect ? 'text-success' : 'text-danger'}`}>
+                              {userBlankAnswer}
+                            </span>
+                            {!isBlankCorrect && (
+                              <span className="text-muted ms-2">
+                                (Correct: {blank.correctAnswer})
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -681,19 +763,40 @@ export default function StudentQuiz({
                 </div>
               )}
 
-              {currentQuestion?.type === 'fill-in-the-blank' && (
-                <div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Enter your answer"
-                    value={quizAttempt.answers[currentQuestionId] || ''}
-                    onChange={(e) =>
-                      handleAnswerChange(currentQuestionId, e.target.value)
-                    }
-                  />
-                </div>
-              )}
+              {currentQuestion?.type === 'fill-in-the-blank' &&
+                currentQuestion.blanks && (
+                  <div>
+                    {currentQuestion.blanks.map((blank, blankIndex) => (
+                      <div key={blank.id} className="mb-3">
+                        <label className="form-label">
+                          Blank {blankIndex + 1}:
+                        </label>
+                        <select
+                          className="form-select"
+                          value={
+                            (
+                              quizAttempt.answers[currentQuestionId] as string[]
+                            )?.[blankIndex] || ''
+                          }
+                          onChange={(e) =>
+                            handleBlankAnswerChange(
+                              currentQuestionId,
+                              blankIndex,
+                              e.target.value
+                            )
+                          }
+                        >
+                          <option value="">Select an answer...</option>
+                          {blank.options.map((option, optionIndex) => (
+                            <option key={optionIndex} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                )}
             </div>
 
             <div className="d-flex justify-content-between">
@@ -709,10 +812,7 @@ export default function StudentQuiz({
                 <Button
                   variant="success"
                   onClick={handleSubmitQuiz}
-                  disabled={
-                    Object.keys(quizAttempt.answers).length <
-                    (quiz?.questions?.length || 0)
-                  }
+                  disabled={!areAllQuestionsAnswered()}
                 >
                   Submit Quiz
                 </Button>
@@ -720,7 +820,9 @@ export default function StudentQuiz({
                 <Button
                   variant="primary"
                   onClick={handleNextQuestion}
-                  disabled={!quizAttempt.answers[currentQuestionId]}
+                  disabled={
+                    !isQuestionAnswered(quiz?.questions[currentQuestionIndex])
+                  }
                 >
                   Next
                 </Button>

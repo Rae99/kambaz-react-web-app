@@ -37,15 +37,15 @@ export default function QuizPreview() {
   // Helper function to check if a question is fully answered
   const isQuestionAnswered = (question: Question): boolean => {
     const answer = quizAttempt.answers[question._id || ''];
-
+    
     if (question.type === 'fill-in-the-blank' && question.blanks) {
       // For fill-in-the-blank, check if all blanks have answers
-      const userAnswers = (answer as string[]) || [];
-      return question.blanks.every(
-        (_, index) => userAnswers[index] && userAnswers[index].trim() !== ''
+      const userAnswers = answer as string[] || [];
+      return question.blanks.every((_, index) => 
+        userAnswers[index] && userAnswers[index].trim() !== ''
       );
     }
-
+    
     // For other question types, just check if answer exists
     return !!answer;
   };
@@ -53,7 +53,7 @@ export default function QuizPreview() {
   // Helper function to check if all questions are answered
   const areAllQuestionsAnswered = (): boolean => {
     if (!quiz) return false;
-    return quiz.questions.every((question) => isQuestionAnswered(question));
+    return quiz.questions.every(question => isQuestionAnswered(question));
   };
 
   useEffect(() => {
