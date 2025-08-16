@@ -1,13 +1,16 @@
 import { useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import { FaPlus, FaTrash, FaEdit } from 'react-icons/fa';
-import type { Question } from './types';
+import { useSelector } from 'react-redux';
+import type { Question, Quiz } from './types';
+import * as quizzesClient from './client';
 import MultipleChoiceEditor from './MultipleChoiceEditor';
 import TrueFalseEditor from './TrueFalseEditor';
 import FillInBlankEditor from './FillInBlankEditor';
 
 interface QuizQuestionsEditorProps {
   questions?: Question[];
+  quizId?: string; // Add quiz ID for immediate question updates
   onQuestionsChange?: (questions: Question[]) => void;
   onSave?: () => void;
   onSaveAndPublish?: () => void;
@@ -16,6 +19,7 @@ interface QuizQuestionsEditorProps {
 
 export default function QuizQuestionsEditor({
   questions = [],
+  quizId,
   onQuestionsChange,
   onSave,
   onSaveAndPublish,
@@ -23,6 +27,10 @@ export default function QuizQuestionsEditor({
 }: QuizQuestionsEditorProps) {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
+
+  // Get current quiz from Redux store for immediate backend updates
+  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const currentQuiz = quizId ? quizzes.find((q: Quiz) => q._id === quizId) : null;
 
   const handleAddQuestion = () => {
     // Default to multiple choice question
@@ -100,12 +108,36 @@ export default function QuizQuestionsEditor({
 
   const handleSaveQuestion = async () => {
     if (editingQuestion && editingIndex >= 0) {
-      const updatedQuestions = [...questions];
-      updatedQuestions[editingIndex] = editingQuestion;
-      onQuestionsChange?.(updatedQuestions);
+      try {
+        // Update local state first
+        const updatedQuestions = [...questions];
+        updatedQuestions[editingIndex] = editingQuestion;
+        onQuestionsChange?.(updatedQuestions);
 
-      setEditingQuestion(null);
-      setEditingIndex(-1);
+        // If we have a quiz ID and current quiz, save immediately to backend
+        if (quizId && currentQuiz) {
+          console.log('Saving question to backend:', editingQuestion);
+          
+          // Create updated quiz object with new questions
+          const updatedQuiz = {
+            ...currentQuiz,
+            questions: updatedQuestions,
+            updatedAt: new Date().toISOString(),
+          };
+
+          // Save to backend
+          await quizzesClient.updateQuiz(quizId, updatedQuiz);
+          console.log('Question saved successfully to backend');
+        }
+
+        // Exit editing mode
+        setEditingQuestion(null);
+        setEditingIndex(-1);
+      } catch (error) {
+        console.error('Error saving question:', error);
+        // Show error message to user
+        alert('Failed to save question. Please try again.');
+      }
     }
   };
 

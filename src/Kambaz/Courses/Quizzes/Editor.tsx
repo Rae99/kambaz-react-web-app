@@ -384,6 +384,7 @@ export default function QuizEditor() {
           element={
             <QuizQuestionsEditor
               questions={quizForm.questions}
+              quizId={isNewQuiz ? undefined : qid}
               onQuestionsChange={(questions) => {
                 handleFormChange('questions', questions);
               }}
