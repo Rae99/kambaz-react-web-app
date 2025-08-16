@@ -236,23 +236,17 @@ export default function Quizzes() {
       ? new Date(quiz.availableDate)
       : null;
     const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
-    const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
 
     let availabilityStatus = '';
-    let availabilityVariant = 'secondary';
 
     if (!availableDate) {
       availabilityStatus = 'Not available';
-      availabilityVariant = 'secondary';
     } else if (now < availableDate) {
       availabilityStatus = `Not available until ${availableDate.toLocaleDateString()}`;
-      availabilityVariant = 'warning';
     } else if (dueDate && now > dueDate) {
       availabilityStatus = 'Closed';
-      availabilityVariant = 'danger';
     } else {
       availabilityStatus = 'Available';
-      availabilityVariant = 'success';
     }
 
     return (

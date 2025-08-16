@@ -16,8 +16,7 @@ import StudentQuiz from './Quizzes/StudentQuiz';
 import Grades from './Grades';
 import { useSelector } from 'react-redux';
 import { useParams, useLocation } from 'react-router-dom';
-import { CiDroplet } from 'react-icons/ci';
-import ProtectedCourseRoute, {
+import {
   FacultyProtectedRoute,
   StudentProtectedRoute,
 } from './ProtectedCourseRoute';

@@ -15,8 +15,6 @@ import type { Quiz, Question } from './types';
 
 // Import availability functions from parent component
 import {
-  isQuizAvailableForStudent,
-  getQuizAvailabilityReason,
   canStudentTakeQuiz,
 } from './index';
 
@@ -39,7 +37,6 @@ interface StudentQuizProps {
 
 export default function StudentQuiz({
   mode: initialMode,
-  attemptId,
 }: StudentQuizProps) {
   const { cid, qid } = useParams();
   const navigate = useNavigate();
@@ -289,7 +286,6 @@ export default function StudentQuiz({
   };
 
   const handleBlankAnswerChange = (
-    questionId: string,
     blankIndex: number,
     answer: string
   ) => {
@@ -780,7 +776,6 @@ export default function StudentQuiz({
                           }
                           onChange={(e) =>
                             handleBlankAnswerChange(
-                              currentQuestionId,
                               blankIndex,
                               e.target.value
                             )

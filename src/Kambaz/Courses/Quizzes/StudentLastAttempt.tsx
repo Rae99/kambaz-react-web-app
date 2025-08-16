@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Alert, Spinner } from 'react-bootstrap';
-import { FaEye, FaCheck, FaTimes } from 'react-icons/fa';
+import { FaEye } from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import * as quizzesClient from './client';
