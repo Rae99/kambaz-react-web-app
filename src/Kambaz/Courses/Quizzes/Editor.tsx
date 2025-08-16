@@ -315,8 +315,12 @@ export default function QuizEditor() {
           element={
             <QuizQuestionsEditor
               questions={quizForm.questions}
+              questionGroups={quizForm.questionGroups || []}
               onQuestionsChange={(questions) => {
                 handleFormChange('questions', questions);
+              }}
+              onQuestionGroupsChange={(groups) => {
+                handleFormChange('questionGroups', groups);
               }}
               onSave={handleSave}
               onSaveAndPublish={handleSaveAndPublish}

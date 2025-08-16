@@ -20,6 +20,7 @@ export interface Quiz {
   dueDate?: string;       // ISO 8601 格式: "2024-01-01T00:00:00.000Z"
   untilDate?: string;     // ISO 8601 格式: "2024-01-01T00:00:00.000Z"
   questions: Question[];
+  questionGroups?: QuestionGroup[]; // Optional question groups
   isPublished: boolean;
   createdAt: string;      // ISO 8601 格式
   updatedAt: string;      // ISO 8601 格式
@@ -36,6 +37,17 @@ export interface Question {
   explanation?: string;
   // New fields for fill-in-the-blank
   blanks?: BlankOption[]; // For fill-in-the-blank questions
+  // Question grouping
+  groupId?: string; // ID of the question group this question belongs to
+}
+
+export interface QuestionGroup {
+  id: string;
+  name: string;
+  description?: string;
+  points?: number; // Optional group-level points
+  pickQuestions?: number; // Number of questions to randomly pick from this group (0 = all)
+  questionsPerPage?: number; // For pagination within group
 }
 
 export interface BlankOption {
