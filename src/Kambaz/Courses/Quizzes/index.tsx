@@ -129,6 +129,9 @@ export default function Quizzes() {
     (state: any) => state.quizzesReducer
   );
 
+  // Search functionality
+  const [searchTerm, setSearchTerm] = useState('');
+
   // Check if user is faculty (has elevated permissions)
   const isFaculty =
     currentUser?.role === 'FACULTY' ||
@@ -287,9 +290,13 @@ export default function Quizzes() {
     );
   }
 
-  const courseQuizzes = (quizzes || []).filter(
-    (quiz: Quiz) => quiz.courseId === cid
-  );
+  const courseQuizzes = (quizzes || [])
+    .filter((quiz: Quiz) => quiz.courseId === cid)
+    .filter((quiz: Quiz) =>
+      searchTerm.trim() === '' ||
+      quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (quiz.description && quiz.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
 
   const sortedQuizzes = [...courseQuizzes].sort((a, b) => {
     switch (sortBy) {
@@ -315,7 +322,12 @@ export default function Quizzes() {
   return (
     <div id="wd-quizzes">
       {/* Control Bar - only for faculty */}
-      {isFaculty && <QuizzesControls />}
+      {isFaculty && (
+        <QuizzesControls 
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+        />
+      )}
 
       <hr className="mb-3" />
       {/* Header */}

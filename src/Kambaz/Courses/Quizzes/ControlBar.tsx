@@ -3,9 +3,15 @@ import { BsThreeDotsVertical } from 'react-icons/bs';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
 
-export default function QuizzesControls() {
+interface QuizzesControlsProps {
+  searchTerm: string;
+  onSearchChange: (term: string) => void;
+}
+
+export default function QuizzesControls({ searchTerm, onSearchChange }: QuizzesControlsProps) {
   const { cid } = useParams();
   const navigate = useNavigate();
+  
   return (
     <div className="d-flex justify-content-between align-items-center mb-3">
       <div
@@ -22,6 +28,8 @@ export default function QuizzesControls() {
           className="form-control ps-5 form-control-lg"
           placeholder="Search for Quiz"
           style={{ backgroundColor: '#f8f9fa' }}
+          value={searchTerm}
+          onChange={(e) => onSearchChange(e.target.value)}
         />
       </div>
 
