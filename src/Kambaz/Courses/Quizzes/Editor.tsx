@@ -16,6 +16,28 @@ import QuizQuestionsEditor from './QuizQuestionsEditor';
 import type { Quiz } from './types';
 import * as coursesClient from '../client';
 
+// Function to convert datetime-local format to ISO string
+const formatDateForServer = (dateTimeLocal: string) => {
+  if (!dateTimeLocal) return '';
+  // datetime-local gives us "YYYY-MM-DDTHH:MM"
+  // We need to add seconds and timezone: "YYYY-MM-DDTHH:MM:00.000Z"
+  return new Date(dateTimeLocal).toISOString();
+};
+
+// Function to convert ISO string to datetime-local format
+const formatDateForInput = (isoString: string) => {
+  if (!isoString) return '';
+  // ISO string: "2024-01-22T23:59:00.000Z"
+  // datetime-local needs: "YYYY-MM-DDTHH:MM"
+  const date = new Date(isoString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+};
+
 export default function QuizEditor() {
   const params = useParams();
   const { cid, qid } = params;
@@ -136,15 +158,9 @@ export default function QuizEditor() {
       oneQuestionAtATime: quiz.oneQuestionAtATime ?? true,
       webcamRequired: quiz.webcamRequired ?? false,
       lockQuestionsAfterAnswering: quiz.lockQuestionsAfterAnswering ?? false,
-      dueDate: quiz.dueDate
-        ? new Date(quiz.dueDate).toISOString().slice(0, 16)
-        : '',
-      availableDate: quiz.availableDate
-        ? new Date(quiz.availableDate).toISOString().slice(0, 16)
-        : '',
-      untilDate: quiz.untilDate
-        ? new Date(quiz.untilDate).toISOString().slice(0, 16)
-        : '',
+      dueDate: formatDateForInput(quiz.dueDate || ''),
+      availableDate: formatDateForInput(quiz.availableDate || ''),
+      untilDate: formatDateForInput(quiz.untilDate || ''),
       questions: quiz.questions ?? [],
       isPublished: quiz.isPublished ?? false,
       createdAt: quiz.createdAt ?? new Date().toISOString(),
@@ -167,15 +183,40 @@ export default function QuizEditor() {
 
   const handleSave = async () => {
     try {
-      const quizData = { ...quizForm };
+      // Convert date formats before sending to server
+      const quizData = { 
+        ...quizForm,
+        dueDate: quizForm.dueDate ? formatDateForServer(quizForm.dueDate) : '',
+        untilDate: quizForm.untilDate ? formatDateForServer(quizForm.untilDate) : '',
+        availableDate: quizForm.availableDate ? formatDateForServer(quizForm.availableDate) : '',
+      };
+      console.log('Saving quiz data:', quizData);
+      console.log('Original dueDate:', quizForm.dueDate);
+      console.log('Formatted dueDate:', quizData.dueDate);
+      console.log('Original untilDate:', quizForm.untilDate);
+      console.log('Formatted untilDate:', quizData.untilDate);
+      
       if (isNewQuiz) {
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
         dispatch(addQuiz(newQuiz));
 
+        // Clear draft after successful save
+        const draftKey = qid && qid !== 'new' 
+          ? `quiz-draft-${cid}-${qid}` 
+          : `quiz-draft-${cid}-new`;
+        localStorage.removeItem(draftKey);
+
         navigate(`/Kambaz/Courses/${cid}/Quizzes/${newQuiz._id}`);
       } else {
         const updatedQuiz = await quizzesClient.updateQuiz(qid!, quizData);
+        console.log('Updated quiz response:', updatedQuiz);
         dispatch(updateQuiz(updatedQuiz));
+
+        // Clear draft after successful save
+        const draftKey = qid && qid !== 'new' 
+          ? `quiz-draft-${cid}-${qid}` 
+          : `quiz-draft-${cid}-new`;
+        localStorage.removeItem(draftKey);
 
         navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
       }
@@ -191,15 +232,43 @@ export default function QuizEditor() {
 
   const handleSaveAndPublish = async () => {
     try {
-      const quizData = { ...quizForm, isPublished: true };
+      // Convert date formats before sending to server
+      const quizData = { 
+        ...quizForm, 
+        isPublished: true,
+        dueDate: quizForm.dueDate ? formatDateForServer(quizForm.dueDate) : '',
+        untilDate: quizForm.untilDate ? formatDateForServer(quizForm.untilDate) : '',
+        availableDate: quizForm.availableDate ? formatDateForServer(quizForm.availableDate) : '',
+      };
+      console.log('Saving and publishing quiz data:', quizData);
+      console.log('Original dueDate:', quizForm.dueDate);
+      console.log('Formatted dueDate:', quizData.dueDate);
+      console.log('Original untilDate:', quizForm.untilDate);
+      console.log('Formatted untilDate:', quizData.untilDate);
+      
       if (isNewQuiz) {
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
         dispatch(addQuiz(newQuiz));
+
+        // Clear draft after successful save and publish
+        const draftKey = qid && qid !== 'new' 
+          ? `quiz-draft-${cid}-${qid}` 
+          : `quiz-draft-${cid}-new`;
+        localStorage.removeItem(draftKey);
+
         // Navigate to quiz list after save and publish
         navigate(`/Kambaz/Courses/${cid}/Quizzes`);
       } else {
         const updatedQuiz = await quizzesClient.updateQuiz(qid!, quizData);
+        console.log('Updated quiz response (save and publish):', updatedQuiz);
         dispatch(updateQuiz(updatedQuiz));
+
+        // Clear draft after successful save and publish
+        const draftKey = qid && qid !== 'new' 
+          ? `quiz-draft-${cid}-${qid}` 
+          : `quiz-draft-${cid}-new`;
+        localStorage.removeItem(draftKey);
+
         // Navigate to quiz list after save and publish
         navigate(`/Kambaz/Courses/${cid}/Quizzes`);
       }

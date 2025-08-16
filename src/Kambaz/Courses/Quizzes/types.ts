@@ -16,13 +16,13 @@ export interface Quiz {
   oneQuestionAtATime: boolean;
   webcamRequired: boolean;
   lockQuestionsAfterAnswering: boolean;
-  availableDate?: string; // ISO 8601 格式: "2024-01-01T00:00:00.000Z"
-  dueDate?: string;       // ISO 8601 格式: "2024-01-01T00:00:00.000Z"
-  untilDate?: string;     // ISO 8601 格式: "2024-01-01T00:00:00.000Z"
+  availableDate?: string; // ISO 8601  "2024-01-01T00:00:00.000Z"
+  dueDate?: string;       // ISO 8601  "2024-01-01T00:00:00.000Z"
+  untilDate?: string;     // ISO 8601  "2024-01-01T00:00:00.000Z"
   questions: Question[];
   isPublished: boolean;
-  createdAt: string;      // ISO 8601 格式
-  updatedAt: string;      // ISO 8601 格式
+  createdAt: string;      // ISO 8601  "2024-01-01T00:00:00.000Z"
+  updatedAt: string;      // ISO 8601  "2024-01-01T00:00:00.000Z"
 }
 
 export interface Question {

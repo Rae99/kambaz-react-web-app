@@ -311,7 +311,10 @@ export default function QuizDetailsEditor({
               id="wd-due-date"
               className="form-control"
               value={quizForm.dueDate || ''}
-              onChange={(e) => onFormChange('dueDate', e.target.value)}
+              onChange={(e) => {
+                console.log('Due date changed:', e.target.value);
+                onFormChange('dueDate', e.target.value);
+              }}
             />
           </div>
           <div className="row">
@@ -336,7 +339,10 @@ export default function QuizDetailsEditor({
                 id="wd-until-date"
                 className="form-control"
                 value={quizForm.untilDate || ''}
-                onChange={(e) => onFormChange('untilDate', e.target.value)}
+                onChange={(e) => {
+                  console.log('Until date changed:', e.target.value);
+                  onFormChange('untilDate', e.target.value);
+                }}
               />
             </div>
           </div>
