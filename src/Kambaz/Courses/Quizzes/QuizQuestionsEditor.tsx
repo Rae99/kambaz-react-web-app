@@ -148,14 +148,38 @@ export default function QuizQuestionsEditor({
 
   const handleDeleteQuestion = async (index: number) => {
     if (window.confirm('Are you sure you want to delete this question?')) {
-      const updatedQuestions = questions.filter((_, i) => i !== index);
-      onQuestionsChange?.(updatedQuestions);
+      try {
+        // Update local state first
+        const updatedQuestions = questions.filter((_, i) => i !== index);
+        onQuestionsChange?.(updatedQuestions);
 
-      if (editingIndex === index) {
-        setEditingQuestion(null);
-        setEditingIndex(-1);
-      } else if (editingIndex > index) {
-        setEditingIndex(editingIndex - 1);
+        // If we have a quiz ID and current quiz, save immediately to backend
+        if (quizId && currentQuiz) {
+          console.log('Deleting question from backend, new questions count:', updatedQuestions.length);
+          
+          // Create updated quiz object with new questions
+          const updatedQuiz = {
+            ...currentQuiz,
+            questions: updatedQuestions,
+            updatedAt: new Date().toISOString(),
+          };
+
+          // Save to backend
+          await quizzesClient.updateQuiz(quizId, updatedQuiz);
+          console.log('Question deleted successfully from backend');
+        }
+
+        // Update editing state
+        if (editingIndex === index) {
+          setEditingQuestion(null);
+          setEditingIndex(-1);
+        } else if (editingIndex > index) {
+          setEditingIndex(editingIndex - 1);
+        }
+      } catch (error) {
+        console.error('Error deleting question:', error);
+        // Show error message to user
+        alert('Failed to delete question. Please try again.');
       }
     }
   };
