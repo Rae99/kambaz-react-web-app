@@ -292,10 +292,12 @@ export default function Quizzes() {
 
   const courseQuizzes = (quizzes || [])
     .filter((quiz: Quiz) => quiz.courseId === cid)
-    .filter((quiz: Quiz) =>
-      searchTerm.trim() === '' ||
-      quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (quiz.description && quiz.description.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(
+      (quiz: Quiz) =>
+        searchTerm.trim() === '' ||
+        quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (quiz.description &&
+          quiz.description.toLowerCase().includes(searchTerm.toLowerCase()))
     );
 
   const sortedQuizzes = [...courseQuizzes].sort((a, b) => {
@@ -323,7 +325,7 @@ export default function Quizzes() {
     <div id="wd-quizzes">
       {/* Control Bar - only for faculty */}
       {isFaculty && (
-        <QuizzesControls 
+        <QuizzesControls
           searchTerm={searchTerm}
           onSearchChange={setSearchTerm}
         />

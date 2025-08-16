@@ -8,10 +8,13 @@ interface QuizzesControlsProps {
   onSearchChange: (term: string) => void;
 }
 
-export default function QuizzesControls({ searchTerm, onSearchChange }: QuizzesControlsProps) {
+export default function QuizzesControls({
+  searchTerm,
+  onSearchChange,
+}: QuizzesControlsProps) {
   const { cid } = useParams();
   const navigate = useNavigate();
-  
+
   return (
     <div className="d-flex justify-content-between align-items-center mb-3">
       <div
