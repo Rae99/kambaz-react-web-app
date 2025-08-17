@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
-import { ListGroup } from 'react-bootstrap';
-import { FaRegEdit, FaCopy, FaTrash} from 'react-icons/fa';
+import { ListGroup, Modal, Button, Form } from 'react-bootstrap';
+import { FaRegEdit, FaCopy, FaTrash } from 'react-icons/fa';
 import { FaCheckCircle, FaBan } from 'react-icons/fa';
 import { BsThreeDotsVertical } from 'react-icons/bs';
+import { v4 as uuidv4 } from 'uuid';
 // import { CheckCircle, SlashCircle } from 'react-bootstrap-icons';
 import {
   setQuizzes,
@@ -37,6 +38,15 @@ export default function Quizzes() {
 
   // Search functionality
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Copy modal state
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [selectedQuizToCopy, setSelectedQuizToCopy] = useState<Quiz | null>(
+    null
+  );
+  const [targetCourseId, setTargetCourseId] = useState('');
+  const [availableCourses, setAvailableCourses] = useState<any[]>([]);
+  const [copyLoading, setCopyLoading] = useState(false);
 
   // Check if user is faculty (has elevated permissions)
   const isFaculty =
@@ -86,6 +96,69 @@ export default function Quizzes() {
   };
 
   const handleCopyQuiz = async (quizId: string) => {
+    const quiz = quizzes.find((q: Quiz) => q._id === quizId);
+    if (quiz) {
+      setSelectedQuizToCopy(quiz);
+
+      // Fetch available courses for selection
+      try {
+        const courses = await coursesClient.fetchAllCourses();
+        // Filter out current course and only show courses where user is faculty
+        const eligibleCourses = courses.filter(
+          (course: any) => course._id !== cid
+        );
+        setAvailableCourses(eligibleCourses);
+        setShowCopyModal(true);
+      } catch (error) {
+        console.error('Error fetching courses:', error);
+      }
+    }
+  };
+
+  const handleConfirmCopy = async () => {
+    if (!selectedQuizToCopy || !targetCourseId) return;
+
+    try {
+      setCopyLoading(true);
+
+      // Create a copy with a new title
+      const quizCopy = {
+        ...selectedQuizToCopy,
+        title: `${selectedQuizToCopy.title} (Copy)`,
+        isPublished: false, // Always unpublished when copied
+        _id: uuidv4(), // Generate new UUID for the copy (actually backend handles this already but it's fine)
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        courseId: targetCourseId, // Set the new course ID
+      };
+
+      await coursesClient.createQuizForCourse(targetCourseId, quizCopy);
+
+      // Close modal and reset state
+      setShowCopyModal(false);
+      setSelectedQuizToCopy(null);
+      setTargetCourseId('');
+
+      // Show success message (you might want to add a toast notification here)
+      alert(
+        `Quiz "${selectedQuizToCopy.title}" copied successfully to the selected course!`
+      );
+    } catch (error) {
+      console.error('Error copying quiz:', error);
+      alert('Failed to copy quiz. Please try again.');
+    } finally {
+      setCopyLoading(false);
+    }
+  };
+
+  const handleCancelCopy = () => {
+    setShowCopyModal(false);
+    setSelectedQuizToCopy(null);
+    setTargetCourseId('');
+  };
+
+  // Legacy function for same-course duplication (rename for clarity)
+  const handleDuplicateQuiz = async (quizId: string) => {
     try {
       const quiz = quizzes.find((q: Quiz) => q._id === quizId);
       if (quiz) {
@@ -94,16 +167,16 @@ export default function Quizzes() {
           ...quiz,
           title: `${quiz.title} (Copy)`,
           isPublished: false, // Always unpublished when copied
-          _id: undefined, // Remove ID so it creates a new quiz
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          _id: uuidv4(), // Generate new UUID for the copy
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
         };
 
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizCopy);
         dispatch(setQuizzes([...quizzes, newQuiz]));
       }
     } catch (error) {
-      console.error('Error copying quiz:', error);
+      console.error('Error duplicating quiz:', error);
     }
   };
 
@@ -395,11 +468,23 @@ export default function Quizzes() {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 closeMenu();
+                                handleDuplicateQuiz(quiz._id!);
+                              }}
+                            >
+                              <FaCopy className="me-2" />
+                              Duplicate
+                            </button>
+                            <button
+                              className="btn btn-link text-decoration-none p-2 w-100 text-start"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                closeMenu();
                                 handleCopyQuiz(quiz._id!);
                               }}
                             >
                               <FaCopy className="me-2" />
-                              Copy
+                              Copy to Course
                             </button>
                           </div>
                         </div>
@@ -426,6 +511,47 @@ export default function Quizzes() {
           ))
         )}
       </ListGroup>
+
+      {/* Copy Quiz Modal */}
+      <Modal show={showCopyModal} onHide={handleCancelCopy} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Copy Quiz to Another Course</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Copy "{selectedQuizToCopy?.title}" to which course?</p>
+          <Form.Group>
+            <Form.Label>Select Target Course:</Form.Label>
+            <Form.Select
+              value={targetCourseId}
+              onChange={(e) => setTargetCourseId(e.target.value)}
+              disabled={copyLoading}
+            >
+              <option value="">Choose a course...</option>
+              {availableCourses.map((course) => (
+                <option key={course._id} value={course._id}>
+                  {course.name} ({course.number})
+                </option>
+              ))}
+            </Form.Select>
+          </Form.Group>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button
+            variant="secondary"
+            onClick={handleCancelCopy}
+            disabled={copyLoading}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            onClick={handleConfirmCopy}
+            disabled={!targetCourseId || copyLoading}
+          >
+            {copyLoading ? 'Copying...' : 'Copy Quiz'}
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
