@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { ListGroup } from 'react-bootstrap';
-import { FaRegEdit, FaCopy, FaTrash } from 'react-icons/fa';
+import { FaRegEdit, FaCopy, FaTrash} from 'react-icons/fa';
+import { FaCheckCircle, FaBan } from 'react-icons/fa';
 import { BsThreeDotsVertical } from 'react-icons/bs';
+// import { CheckCircle, SlashCircle } from 'react-bootstrap-icons';
 import {
   setQuizzes,
   setLoading,
@@ -272,8 +274,7 @@ export default function Quizzes() {
                   className="d-flex align-items-center"
                   style={{ flex: 1, minWidth: 0 }}
                 >
-                  {/* Rocket icon instead of grip */}
-                  <span className="me-3 fs-4">🚀</span>
+                  <span className="me-3 fs-3">🚀</span>
 
                   <div
                     className="d-flex flex-column"
@@ -312,9 +313,22 @@ export default function Quizzes() {
                         handlePublishQuiz(quiz._id!, quiz.isPublished);
                       }}
                     >
-                      {quiz.isPublished ? '✅' : '🚫'}
+                      {quiz.isPublished ? (
+                        <FaCheckCircle color="green" size={26} />
+                      ) : (
+                        <FaBan color="red" size={26} />
+                      )}
                     </span>
                   )}
+                  {/* 🔍 What Each Method Does
+                  e.preventDefault()
+                  Purpose: Prevents the browser's default behavior for that event
+                  In this context: Prevents the <Link> component from navigating when you click the publish button
+                  Without it: Clicking the publish button would also trigger the Link navigation to the quiz details page
+                  e.stopPropagation()
+                  Purpose: Prevents the event from bubbling up to parent elements
+                  In this context: Stops the click event from reaching the parent <ListGroup.Item as={Link}>
+                  Without it: The click would bubble up and trigger the Link navigation */}
 
                   {/* Role-specific Actions */}
                   {isFaculty ? (
