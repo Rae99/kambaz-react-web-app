@@ -171,7 +171,11 @@ export default function Quizzes() {
     );
   }
 
-  const searchedCourseQuizzes = (quizzes || []).filter(
+  // quizzes from Redux store are already filtered by course ID from the API call
+  const courseQuizzes = quizzes || [];
+
+  // Filter by search term
+  const searchedCourseQuizzes = courseQuizzes.filter(
     (quiz: Quiz) =>
       searchTerm.trim() === '' ||
       quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -237,12 +241,21 @@ export default function Quizzes() {
 
       {/* Quizzes List */}
       <ListGroup className="wd-quizzes rounded-0">
-        {sortedQuizzes.length === 0 ? (
+        {courseQuizzes.length === 0 ? (
+          // No quizzes exist for this course at all
           <div className="text-center py-5">
             <p className="text-muted">
               {isFaculty
                 ? "No quizzes available yet. Click the '+ Quiz' button to create your first quiz."
                 : 'No quizzes are currently available for this course.'}
+            </p>
+          </div>
+        ) : sortedQuizzes.length === 0 ? (
+          // Quizzes exist but search filtered them out
+          <div className="text-center py-5">
+            <p className="text-muted">
+              No quizzes match your search keyword "{searchTerm}". Try a
+              different search term.
             </p>
           </div>
         ) : (
