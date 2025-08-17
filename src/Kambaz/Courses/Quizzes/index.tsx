@@ -202,13 +202,13 @@ export default function Quizzes() {
 
   return (
     <div id="wd-quizzes">
-      {/* Control Bar - only for faculty */}
-      {isFaculty && (
-        <QuizzesControls
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-        />
-      )}
+      {/* Control Bar - add button only for faculty, search functionality for both faculty and student */}
+
+      <QuizzesControls
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        isFaculty={isFaculty}
+      />
 
       <hr className="mb-3" />
       {/* Header */}
