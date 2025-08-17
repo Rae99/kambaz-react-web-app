@@ -12,6 +12,10 @@ import {
 } from 'react-icons/fa';
 import * as quizzesClient from './client';
 import type { Quiz } from './types';
+import {
+  getAvailabilityStatusText,
+  getAvailabilityColourVariant,
+} from './quiz-rules';
 import StudentQuizActionSection from './StudentQuizActionSection';
 import StudentLastAttempt from './StudentLastAttempt';
 
@@ -103,41 +107,26 @@ export default function QuizDetails() {
     return <Alert variant="warning">Quiz not found</Alert>;
   }
 
-  const now = new Date();
   const availableDate = quiz.availableDate
     ? new Date(quiz.availableDate)
     : null;
   const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
   const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
 
-  let availabilityStatus = '';
-  let availabilityVariant = 'secondary';
-
-  if (!availableDate) {
-    availabilityStatus = 'Not available';
-    availabilityVariant = 'secondary';
-  } else if (now < availableDate) {
-    availabilityStatus = `Not available until ${availableDate.toLocaleDateString()}`;
-    availabilityVariant = 'warning';
-  } else if (dueDate && now > dueDate) {
-    availabilityStatus = 'Closed';
-    availabilityVariant = 'danger';
-  } else {
-    availabilityStatus = 'Available';
-    availabilityVariant = 'success';
-  }
+  const availabilityStatus = getAvailabilityStatusText(quiz);
+  const availabilityColourVariant = getAvailabilityColourVariant(quiz);
 
   // Use quiz.points directly - keep it simple
   const totalPoints = quiz.points || 0;
 
   // Debug logging for totalPoints calculation
-  console.log('QuizDetails - totalPoints calculation:', {
-    quizId: quiz._id,
-    quizTitle: quiz.title,
-    quizPoints: quiz.points,
-    questionsCount: quiz.questions?.length,
-    finalTotalPoints: totalPoints,
-  });
+  // console.log('QuizDetails - totalPoints calculation:', {
+  //   quizId: quiz._id,
+  //   quizTitle: quiz.title,
+  //   quizPoints: quiz.points,
+  //   questionsCount: quiz.questions?.length,
+  //   finalTotalPoints: totalPoints,
+  // });
 
   return (
     <div className="quiz-details">
@@ -225,7 +214,7 @@ export default function QuizDetails() {
         <Card.Body>
           <h5 className="card-title">Availability</h5>
           <div className="d-flex align-items-center gap-3">
-            <Badge bg={availabilityVariant} className="fs-6">
+            <Badge bg={availabilityColourVariant} className="fs-6">
               {availabilityStatus}
             </Badge>
             {availableDate && (

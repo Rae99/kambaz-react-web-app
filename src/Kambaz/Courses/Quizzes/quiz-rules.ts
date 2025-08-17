@@ -126,6 +126,27 @@ export const getAvailabilityStatusText = (quiz: Quiz): string => {
 };
 
 /**
+ * Generate availability color variant for quiz display
+ */
+export const getAvailabilityColourVariant = (quiz: Quiz): string => {
+  const now = new Date();
+  const availableDate = quiz.availableDate
+    ? new Date(quiz.availableDate)
+    : null;
+  const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
+
+  if (!availableDate) {
+    return 'secondary';
+  } else if (now < availableDate) {
+    return 'warning';
+  } else if (dueDate && now > dueDate) {
+    return 'danger';
+  } else {
+    return 'success';
+  }
+};
+
+/**
  * Calculate total points for a quiz
  */
 export const calculateQuizTotalPoints = (quiz: Quiz): number => {
