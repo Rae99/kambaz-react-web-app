@@ -14,9 +14,7 @@ import * as quizzesClient from './client';
 import type { Quiz, Question } from './types';
 
 // Import availability functions from parent component
-import {
-  canStudentTakeQuiz,
-} from './index';
+import { canStudentTakeQuiz } from './services';
 
 interface QuizAttempt {
   _id?: string;
@@ -35,9 +33,7 @@ interface StudentQuizProps {
   attemptId?: string;
 }
 
-export default function StudentQuiz({
-  mode: initialMode,
-}: StudentQuizProps) {
+export default function StudentQuiz({ mode: initialMode }: StudentQuizProps) {
   const { cid, qid } = useParams();
   const navigate = useNavigate();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
@@ -66,17 +62,18 @@ export default function StudentQuiz({
 
   // Helper function to check if a question is fully answered
   const isQuestionAnswered = (question: Question): boolean => {
-    const currentQuestionId = question?._id || `question_${currentQuestionIndex}`;
+    const currentQuestionId =
+      question?._id || `question_${currentQuestionIndex}`;
     const answer = quizAttempt.answers[currentQuestionId];
-    
+
     if (question.type === 'fill-in-the-blank' && question.blanks) {
       // For fill-in-the-blank, check if all blanks have answers
-      const userAnswers = answer as string[] || [];
-      return question.blanks.every((_, index) => 
-        userAnswers[index] && userAnswers[index].trim() !== ''
+      const userAnswers = (answer as string[]) || [];
+      return question.blanks.every(
+        (_, index) => userAnswers[index] && userAnswers[index].trim() !== ''
       );
     }
-    
+
     // For other question types, just check if answer exists
     return !!answer;
   };
@@ -87,14 +84,15 @@ export default function StudentQuiz({
     return quiz.questions.every((question, index) => {
       const questionId = question._id || `question_${index}`;
       const answer = quizAttempt.answers[questionId];
-      
+
       if (question.type === 'fill-in-the-blank' && question.blanks) {
-        const userAnswers = answer as string[] || [];
-        return question.blanks.every((_, blankIndex) => 
-          userAnswers[blankIndex] && userAnswers[blankIndex].trim() !== ''
+        const userAnswers = (answer as string[]) || [];
+        return question.blanks.every(
+          (_, blankIndex) =>
+            userAnswers[blankIndex] && userAnswers[blankIndex].trim() !== ''
         );
       }
-      
+
       return !!answer;
     });
   };
@@ -285,10 +283,7 @@ export default function StudentQuiz({
     }
   };
 
-  const handleBlankAnswerChange = (
-    blankIndex: number,
-    answer: string
-  ) => {
+  const handleBlankAnswerChange = (blankIndex: number, answer: string) => {
     const currentQuestion = quiz?.questions[currentQuestionIndex];
     const answerKey =
       currentQuestion?._id || `question_${currentQuestionIndex}`;
@@ -589,14 +584,22 @@ export default function StudentQuiz({
                     <div>
                       <p className="text-muted mb-1">Your answers:</p>
                       {question.blanks.map((blank, blankIndex) => {
-                        const userAnswers = userAnswer as string[] || [];
-                        const userBlankAnswer = userAnswers[blankIndex] || 'Not answered';
-                        const isBlankCorrect = userBlankAnswer === blank.correctAnswer;
-                        
+                        const userAnswers = (userAnswer as string[]) || [];
+                        const userBlankAnswer =
+                          userAnswers[blankIndex] || 'Not answered';
+                        const isBlankCorrect =
+                          userBlankAnswer === blank.correctAnswer;
+
                         return (
                           <div key={blank.id} className="ms-3 mb-2">
-                            <span className="fw-semibold">Blank {blankIndex + 1}:</span>
-                            <span className={`ms-2 ${isBlankCorrect ? 'text-success' : 'text-danger'}`}>
+                            <span className="fw-semibold">
+                              Blank {blankIndex + 1}:
+                            </span>
+                            <span
+                              className={`ms-2 ${
+                                isBlankCorrect ? 'text-success' : 'text-danger'
+                              }`}
+                            >
                               {userBlankAnswer}
                             </span>
                             {!isBlankCorrect && (
@@ -775,10 +778,7 @@ export default function StudentQuiz({
                             )?.[blankIndex] || ''
                           }
                           onChange={(e) =>
-                            handleBlankAnswerChange(
-                              blankIndex,
-                              e.target.value
-                            )
+                            handleBlankAnswerChange(blankIndex, e.target.value)
                           }
                         >
                           <option value="">Select an answer...</option>

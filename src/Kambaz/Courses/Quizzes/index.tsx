@@ -15,110 +15,14 @@ import * as quizzesClient from './client';
 import type { Quiz } from './types';
 import QuizzesControls from './ControlBar';
 import * as coursesClient from '../client';
-
-// Check if quiz is available for students to take
-export const isQuizAvailableForStudent = (quiz: Quiz): boolean => {
-  if (!quiz.isPublished) {
-    return false;
-  }
-
-  const now = new Date();
-  const availableDate = quiz.availableDate
-    ? new Date(quiz.availableDate)
-    : null;
-  const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
-  const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
-
-  // Check if quiz is within its available time window
-  if (availableDate && now < availableDate) {
-    return false; // Not yet available
-  }
-
-  if (untilDate && now > untilDate) {
-    return false; // Past the until date
-  }
-
-  if (dueDate && now > dueDate) {
-    return false; // Past the due date
-  }
-
-  return true; // Quiz is available
-};
-
-// Get the reason why a quiz is not available
-export const getQuizAvailabilityReason = (quiz: Quiz): string => {
-  if (!quiz.isPublished) {
-    return 'Quiz not published';
-  }
-
-  const now = new Date();
-  const availableDate = quiz.availableDate
-    ? new Date(quiz.availableDate)
-    : null;
-  const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
-  const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
-
-  if (availableDate && now < availableDate) {
-    return `Available from ${availableDate.toLocaleDateString()}`;
-  }
-
-  if (untilDate && now > untilDate) {
-    return 'Quiz closed';
-  }
-
-  if (dueDate && now > dueDate) {
-    return 'Due date passed';
-  }
-
-  return 'Quiz not available';
-};
-
-// Check if student can take the quiz (considering attempt limits)
-export const canStudentTakeQuiz = async (
-  quiz: Quiz,
-  studentId: string
-): Promise<{ canTake: boolean; reason?: string }> => {
-  // First check basic availability
-  if (!isQuizAvailableForStudent(quiz)) {
-    return { canTake: false, reason: getQuizAvailabilityReason(quiz) };
-  }
-
-  // Check attempt limits
-  try {
-    const attempts = await quizzesClient.getStudentAttempts(
-      quiz._id!,
-      studentId
-    );
-    const existingAttempts = attempts.filter(
-      (attempt: any) => attempt.isCompleted
-    );
-
-    if (quiz.multipleAttempts && quiz.attemptsAllowed) {
-      // Multiple attempts allowed - check against limit
-      const currentAttemptNumber = existingAttempts.length + 1;
-      if (currentAttemptNumber > quiz.attemptsAllowed) {
-        return {
-          canTake: false,
-          reason: `You have exceeded the maximum attempts (${quiz.attemptsAllowed}) for this quiz.`,
-        };
-      }
-    } else {
-      // Only one attempt allowed - check if student has already taken it
-      if (existingAttempts.length > 0) {
-        return {
-          canTake: false,
-          reason:
-            'You have already taken this quiz. Only one attempt is allowed.',
-        };
-      }
-    }
-  } catch (error) {
-    console.error('Error checking student attempts:', error);
-    return { canTake: false, reason: 'Unable to verify attempt limits' };
-  }
-
-  return { canTake: true };
-};
+import {
+  isQuizAvailableForStudent,
+  getQuizAvailabilityReason,
+  getAvailabilityStatusText,
+  getFormattedDueDate,
+  calculateQuizTotalPoints,
+} from './quiz-rules';
+import { canStudentTakeQuiz, getStudentQuizScore } from './services';
 
 export default function Quizzes() {
   const { cid } = useParams();
@@ -157,7 +61,6 @@ export default function Quizzes() {
     fetchQuizzes();
   }, [cid, dispatch]);
 
-  // TODO: delete log once bug fixed
   const handleDeleteQuiz = async (quizId: string) => {
     try {
       await quizzesClient.deleteQuiz(quizId);
@@ -231,31 +134,15 @@ export default function Quizzes() {
 
   // Helper function to render availability information
   const renderAvailabilityInfo = (quiz: Quiz, isFaculty: boolean) => {
-    const now = new Date();
-    const availableDate = quiz.availableDate
-      ? new Date(quiz.availableDate)
-      : null;
-    const dueDate = quiz.dueDate ? new Date(quiz.dueDate) : null;
-
-    let availabilityStatus = '';
-
-    if (!availableDate) {
-      availabilityStatus = 'Not available';
-    } else if (now < availableDate) {
-      availabilityStatus = `Not available until ${availableDate.toLocaleDateString()}`;
-    } else if (dueDate && now > dueDate) {
-      availabilityStatus = 'Closed';
-    } else {
-      availabilityStatus = 'Available';
-    }
+    const availabilityStatus = getAvailabilityStatusText(quiz);
+    const formattedDueDate = getFormattedDueDate(quiz);
+    const totalPoints = calculateQuizTotalPoints(quiz);
 
     return (
       <>
         <span className="fw-bold">{availabilityStatus}</span> |{' '}
-        <span className="fw-bold">Due</span>{' '}
-        {dueDate ? dueDate.toLocaleDateString() : 'Not set'} at 11:59pm |{' '}
-        {quiz.questions.reduce((sum, q) => sum + q.points, 0)} pts |{' '}
-        {quiz.questions?.length || 0} Questions
+        <span className="fw-bold">Due</span> {formattedDueDate} at 11:59pm |{' '}
+        {totalPoints} pts | {quiz.questions?.length || 0} Questions
         {!isFaculty && (
           <>
             {' '}
@@ -284,17 +171,15 @@ export default function Quizzes() {
     );
   }
 
-  const courseQuizzes = (quizzes || [])
-    .filter((quiz: Quiz) => quiz.courseId === cid)
-    .filter(
-      (quiz: Quiz) =>
-        searchTerm.trim() === '' ||
-        quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (quiz.description &&
-          quiz.description.toLowerCase().includes(searchTerm.toLowerCase()))
-    );
+  const searchedCourseQuizzes = (quizzes || []).filter(
+    (quiz: Quiz) =>
+      searchTerm.trim() === '' ||
+      quiz.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (quiz.description &&
+        quiz.description.toLowerCase().includes(searchTerm.toLowerCase()))
+  );
 
-  const sortedQuizzes = [...courseQuizzes].sort((a, b) => {
+  const sortedQuizzes = [...searchedCourseQuizzes].sort((a, b) => {
     switch (sortBy) {
       case 'name':
         return a.title.localeCompare(b.title);
@@ -589,31 +474,9 @@ const StudentScore = ({ quiz }: { quiz: Quiz }) => {
         (currentUser?._id && currentUser?.role === 'STUDENT') ||
         currentUser?.role === 'USER'
       ) {
-        try {
-          const attempts = await quizzesClient.getStudentAttempts(
-            quiz._id!,
-            currentUser._id
-          );
-          if (attempts.length > 0) {
-            // Get the last completed attempt
-            const lastAttempt = attempts
-              .filter((attempt: any) => attempt.isCompleted)
-              .sort(
-                (a: any, b: any) =>
-                  new Date(b.submittedAt).getTime() -
-                  new Date(a.submittedAt).getTime()
-              )[0];
-
-            if (lastAttempt) {
-              setScore(`${lastAttempt.score}/${lastAttempt.totalPoints}`);
-            }
-          }
-        } catch (error) {
-          console.error('Error fetching score:', error);
-          setScore('Error');
-        } finally {
-          setLoading(false);
-        }
+        const result = await getStudentQuizScore(quiz._id!, currentUser._id);
+        setScore(result.score);
+        setLoading(result.loading);
       } else {
         setLoading(false);
       }
