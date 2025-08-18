@@ -11,7 +11,7 @@ import Zoom from './Zoom';
 import Quizzes from './Quizzes';
 import QuizEditor from './Quizzes/Editor/index';
 import QuizDetails from './Quizzes/QuizDetails';
-import QuizPreview from './Quizzes/QuizPreview';
+import QuizPreview from './Quizzes/QuizPreview/index';
 import StudentQuiz from './Quizzes/StudentQuiz';
 import Grades from './Grades';
 import { useSelector } from 'react-redux';
