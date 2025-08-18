@@ -1,6 +1,20 @@
 import { FaRegEdit, FaCopy, FaTrash } from 'react-icons/fa';
 import type { Quiz } from '../types';
 
+/**
+ * QuizContextMenu Component
+ *
+ * Provides a dropdown context menu for quiz actions including:
+ * - Edit quiz functionality
+ * - Delete quiz with confirmation
+ * - Publish/unpublish toggle
+ * - Duplicate quiz within course
+ * - Copy quiz to another course
+ *
+ * This component handles all quiz management actions in a compact
+ * dropdown interface that appears on demand.
+ */
+
 interface QuizContextMenuProps {
   quiz: Quiz;
   isOpen: boolean;

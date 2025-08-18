@@ -3,6 +3,17 @@ import { Button } from 'react-bootstrap';
 import { FaSearch, FaPlus } from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
 
+/**
+ * ControlBar Component
+ *
+ * Provides the main control interface for the quiz list including:
+ * - Search functionality for filtering quizzes
+ * - Create quiz button (faculty only)
+ * - Responsive layout with search and action controls
+ *
+ * This component handles user input and navigation for quiz management.
+ */
+
 interface QuizzesControlsProps {
   searchTerm: string;
   onSearchChange: (term: string) => void;

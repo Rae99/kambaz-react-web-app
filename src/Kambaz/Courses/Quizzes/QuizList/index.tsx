@@ -23,6 +23,30 @@ import QuizListItem from './QuizListItem';
 import CopyQuizModal from './CopyQuizModal';
 import StudentScore from './StudentScore';
 
+/**
+ * QuizList Main Component
+ *
+ * This is the main orchestrator component that manages the quiz list display and functionality.
+ * It coordinates all quiz-related operations including:
+ *
+ * Core Responsibilities:
+ * - Fetches and displays quizzes for a specific course
+ * - Manages quiz CRUD operations (create, read, update, delete)
+ * - Handles quiz publishing/unpublishing
+ * - Provides search and sorting functionality
+ * - Manages quiz duplication and copying between courses
+ * - Coordinates with sub-components for UI rendering
+ *
+ * State Management:
+ * - Quiz data fetching and Redux state management
+ * - Search and filtering state
+ * - Copy modal state and course selection
+ * - Context menu state for quiz actions
+ * - Sorting preferences
+ *
+ * The component uses several helper functions from quiz-rules.ts for consistent
+ * quiz information display and calculation.
+ */
 export default function QuizList() {
   const { cid } = useParams();
   const navigate = useNavigate();
@@ -107,7 +131,16 @@ export default function QuizList() {
     }
   }, [openMenuId]);
 
-  // Quiz action handlers
+  /**
+   * Quiz Action Handlers
+   * These functions handle all quiz-related operations including CRUD operations,
+   * publishing, duplication, and course copying.
+   */
+
+  /**
+   * Deletes a quiz from the course and updates Redux state
+   * @param quizId - The ID of the quiz to delete
+   */
   const handleDeleteQuiz = async (quizId: string) => {
     try {
       await quizzesClient.deleteQuiz(quizId);
@@ -117,6 +150,11 @@ export default function QuizList() {
     }
   };
 
+  /**
+   * Toggles the published state of a quiz (published/unpublished)
+   * @param quizId - The ID of the quiz to toggle
+   * @param isPublished - Current published state
+   */
   const handlePublishToggle = async (quizId: string, isPublished: boolean) => {
     try {
       const quiz = quizzes.find((q: Quiz) => q._id === quizId);
@@ -130,10 +168,18 @@ export default function QuizList() {
     }
   };
 
+  /**
+   * Navigates to the quiz editor for the specified quiz
+   * @param quizId - The ID of the quiz to edit
+   */
   const handleEdit = (quizId: string) => {
     navigate(`/Kambaz/Courses/${cid}/Quizzes/${quizId}/edit`);
   };
 
+  /**
+   * Creates a duplicate of a quiz within the same course
+   * @param quizId - The ID of the quiz to duplicate
+   */
   const handleDuplicate = async (quizId: string) => {
     try {
       const quiz = quizzes.find((q: Quiz) => q._id === quizId);
@@ -155,6 +201,10 @@ export default function QuizList() {
     }
   };
 
+  /**
+   * Initiates the process of copying a quiz to another course
+   * @param quizId - The ID of the quiz to copy
+   */
   const handleCopyToCourse = async (quizId: string) => {
     const quiz = quizzes.find((q: Quiz) => q._id === quizId);
     if (quiz && isFaculty) {
@@ -163,6 +213,10 @@ export default function QuizList() {
     }
   };
 
+  /**
+   * Executes the quiz copy operation to the selected target course
+   * Creates a new quiz with modified metadata and saves it to the target course
+   */
   const handleConfirmCopy = async () => {
     if (!selectedQuizToCopy || !targetCourseId) return;
 
@@ -202,7 +256,13 @@ export default function QuizList() {
     setTargetCourseId('');
   };
 
-  // Helper function to render availability information
+  /**
+   * Helper function to render consistent availability information for each quiz
+   * Uses helper functions from quiz-rules.ts for standardized formatting
+   * @param quiz - The quiz object to render info for
+   * @param isFaculty - Whether the current user is faculty
+   * @returns JSX element with formatted availability information
+   */
   const renderAvailabilityInfo = (quiz: Quiz, isFaculty: boolean) => {
     const availabilityStatus = getAvailabilityStatusText(quiz);
     const formattedDueDate = getFormattedDueDate(quiz);
@@ -241,7 +301,10 @@ export default function QuizList() {
     );
   }
 
-  // Data processing
+  /**
+   * Data Processing and Filtering
+   * Applies search filtering and sorting to the quiz list
+   */
   const courseQuizzes = quizzes || [];
   const searchedCourseQuizzes = courseQuizzes.filter(
     (quiz: Quiz) =>

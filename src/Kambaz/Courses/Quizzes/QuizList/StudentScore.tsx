@@ -3,6 +3,19 @@ import { useSelector } from 'react-redux';
 import type { Quiz } from '../types';
 import { getStudentQuizScore } from '../services';
 
+/**
+ * StudentScore Component
+ *
+ * Displays the current student's score for a specific quiz:
+ * - Fetches student's quiz attempt score from backend
+ * - Shows loading state while fetching
+ * - Displays "N/A" if no score available
+ * - Only renders for students and regular users
+ *
+ * This component provides personalized score information
+ * for students viewing the quiz list.
+ */
+
 interface StudentScoreProps {
   quiz: Quiz;
 }

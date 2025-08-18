@@ -1,6 +1,19 @@
 import { Modal, Button, Form } from 'react-bootstrap';
 import type { Quiz } from '../types';
 
+/**
+ * CopyQuizModal Component
+ *
+ * Modal dialog for copying quizzes between courses:
+ * - Displays available target courses
+ * - Handles course selection
+ * - Manages copy operation state
+ * - Provides user feedback during copying
+ *
+ * This component facilitates the cross-course quiz duplication
+ * functionality for faculty users.
+ */
+
 interface CopyQuizModalProps {
   show: boolean;
   quiz: Quiz | null;

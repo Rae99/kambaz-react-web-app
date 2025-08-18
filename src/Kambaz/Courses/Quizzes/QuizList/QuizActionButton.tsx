@@ -4,6 +4,19 @@ import { useSelector } from 'react-redux';
 import type { Quiz } from '../types';
 import { canStudentTakeQuiz } from '../services';
 
+/**
+ * QuizActionButton Component
+ *
+ * Dynamic button component that determines quiz availability for students:
+ * - Checks if student can take the quiz based on attempt limits
+ * - Shows "Start Quiz" button when available
+ * - Displays disabled state with reason when unavailable
+ * - Handles navigation to quiz taking interface
+ *
+ * This component provides intelligent quiz access control for students
+ * based on their attempt history and quiz settings.
+ */
+
 interface QuizActionButtonProps {
   quiz: Quiz;
 }

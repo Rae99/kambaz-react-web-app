@@ -10,6 +10,19 @@ import {
 import QuizContextMenu from './QuizContextMenu';
 import QuizActionButton from './QuizActionButton';
 
+/**
+ * QuizListItem Component
+ *
+ * Renders an individual quiz item in the quiz list with:
+ * - Quiz title and availability information
+ * - Publish/unpublish status (faculty only)
+ * - Context menu for quiz actions
+ * - Navigation to quiz details
+ *
+ * This component handles the display and interaction for each quiz
+ * in the list, including faculty-specific controls and student navigation.
+ */
+
 interface QuizListItemProps {
   quiz: Quiz;
   isFaculty: boolean;
