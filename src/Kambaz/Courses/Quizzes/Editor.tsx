@@ -134,6 +134,11 @@ export default function QuizEditor() {
     if (isNewQuiz) return;
     if (!quiz) return;
     if (hasHydratedRef.current) return;
+    // Hydrate the form only once to avoid overwriting user edits.
+    // - Start with hasHydratedRef = false.
+    // - The first time a quiz loads, copy quiz -> form, then set hasHydratedRef = true.
+    // - Later Redux updates or PUT responses may replace the quiz object,
+    //   but we DO NOT re-hydrate, so in-progress edits are not blown away.
 
     setQuizForm({
       title: quiz.title ?? 'New Quiz',
@@ -393,8 +398,24 @@ export default function QuizEditor() {
             />
           }
         />
-        <Route path="*" element={<Navigate to={`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`} replace />} />
-        <Route path="" element={<Navigate to={`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`} replace />} />
+        <Route
+          path="*"
+          element={
+            <Navigate
+              to={`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`}
+              replace
+            />
+          }
+        />
+        <Route
+          path=""
+          element={
+            <Navigate
+              to={`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`}
+              replace
+            />
+          }
+        />
       </Routes>
     </div>
   );
