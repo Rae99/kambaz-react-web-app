@@ -295,3 +295,44 @@ export const useQuizActions = (cid: string, qid: string, quizForm: Quiz, isNewQu
     handleCancel,
   };
 };
+
+
+// A React Hook is a function that lets function components use React features (state, lifecycle, context) without classes.
+// Hooks always start with use (e.g., useState, useEffect, or your custom useQuizEditor).
+
+// Rules of Hooks (quick):
+// 	•	Call hooks at the top level (not inside if/for)
+// 	•	Call hooks only in React components or other hooks
+// 	•	Name custom hooks with use…
+
+// When some stateful / side-effectful logic is reused across components,
+// extract it into a custom Hook.
+// - It does NOT return JSX; it returns data and functions.
+// - The name must start with `use` (e.g., useQuizEditor).
+// - Use it in components just like built-in hooks.
+
+// useRef: a persistent, mutable container { current: T } that survives re-renders.
+// “survives re-renders” means the ref’s value stays the same for that one component instance across its re-renders.
+// Mutating ref.current does NOT trigger a re-render.
+// Common uses: hold a DOM node, store a boolean flag (e.g. hasHydrated), keep timer IDs, etc.
+
+
+
+
+// Hydrate the form only once from the quiz object.
+
+// Why: the quiz in Redux can be replaced later (e.g., after a PUT response or when
+// a background detail fetch finishes). If we blindly copy quiz → form on every update,
+// we would overwrite the user's in-progress edits.
+//
+// Strategy:
+// 1) Start with hasHydratedRef.current = false.
+// 2) The first time a quiz object is available, copy quiz → form, then set
+//    hasHydratedRef.current = true.
+// 3) On later quiz updates, DO NOT re-hydrate; keep the user's local form state.
+//    (This prevents “I typed, then a fetch finished, and my edits disappeared”.)
+//
+// Optional “upgrade once”:
+// If you first load a stub quiz (no questions) and later load the full quiz (with questions),
+// allow exactly one upgrade when the new quiz is strictly more complete (e.g., questions length
+// increased). After that single upgrade, lock again to avoid wiping edits.
