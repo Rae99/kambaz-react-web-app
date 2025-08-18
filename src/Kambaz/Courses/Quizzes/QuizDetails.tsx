@@ -119,15 +119,6 @@ export default function QuizDetails() {
   // Use quiz.points directly - keep it simple
   const totalPoints = quiz.points || 0;
 
-  // Debug logging for totalPoints calculation
-  // console.log('QuizDetails - totalPoints calculation:', {
-  //   quizId: quiz._id,
-  //   quizTitle: quiz.title,
-  //   quizPoints: quiz.points,
-  //   questionsCount: quiz.questions?.length,
-  //   finalTotalPoints: totalPoints,
-  // });
-
   return (
     <div className="quiz-details">
       {/* Header */}
@@ -219,17 +210,17 @@ export default function QuizDetails() {
             </Badge>
             {availableDate && (
               <span className="text-muted">
-                Available from: {availableDate.toLocaleDateString()} at 12:00 AM
+                Available from: {availableDate.toLocaleString()}
               </span>
             )}
             {untilDate && (
               <span className="text-muted">
-                Until: {untilDate.toLocaleDateString()} at 11:59 PM
+                Until: {untilDate.toLocaleString()}
               </span>
             )}
             {dueDate && (
               <span className="text-muted">
-                Due: {dueDate.toLocaleDateString()} at 11:59 PM
+                Due: {dueDate.toLocaleString()}
               </span>
             )}
           </div>
