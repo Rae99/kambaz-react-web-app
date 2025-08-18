@@ -1,10 +1,10 @@
 import {
   useParams,
   useNavigate,
-  useLocation,
   Routes,
   Route,
   Navigate,
+  NavLink,
 } from 'react-router-dom';
 import { useSelector, useDispatch } from 'react-redux';
 import { useState, useEffect, useRef } from 'react';
@@ -42,16 +42,10 @@ export default function QuizEditor() {
   const params = useParams();
   const { cid, qid } = params;
   const navigate = useNavigate();
-  const location = useLocation();
   const dispatch = useDispatch();
 
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
   const isNewQuiz = qid === 'new';
-
-  // Determine active tab from URL
-  const activeTab = location.pathname.includes('/questions')
-    ? 'questions'
-    : 'details';
 
   const [fetchState, setFetchState] = useState<
     'idle' | 'loading' | 'ok' | 'notfound' | 'error'
@@ -352,34 +346,21 @@ export default function QuizEditor() {
       {/* Tabs */}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
-          <button
-            type="button"
-            className={`nav-link btn btn-link ${
-              activeTab === 'details' ? 'active' : ''
-            }`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`);
-            }}
+          <NavLink
+            to={`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`}
+            end
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
             Details
-          </button>
+          </NavLink>
         </li>
         <li className="nav-item">
-          <button
-            type="button"
-            className={`nav-link btn btn-link ${
-              activeTab === 'questions' ? 'active' : ''
-            }`}
-            onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/questions`);
-            }}
+          <NavLink
+            to={`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/questions`}
+            className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
           >
             Questions
-          </button>
+          </NavLink>
         </li>
       </ul>
 
@@ -412,8 +393,8 @@ export default function QuizEditor() {
             />
           }
         />
-        <Route path="*" element={<Navigate to="details" replace />} />
-        <Route path="" element={<Navigate to="details" replace />} />
+        <Route path="*" element={<Navigate to={`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`} replace />} />
+        <Route path="" element={<Navigate to={`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`} replace />} />
       </Routes>
     </div>
   );
