@@ -1,5 +1,6 @@
 import axios from "axios";
-import type { Quiz } from "./Quizzes/types";
+import type { Quiz, QuizDTO } from "./Quizzes/types";
+import { convertQuizDTOToQuiz, convertQuizToQuizDTO } from "./Quizzes/types";
 const HTTP_SERVER = import.meta.env.VITE_HTTP_SERVER;
 const COURSES_API = `${HTTP_SERVER}/api/courses`;
 const axiosWithCredentials = axios.create({ withCredentials: true });
@@ -57,14 +58,17 @@ export const createAssignmentForCourse = async (courseId: string, assignment: an
   return response.data;
 };
 
-export const findQuizzesForCourse = async (courseId: string) => {
+export const findQuizzesForCourse = async (courseId: string): Promise<Quiz[]> => {
     const response = await axiosWithCredentials.get(`${COURSES_API}/${courseId}/quizzes`);
-    return response.data;
+    const dtos: QuizDTO[] = response.data;
+    return dtos.map(convertQuizDTOToQuiz);
   };
   
-  export const createQuizForCourse = async (courseId: string, quiz: Quiz) => {
-    const response = await axiosWithCredentials.post(`${COURSES_API}/${courseId}/quizzes`, quiz);
-    return response.data;
+  export const createQuizForCourse = async (courseId: string, quiz: Quiz): Promise<Quiz> => {
+    const dto = convertQuizToQuizDTO(quiz);
+    const response = await axiosWithCredentials.post(`${COURSES_API}/${courseId}/quizzes`, dto);
+    const responseDTO: QuizDTO = response.data;
+    return convertQuizDTOToQuiz(responseDTO);
   };
 
  
