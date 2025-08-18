@@ -3,8 +3,8 @@ import { Button, Alert, Spinner } from 'react-bootstrap';
 import { FaEye } from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import * as quizzesClient from './client';
-import type { Quiz, QuizAttempt } from './types';
+import * as quizzesClient from '../client';
+import type { Quiz, QuizAttempt } from '../types';
 
 interface StudentLastAttemptProps {
   quiz: Quiz;

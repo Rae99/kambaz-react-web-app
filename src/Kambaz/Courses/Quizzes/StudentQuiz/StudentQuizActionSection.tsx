@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { Button } from 'react-bootstrap';
-import { canStudentTakeQuiz } from './services';
-import type { Quiz } from './types';
+import { canStudentTakeQuiz } from '../services';
+import type { Quiz } from '../types';
 
 interface StudentQuizActionSectionProps {
   quiz: Quiz;

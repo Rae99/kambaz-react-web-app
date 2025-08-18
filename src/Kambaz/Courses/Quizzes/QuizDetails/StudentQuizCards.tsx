@@ -1,7 +1,7 @@
 import { Card } from 'react-bootstrap';
 import type { Quiz } from '../types';
-import StudentQuizActionSection from '../StudentQuizActionSection';
-import StudentLastAttempt from '../StudentLastAttempt';
+import StudentQuizActionSection from '../StudentQuiz/StudentQuizActionSection';
+import StudentLastAttempt from '../StudentQuiz/StudentLastAttempt';
 
 interface StudentQuizCardsProps {
   quiz: Quiz;
