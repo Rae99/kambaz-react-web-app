@@ -184,26 +184,31 @@ export default function QuizEditor() {
   const handleSave = async () => {
     try {
       // Convert date formats before sending to server
-      const quizData = { 
+      const quizData = {
         ...quizForm,
         dueDate: quizForm.dueDate ? formatDateForServer(quizForm.dueDate) : '',
-        untilDate: quizForm.untilDate ? formatDateForServer(quizForm.untilDate) : '',
-        availableDate: quizForm.availableDate ? formatDateForServer(quizForm.availableDate) : '',
+        untilDate: quizForm.untilDate
+          ? formatDateForServer(quizForm.untilDate)
+          : '',
+        availableDate: quizForm.availableDate
+          ? formatDateForServer(quizForm.availableDate)
+          : '',
       };
       console.log('Saving quiz data:', quizData);
       console.log('Original dueDate:', quizForm.dueDate);
       console.log('Formatted dueDate:', quizData.dueDate);
       console.log('Original untilDate:', quizForm.untilDate);
       console.log('Formatted untilDate:', quizData.untilDate);
-      
+
       if (isNewQuiz) {
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
         dispatch(addQuiz(newQuiz));
 
         // Clear draft after successful save
-        const draftKey = qid && qid !== 'new' 
-          ? `quiz-draft-${cid}-${qid}` 
-          : `quiz-draft-${cid}-new`;
+        const draftKey =
+          qid && qid !== 'new'
+            ? `quiz-draft-${cid}-${qid}`
+            : `quiz-draft-${cid}-new`;
         localStorage.removeItem(draftKey);
 
         navigate(`/Kambaz/Courses/${cid}/Quizzes/${newQuiz._id}`);
@@ -213,9 +218,10 @@ export default function QuizEditor() {
         dispatch(updateQuiz(updatedQuiz));
 
         // Clear draft after successful save
-        const draftKey = qid && qid !== 'new' 
-          ? `quiz-draft-${cid}-${qid}` 
-          : `quiz-draft-${cid}-new`;
+        const draftKey =
+          qid && qid !== 'new'
+            ? `quiz-draft-${cid}-${qid}`
+            : `quiz-draft-${cid}-new`;
         localStorage.removeItem(draftKey);
 
         navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
@@ -233,27 +239,32 @@ export default function QuizEditor() {
   const handleSaveAndPublish = async () => {
     try {
       // Convert date formats before sending to server
-      const quizData = { 
-        ...quizForm, 
+      const quizData = {
+        ...quizForm,
         isPublished: true,
         dueDate: quizForm.dueDate ? formatDateForServer(quizForm.dueDate) : '',
-        untilDate: quizForm.untilDate ? formatDateForServer(quizForm.untilDate) : '',
-        availableDate: quizForm.availableDate ? formatDateForServer(quizForm.availableDate) : '',
+        untilDate: quizForm.untilDate
+          ? formatDateForServer(quizForm.untilDate)
+          : '',
+        availableDate: quizForm.availableDate
+          ? formatDateForServer(quizForm.availableDate)
+          : '',
       };
       console.log('Saving and publishing quiz data:', quizData);
       console.log('Original dueDate:', quizForm.dueDate);
       console.log('Formatted dueDate:', quizData.dueDate);
       console.log('Original untilDate:', quizForm.untilDate);
       console.log('Formatted untilDate:', quizData.untilDate);
-      
+
       if (isNewQuiz) {
         const newQuiz = await coursesClient.createQuizForCourse(cid!, quizData);
         dispatch(addQuiz(newQuiz));
 
         // Clear draft after successful save and publish
-        const draftKey = qid && qid !== 'new' 
-          ? `quiz-draft-${cid}-${qid}` 
-          : `quiz-draft-${cid}-new`;
+        const draftKey =
+          qid && qid !== 'new'
+            ? `quiz-draft-${cid}-${qid}`
+            : `quiz-draft-${cid}-new`;
         localStorage.removeItem(draftKey);
 
         // Navigate to quiz list after save and publish
@@ -264,9 +275,10 @@ export default function QuizEditor() {
         dispatch(updateQuiz(updatedQuiz));
 
         // Clear draft after successful save and publish
-        const draftKey = qid && qid !== 'new' 
-          ? `quiz-draft-${cid}-${qid}` 
-          : `quiz-draft-${cid}-new`;
+        const draftKey =
+          qid && qid !== 'new'
+            ? `quiz-draft-${cid}-${qid}`
+            : `quiz-draft-${cid}-new`;
         localStorage.removeItem(draftKey);
 
         // Navigate to quiz list after save and publish
@@ -340,28 +352,34 @@ export default function QuizEditor() {
       {/* Tabs */}
       <ul className="nav nav-tabs mb-4">
         <li className="nav-item">
-          <a
-            className={`nav-link ${activeTab === 'details' ? 'active' : ''}`}
-            href="#details"
+          <button
+            type="button"
+            className={`nav-link btn btn-link ${
+              activeTab === 'details' ? 'active' : ''
+            }`}
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/details`);
             }}
           >
             Details
-          </a>
+          </button>
         </li>
         <li className="nav-item">
-          <a
-            className={`nav-link ${activeTab === 'questions' ? 'active' : ''}`}
-            href="#questions"
+          <button
+            type="button"
+            className={`nav-link btn btn-link ${
+              activeTab === 'questions' ? 'active' : ''
+            }`}
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/edit/questions`);
             }}
           >
             Questions
-          </a>
+          </button>
         </li>
       </ul>
 
