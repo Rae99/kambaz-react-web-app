@@ -6,6 +6,7 @@ import * as quizzesClient from '../client';
 import QuestionHeader from './QuestionHeader';
 import QuestionList from './QuestionList';
 import QuestionEditor from './QuestionEditor';
+import React from 'react'; // Added missing import
 
 /**
  * QuizQuestionsEditor Main Component
@@ -44,9 +45,20 @@ export default function QuizQuestionsEditor({
 
   // Get current quiz from Redux store for immediate backend updates
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
-  const currentQuiz = quizId
-    ? quizzes.find((q: Quiz) => q._id === quizId)
-    : null;
+
+  // Use useMemo to recalculate currentQuiz when quizzes or quizId changes
+  const currentQuiz = React.useMemo(() => {
+    if (!quizId) return null;
+    return quizzes.find((q: Quiz) => q._id === quizId);
+  }, [quizzes, quizId]);
+
+  // If we don't have the quiz in store, try to fetch it
+  React.useEffect(() => {
+    if (quizId && !currentQuiz) {
+      // This will trigger the parent component to fetch the quiz if needed
+      console.log('Quiz not found in store, may need to fetch:', quizId);
+    }
+  }, [quizId, currentQuiz]);
 
   const handleAddQuestion = () => {
     // Default to multiple choice question

@@ -61,7 +61,14 @@ export const useQuizEditor = (cid: string, qid: string) => {
   >('idle');
   const hasHydratedRef = useRef(false);
 
-  const quiz = isNewQuiz ? null : quizzes.find((q: Quiz) => q._id === qid);
+  // Try to find quiz from store first, but don't rely on it for existing quizzes
+  const quizFromStore = isNewQuiz ? null : quizzes.find((q: Quiz) => q._id === qid);
+  
+  // Use local state to store quiz data independently of Redux store
+  const [localQuiz, setLocalQuiz] = useState<Quiz | null>(quizFromStore || null);
+  
+  // Use local quiz if available, otherwise fall back to store
+  const quiz = localQuiz || quizFromStore;
 
   // Fetch quiz data
   useEffect(() => {
@@ -70,11 +77,13 @@ export const useQuizEditor = (cid: string, qid: string) => {
       return;
     }
 
+    // If we already have the quiz data (either from store or local state), we're good
     if (quiz) {
       setFetchState('ok');
       return;
     }
 
+    // If we don't have quiz data, fetch it from backend
     let cancelled = false;
     setFetchState('loading');
     (async () => {
@@ -82,6 +91,9 @@ export const useQuizEditor = (cid: string, qid: string) => {
         const data = await quizzesClient.findQuizById(qid!);
         if (cancelled) return;
         if (data) {
+          // Store in local state first for immediate use
+          setLocalQuiz(data);
+          // Also update Redux store for consistency
           dispatch(updateQuiz(data));
           setFetchState('ok');
         } else {
@@ -95,6 +107,13 @@ export const useQuizEditor = (cid: string, qid: string) => {
       cancelled = true;
     };
   }, [isNewQuiz, qid, quiz, dispatch]);
+
+  // Update local quiz when store changes (e.g., after other components update the quiz)
+  useEffect(() => {
+    if (quizFromStore && !localQuiz) {
+      setLocalQuiz(quizFromStore);
+    }
+  }, [quizFromStore, localQuiz]);
 
   // Redirect logic
   useEffect(() => {
@@ -160,9 +179,15 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
     updatedAt: quiz?.updatedAt ?? new Date().toISOString(),
   });
 
-  // Hydrate form only once
+  // Hydrate form when quiz data becomes available
   useEffect(() => {
     if (!quiz) return;
+    
+    // Reset hydration flag when quiz changes (e.g., after refresh)
+    if (quiz._id !== quizForm._id) {
+      hasHydratedRef.current = false;
+    }
+    
     if (hasHydratedRef.current) return;
 
     setQuizForm({
@@ -192,7 +217,7 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
     });
 
     hasHydratedRef.current = true;
-  }, [quiz, cid, hasHydratedRef]);
+  }, [quiz, cid, hasHydratedRef, quizForm._id]);
 
   const handleFormChange = (field: keyof Quiz, value: any) => {
     setQuizForm((prev) => ({

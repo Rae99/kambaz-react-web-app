@@ -1,4 +1,5 @@
 import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
 import {
   QuizEditorHeader,
   QuizEditorTabs,
@@ -52,6 +53,13 @@ export default function QuizEditor() {
     quizForm,
     isNewQuiz
   );
+
+  // Reset hydration flag when quiz changes (e.g., after refresh)
+  useEffect(() => {
+    if (quiz && !isNewQuiz) {
+      hasHydratedRef.current = false;
+    }
+  }, [quiz?._id, isNewQuiz, hasHydratedRef]);
 
   // Early return for loading/error states
   const loadingState = LoadingStates({ fetchState, isNewQuiz });
