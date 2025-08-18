@@ -9,7 +9,7 @@ import People from './People';
 import Piazza from './Piazza';
 import Zoom from './Zoom';
 import Quizzes from './Quizzes';
-import QuizEditor from './Quizzes/Editor';
+import QuizEditor from './Quizzes/Editor/index';
 import QuizDetails from './Quizzes/QuizDetails';
 import QuizPreview from './Quizzes/QuizPreview';
 import StudentQuiz from './Quizzes/StudentQuiz';
