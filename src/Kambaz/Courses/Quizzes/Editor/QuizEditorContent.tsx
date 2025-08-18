@@ -1,6 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import QuizDetailsEditor from '../QuizDetailsEditor';
-import QuizQuestionsEditor from '../QuizQuestionsEditor';
+import QuizDetailsEditor from '../QuizDetailsEditor/index';
+import QuizQuestionsEditor from '../QuizQuestionsEditor/index';
 import type { Quiz } from '../types';
 
 /**

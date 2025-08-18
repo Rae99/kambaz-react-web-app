@@ -1,85 +1,29 @@
 import { Row, Col } from 'react-bootstrap';
-import type { Quiz } from './types';
+import type { Quiz } from '../types';
 
-interface QuizDetailsEditorProps {
+/**
+ * QuizOptions Component
+ *
+ * Handles the quiz options and settings section:
+ * - Time limit and assignment group
+ * - Quiz behavior options (shuffle, multiple attempts, etc.)
+ * - Show correct answers configuration
+ *
+ * This component manages all the configurable options
+ * that affect how the quiz behaves for students.
+ */
+
+interface QuizOptionsProps {
   quizForm: Quiz;
   onFormChange: (field: keyof Quiz, value: any) => void;
-  onSave?: () => void;
-  onSaveAndPublish?: () => void;
-  onCancel?: () => void;
 }
 
-export default function QuizDetailsEditor({
+export default function QuizOptions({
   quizForm,
   onFormChange,
-  onSave,
-  onSaveAndPublish,
-  onCancel,
-}: QuizDetailsEditorProps) {
+}: QuizOptionsProps) {
   return (
-    <div className="tab-pane fade show active" id="details">
-      <div className="mb-3">
-        <label htmlFor="wd-quiz-title" className="form-label">
-          Quiz Title
-        </label>
-        <input
-          id="wd-quiz-title"
-          value={quizForm.title}
-          onChange={(e) => onFormChange('title', e.target.value)}
-          className="form-control"
-          placeholder="Enter quiz title"
-        />
-      </div>
-
-      <div className="mb-3">
-        <label htmlFor="wd-quiz-description" className="form-label">
-          Quiz Instructions
-        </label>
-        <textarea
-          id="wd-quiz-description"
-          rows={4}
-          className="form-control"
-          value={quizForm.description}
-          onChange={(e) => onFormChange('description', e.target.value)}
-          placeholder="Enter quiz instructions"
-        />
-      </div>
-
-      <Row className="mb-3">
-        <Col md={6}>
-          <label htmlFor="wd-quiz-type" className="form-label">
-            Quiz Type
-          </label>
-          <select
-            id="wd-quiz-type"
-            className="form-select"
-            value={quizForm.quizType || 'Graded Quiz'}
-            onChange={(e) => onFormChange('quizType', e.target.value)}
-          >
-            <option>Graded Quiz</option>
-            <option>Practice Quiz</option>
-            <option>Graded Survey</option>
-            <option>Ungraded Survey</option>
-          </select>
-        </Col>
-        <Col md={6}>
-          <label htmlFor="wd-quiz-points" className="form-label">
-            Quiz Points
-          </label>
-          <input
-            id="wd-quiz-points"
-            type="number"
-            value={quizForm.points || 0}
-            onChange={(e) =>
-              onFormChange('points', parseInt(e.target.value) || 0)
-            }
-            className="form-control"
-            min="0"
-            placeholder="Total points for this quiz"
-          />
-        </Col>
-      </Row>
-
+    <>
       <Row className="mb-3">
         <Col md={6}>
           <label htmlFor="wd-time-limit" className="form-label">
@@ -288,102 +232,6 @@ export default function QuizDetailsEditor({
           )}
         </div>
       </div>
-
-      <div className="mb-3">
-        <label className="form-label">Assign</label>
-        <div className="p-3 border rounded">
-          <div className="mb-3">
-            <label htmlFor="wd-assign-to" className="form-label fw-bold">
-              Assign to
-            </label>
-            <select id="wd-assign-to" className="form-select">
-              <option>Everyone</option>
-              <option>Section 1</option>
-              <option>Section 2</option>
-            </select>
-          </div>
-          <div className="mb-3">
-            <label htmlFor="wd-due-date" className="form-label fw-bold">
-              Due
-            </label>
-            <input
-              type="datetime-local"
-              id="wd-due-date"
-              className="form-control"
-              value={quizForm.dueDate || ''}
-              onChange={(e) => {
-                console.log('Due date changed:', e.target.value);
-                onFormChange('dueDate', e.target.value);
-              }}
-            />
-          </div>
-          <div className="row">
-            <div className="col">
-              <label htmlFor="wd-available-from" className="form-label fw-bold">
-                Available from
-              </label>
-              <input
-                type="datetime-local"
-                id="wd-available-from"
-                className="form-control"
-                value={quizForm.availableDate || ''}
-                onChange={(e) => onFormChange('availableDate', e.target.value)}
-              />
-            </div>
-            <div className="col">
-              <label htmlFor="wd-until-date" className="form-label fw-bold">
-                Until
-              </label>
-              <input
-                type="datetime-local"
-                id="wd-until-date"
-                className="form-control"
-                value={quizForm.untilDate || ''}
-                onChange={(e) => {
-                  console.log('Until date changed:', e.target.value);
-                  onFormChange('untilDate', e.target.value);
-                }}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div className="mb-3">
-        <div className="form-check">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            id="wd-publish-quiz"
-            checked={quizForm.isPublished}
-            onChange={(e) => onFormChange('isPublished', e.target.checked)}
-          />
-          <label className="form-check-label" htmlFor="wd-publish-quiz">
-            Publish quiz
-          </label>
-        </div>
-      </div>
-
-      {/* Save and Cancel Buttons */}
-      {(onSave || onSaveAndPublish || onCancel) && (
-        <div className="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
-          {onCancel && (
-            <button className="btn btn-secondary" onClick={onCancel}>
-              Cancel
-            </button>
-          )}
-          {onSave && (
-            <button className="btn btn-primary" onClick={onSave}>
-              Save Quiz
-            </button>
-          )}
-          {onSaveAndPublish && (
-            <button className="btn btn-success" onClick={onSaveAndPublish}>
-              Save & Publish
-            </button>
-          )}
-        </div>
-      )}
-    </div>
+    </>
   );
 }

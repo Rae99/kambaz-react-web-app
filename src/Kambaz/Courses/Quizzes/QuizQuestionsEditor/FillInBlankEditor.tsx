@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Form, Button, Row, Col, Card } from 'react-bootstrap';
 import { FaPlus, FaTrash, FaSave, FaTimes } from 'react-icons/fa';
-import type { Question, BlankOption } from './types';
+import type { Question, BlankOption } from '../types';
 
 interface FillInBlankEditorProps {
   question: Question;

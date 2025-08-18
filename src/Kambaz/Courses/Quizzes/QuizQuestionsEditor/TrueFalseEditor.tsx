@@ -1,6 +1,6 @@
 import { Form, Button, Row, Col, Card } from 'react-bootstrap';
 import { FaSave, FaTimes } from 'react-icons/fa';
-import type { Question } from './types';
+import type { Question } from '../types';
 
 interface TrueFalseEditorProps {
   question: Question;
