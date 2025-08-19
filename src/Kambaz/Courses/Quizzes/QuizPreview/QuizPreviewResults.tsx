@@ -68,7 +68,7 @@ export default function QuizPreviewResults({
         <Card.Body>
           <h5 className="card-title">Question Review</h5>
           {quiz.questions.map((question: Question, index: number) => {
-            const userAnswer = quizAttempt.answers[question._id || ''];
+            const userAnswer = quizAttempt.answers[index];
 
             // Calculate correctness based on question type
             let isCorrect = false;

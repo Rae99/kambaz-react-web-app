@@ -18,11 +18,11 @@ interface QuizPreviewInterfaceProps {
   quiz: Quiz;
   currentQuestionIndex: number;
   quizAttempt: {
-    answers: { [questionId: string]: string | string[] };
+    answers: { [questionIndex: number]: string | string[] };
   };
-  onAnswerChange: (questionId: string, answer: string | string[]) => void;
+  onAnswerChange: (questionIndex: number, answer: string | string[]) => void;
   onBlankAnswerChange: (
-    questionId: string,
+    questionIndex: number,
     blankIndex: number,
     answer: string
   ) => void;
@@ -55,7 +55,7 @@ export default function QuizPreviewInterface({
               Question {currentQuestionIndex + 1} of {quiz.questions.length}
             </h5>
             <div className="text-muted">
-              {quizAttempt.answers[currentQuestion?._id || '']
+              {quizAttempt.answers[currentQuestionIndex]
                 ? 'Answered'
                 : 'Not answered'}
             </div>
@@ -80,14 +80,10 @@ export default function QuizPreviewInterface({
                           id={`option-${optionIndex}`}
                           value={option}
                           checked={
-                            quizAttempt.answers[currentQuestion._id || ''] ===
-                            option
+                            quizAttempt.answers[currentQuestionIndex] === option
                           }
                           onChange={(e) =>
-                            onAnswerChange(
-                              currentQuestion._id || '',
-                              e.target.value
-                            )
+                            onAnswerChange(currentQuestionIndex, e.target.value)
                           }
                         />
                         <label
@@ -112,10 +108,10 @@ export default function QuizPreviewInterface({
                     id="true-option"
                     value="true"
                     checked={
-                      quizAttempt.answers[currentQuestion._id || ''] === 'true'
+                      quizAttempt.answers[currentQuestionIndex] === 'true'
                     }
                     onChange={(e) =>
-                      onAnswerChange(currentQuestion._id || '', e.target.value)
+                      onAnswerChange(currentQuestionIndex, e.target.value)
                     }
                   />
                   <label className="form-check-label" htmlFor="true-option">
@@ -130,10 +126,10 @@ export default function QuizPreviewInterface({
                     id="false-option"
                     value="false"
                     checked={
-                      quizAttempt.answers[currentQuestion._id || ''] === 'false'
+                      quizAttempt.answers[currentQuestionIndex] === 'false'
                     }
                     onChange={(e) =>
-                      onAnswerChange(currentQuestion._id || '', e.target.value)
+                      onAnswerChange(currentQuestionIndex, e.target.value)
                     }
                   />
                   <label className="form-check-label" htmlFor="false-option">
@@ -156,13 +152,13 @@ export default function QuizPreviewInterface({
                         value={
                           (
                             quizAttempt.answers[
-                              currentQuestion._id || ''
+                              currentQuestionIndex
                             ] as string[]
                           )?.[blankIndex] || ''
                         }
                         onChange={(e) =>
                           onBlankAnswerChange(
-                            currentQuestion._id || '',
+                            currentQuestionIndex,
                             blankIndex,
                             e.target.value
                           )
@@ -202,7 +198,7 @@ export default function QuizPreviewInterface({
               <Button
                 variant="primary"
                 onClick={onNextQuestion}
-                disabled={!quizAttempt.answers[currentQuestion?._id || '']}
+                disabled={!quizAttempt.answers[currentQuestionIndex]}
               >
                 Next
               </Button>
@@ -219,9 +215,7 @@ export default function QuizPreviewInterface({
               <Button
                 key={question._id || index}
                 variant={
-                  quizAttempt.answers[question._id || '']
-                    ? 'success'
-                    : 'outline-secondary'
+                  quizAttempt.answers[index] ? 'success' : 'outline-secondary'
                 }
                 size="sm"
                 className="disabled"

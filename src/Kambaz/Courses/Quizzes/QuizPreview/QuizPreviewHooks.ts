@@ -56,8 +56,8 @@ export const useQuizPreview = (qid: string) => {
   }, [qid]);
 
   // Helper function to check if a question is fully answered
-  const isQuestionAnswered = (question: Question): boolean => {
-    const answer = quizAttempt.answers[question._id || ''];
+  const isQuestionAnswered = (question: Question, questionIndex: number): boolean => {
+    const answer = quizAttempt.answers[questionIndex];
     
     if (question.type === 'fill-in-the-blank' && question.blanks) {
       // For fill-in-the-blank, check if all blanks have answers
@@ -74,31 +74,31 @@ export const useQuizPreview = (qid: string) => {
   // Helper function to check if all questions are answered
   const areAllQuestionsAnswered = (): boolean => {
     if (!quiz) return false;
-    return quiz.questions.every(question => isQuestionAnswered(question));
+    return quiz.questions.every((question, index) => isQuestionAnswered(question, index));
   };
 
   // Handle answer changes
   const handleAnswerChange = (
-    questionId: string,
+    questionIndex: number,
     answer: string | string[]
   ) => {
     setQuizAttempt((prev) => ({
       ...prev,
       answers: {
         ...prev.answers,
-        [questionId]: answer,
+        [questionIndex]: answer,
       },
     }));
   };
 
   // Handle blank answer changes
   const handleBlankAnswerChange = (
-    questionId: string,
+    questionIndex: number,
     blankIndex: number,
     answer: string
   ) => {
     setQuizAttempt((prev) => {
-      const currentAnswers = (prev.answers[questionId] as string[]) || [];
+      const currentAnswers = (prev.answers[questionIndex] as string[]) || [];
       const newAnswers = [...currentAnswers];
       newAnswers[blankIndex] = answer;
 
@@ -106,7 +106,7 @@ export const useQuizPreview = (qid: string) => {
         ...prev,
         answers: {
           ...prev.answers,
-          [questionId]: newAnswers,
+          [questionIndex]: newAnswers,
         },
       };
     });
@@ -129,8 +129,8 @@ export const useQuizPreview = (qid: string) => {
   const handleSubmitQuiz = () => {
     // Calculate score based on answers
     let score = 0;
-    quiz?.questions.forEach((question: Question) => {
-      const userAnswer = quizAttempt.answers[question._id || ''];
+    quiz?.questions.forEach((question: Question, questionIndex: number) => {
+      const userAnswer = quizAttempt.answers[questionIndex];
 
       if (userAnswer) {
         if (question.type === 'fill-in-the-blank' && question.blanks) {

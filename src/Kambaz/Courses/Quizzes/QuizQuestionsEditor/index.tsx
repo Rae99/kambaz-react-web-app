@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Button } from 'react-bootstrap';
+import { useState, useEffect } from 'react';
+import { Button, Card } from 'react-bootstrap';
 import type { Question, Quiz } from '../types';
 import * as quizzesClient from '../client';
 import QuestionHeader from './QuestionHeader';
-import QuestionList from './QuestionList';
 import QuestionEditor from './QuestionEditor';
+import { FaEdit, FaTrash } from 'react-icons/fa';
 
 /**
  * QuizQuestionsEditor Main Component
@@ -42,6 +42,20 @@ export default function QuizQuestionsEditor({
 }: QuizQuestionsEditorProps) {
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
+
+  // Debug logging for questions prop changes
+  console.log('=== QuizQuestionsEditor Render ===');
+  console.log('questions prop received:', questions);
+  console.log('questions prop length:', questions.length);
+  console.log('questions prop content:', questions);
+
+  // Track questions prop changes
+  useEffect(() => {
+    console.log('=== QuizQuestionsEditor useEffect ===');
+    console.log('questions prop changed to:', questions);
+    console.log('questions prop length:', questions.length);
+    console.log('questions prop content:', questions);
+  }, [questions]);
 
   // Use quiz data directly from props, no longer dependent on Redux store
   const currentQuiz = quiz;
@@ -137,16 +151,42 @@ export default function QuizQuestionsEditor({
   };
 
   const handleEditQuestion = (question: Question, index: number) => {
+    console.log('=== STARTING EDIT ===');
+    console.log('Editing question at index:', index);
+    console.log('Question to edit:', question);
+    console.log('Current questions array:', questions);
+    console.log('Current editingIndex before set:', editingIndex);
+
     setEditingQuestion({ ...question });
     setEditingIndex(index);
+
+    console.log('editingIndex set to:', index);
   };
 
   const handleSaveQuestion = async () => {
-    if (editingQuestion && editingIndex >= 0) {
+    // Capture the current editingIndex to avoid closure issues
+    const currentEditingIndex = editingIndex;
+
+    if (editingQuestion && currentEditingIndex >= 0) {
       try {
-        // Update local state first
-        const updatedQuestions = [...questions];
-        updatedQuestions[editingIndex] = editingQuestion;
+        console.log('=== SAVING QUESTION DEBUG ===');
+        console.log('editingIndex from state:', editingIndex);
+        console.log('currentEditingIndex captured:', currentEditingIndex);
+        console.log('editingQuestion:', editingQuestion);
+        console.log('current questions:', questions);
+        console.log('questions array length:', questions.length);
+
+        // Update local state first - ensure deep copy
+        const updatedQuestions = questions.map((q) => ({ ...q }));
+        updatedQuestions[currentEditingIndex] = { ...editingQuestion };
+
+        console.log('updatedQuestions after edit:', updatedQuestions);
+        console.log(
+          'Question at currentEditingIndex after update:',
+          updatedQuestions[currentEditingIndex]
+        );
+        console.log('updatedQuestions array length:', updatedQuestions.length);
+
         onQuestionsChange?.(updatedQuestions);
 
         // If we have quiz ID and quiz data, save immediately to backend
@@ -157,6 +197,8 @@ export default function QuizQuestionsEditor({
             questions: updatedQuestions,
             updatedAt: new Date().toISOString(),
           };
+
+          console.log('Saving to backend with quiz:', updatedQuiz);
 
           // Save to backend
           await quizzesClient.updateQuiz(quizId, updatedQuiz);
@@ -223,11 +265,9 @@ export default function QuizQuestionsEditor({
       />
 
       {questions.length === 0 ? (
-        <QuestionList
-          questions={questions}
-          onEditQuestion={handleEditQuestion}
-          onDeleteQuestion={handleDeleteQuestion}
-        />
+        <div className="text-center text-muted">
+          <p>No questions added yet. Click "Add Question" to get started.</p>
+        </div>
       ) : (
         <div className="questions-list">
           {questions.map((question, index) => (
@@ -245,12 +285,104 @@ export default function QuizQuestionsEditor({
                   onCancel={handleCancelEdit}
                 />
               ) : (
-                // Display mode
-                <QuestionList
-                  questions={[question]}
-                  onEditQuestion={handleEditQuestion}
-                  onDeleteQuestion={handleDeleteQuestion}
-                />
+                // Display mode - render question directly
+                <Card className="mb-3">
+                  <Card.Body>
+                    <div>
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <div>
+                          <h6 className="mb-1">
+                            Question {index + 1}: {question.text}
+                          </h6>
+                          <div className="text-muted">
+                            <small>
+                              {question.type} | {question.points} pts
+                            </small>
+                          </div>
+                        </div>
+                        <div className="d-flex gap-2">
+                          <Button
+                            variant="outline-primary"
+                            size="sm"
+                            onClick={() => handleEditQuestion(question, index)}
+                          >
+                            <FaEdit className="me-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="outline-danger"
+                            size="sm"
+                            onClick={() => handleDeleteQuestion(index)}
+                          >
+                            <FaTrash className="me-1" />
+                            Delete
+                          </Button>
+                        </div>
+                      </div>
+
+                      {question.type === 'multiple-choice' &&
+                        question.options && (
+                          <div className="ms-3">
+                            <small className="text-muted">Options:</small>
+                            <ul className="list-unstyled ms-3">
+                              {question.options.map((option, optIndex) => (
+                                <li key={optIndex} className="mb-1">
+                                  {option || `Option ${optIndex + 1}`}
+                                  {option === question.correctAnswer && (
+                                    <span className="text-success ms-2">
+                                      ✓ Correct
+                                    </span>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+
+                      {question.type === 'true-false' && (
+                        <div className="ms-3">
+                          <small className="text-muted">
+                            Correct Answer:{' '}
+                            <span className="text-success">
+                              {question.correctAnswer}
+                            </span>
+                          </small>
+                        </div>
+                      )}
+
+                      {question.type === 'fill-in-the-blank' && (
+                        <div className="ms-3">
+                          <small className="text-muted">
+                            Blanks: {question.blanks?.length || 0}
+                          </small>
+                          {question.blanks && question.blanks.length > 0 && (
+                            <div className="ms-3 mt-1">
+                              {question.blanks.map((blank, blankIndex) => (
+                                <div key={blank.id} className="mb-1">
+                                  <small className="text-muted">
+                                    <strong>Blank {blankIndex + 1}:</strong>{' '}
+                                    {blank.options.length} options, correct:{' '}
+                                    <span className="text-success">
+                                      {blank.correctAnswer || 'Not set'}
+                                    </span>
+                                  </small>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {question.explanation && (
+                        <div className="ms-3 mt-2">
+                          <small className="text-muted">
+                            <strong>Explanation:</strong> {question.explanation}
+                          </small>
+                        </div>
+                      )}
+                    </div>
+                  </Card.Body>
+                </Card>
               )}
             </div>
           ))}

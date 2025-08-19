@@ -54,17 +54,29 @@ export default function QuizEditorContent({
       <Route
         path="questions"
         element={
-          <QuizQuestionsEditor
-            questions={quizForm.questions}
-            quizId={qid === 'new' ? undefined : qid}
-            quiz={qid === 'new' ? undefined : quizForm} // Pass quiz data to avoid Redux dependency
-            onQuestionsChange={(questions) => {
-              onFormChange('questions', questions);
-            }}
-            onSave={onSave}
-            onSaveAndPublish={onSaveAndPublish}
-            onCancel={onCancel}
-          />
+          (() => {
+            console.log('=== QuizEditorContent Render ===');
+            console.log('quizForm:', quizForm);
+            console.log('quizForm.questions:', quizForm.questions);
+            console.log('quizForm.questions.length:', quizForm.questions?.length);
+            
+            return (
+              <QuizQuestionsEditor
+                questions={quizForm.questions}
+                quizId={qid === 'new' ? undefined : qid}
+                quiz={qid === 'new' ? undefined : quizForm} // Pass quiz data to avoid Redux dependency
+                onQuestionsChange={(questions) => {
+                  console.log('=== QuizEditorContent onQuestionsChange ===');
+                  console.log('Received questions:', questions);
+                  console.log('Current quizForm.questions:', quizForm.questions);
+                  onFormChange('questions', questions);
+                }}
+                onSave={onSave}
+                onSaveAndPublish={onSaveAndPublish}
+                onCancel={onCancel}
+              />
+            );
+          })()
         }
       />
       <Route
