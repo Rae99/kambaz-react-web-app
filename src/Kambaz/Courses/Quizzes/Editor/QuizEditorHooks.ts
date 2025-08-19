@@ -84,12 +84,13 @@ export const useQuizEditor = (cid: string, qid: string) => {
     }
 
     // If we don't have quiz data, fetch it from backend
-    let cancelled = false;
+    // Scenario: The user switches pages quickly—before the first API request finishes, a second one starts. The cancelled flag ensures that only the latest request’s result gets processed.
+    let cancelled = false; // Prevents race conditions when component unmounts during API call
     setFetchState('loading');
     (async () => {
       try {
         const data = await quizzesClient.findQuizById(qid!);
-        if (cancelled) return;
+        if (cancelled) return; // Don't proceed if component was unmounted
         if (data) {
           // Store in local state first for immediate use
           setLocalQuiz(data);
@@ -100,13 +101,14 @@ export const useQuizEditor = (cid: string, qid: string) => {
           setFetchState('notfound');
         }
       } catch {
-        setFetchState('error');
+        if (!cancelled) setFetchState('error');
       }
     })();
     return () => {
-      cancelled = true;
+      cancelled = true; // Mark as cancelled when component unmounts
     };
   }, [isNewQuiz, qid, quiz, dispatch]);
+  // Page refresh → Component remounts, localQuiz initializes to null → useEffect detects quiz is null → Calls API to fetch data → setLocalQuiz(data) resets local state → Component re-renders, displays correct data
 
   // Update local quiz when store changes (e.g., after other components update the quiz)
   useEffect(() => {
@@ -148,6 +150,7 @@ export const useQuizEditor = (cid: string, qid: string) => {
  */
 export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHydratedRef: React.MutableRefObject<boolean>) => {
   const [quizForm, setQuizForm] = useState<Quiz>({
+    _id: quiz?._id,
     title: quiz?.title ?? 'New Quiz',
     description: quiz?.description ?? 'Quiz description',
     courseId: quiz?.courseId || cid || '',
@@ -183,7 +186,7 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
   useEffect(() => {
     if (!quiz) return;
     
-    // Reset hydration flag when quiz changes (e.g., after refresh)
+    // Reset hydration flag when quiz changes (e.g., after refresh or quiz switch)
     if (quiz._id !== quizForm._id) {
       hasHydratedRef.current = false;
     }
@@ -191,6 +194,7 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
     if (hasHydratedRef.current) return;
 
     setQuizForm({
+      _id: quiz._id,
       title: quiz.title ?? 'New Quiz',
       description: quiz.description ?? 'Quiz description',
       courseId: quiz.courseId || cid || '',
@@ -217,7 +221,15 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
     });
 
     hasHydratedRef.current = true;
-  }, [quiz, cid, hasHydratedRef, quizForm._id]);
+  }, [quiz, cid, hasHydratedRef, quizForm._id]); // Now we can use quizForm._id directly
+
+  // When does secondary hydration trigger?
+  // 1. Quiz ID changes: User switches from editing one quiz to another
+  // 2. Quiz data updates: New quiz data fetched from backend
+  // 
+  // When do we only need one hydration?
+  // 1. Initial load: Component renders for the first time
+  // 2. Data stability: Quiz data hasn't changed
 
   const handleFormChange = (field: keyof Quiz, value: any) => {
     setQuizForm((prev) => ({
@@ -239,7 +251,6 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
  * - Handles quiz saving (create new or update existing)
  * - Manages quiz publishing workflow
  * - Handles navigation after successful actions
- * - Clears draft data from localStorage
  * - Provides action handlers for the UI
  * 
  * @param cid - Course ID
@@ -251,13 +262,6 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
 export const useQuizActions = (cid: string, qid: string, quizForm: Quiz, isNewQuiz: boolean) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
-  const clearDraft = () => {
-    const draftKey = qid && qid !== 'new' 
-      ? `quiz-draft-${cid}-${qid}` 
-      : `quiz-draft-${cid}-new`;
-    localStorage.removeItem(draftKey);
-  };
 
   const handleSave = async () => {
     try {
@@ -271,12 +275,10 @@ export const useQuizActions = (cid: string, qid: string, quizForm: Quiz, isNewQu
       if (isNewQuiz) {
         const newQuiz = await coursesClient.createQuizForCourse(cid, quizData);
         dispatch(addQuiz(newQuiz));
-        clearDraft();
         navigate(`/Kambaz/Courses/${cid}/Quizzes/${newQuiz._id}`);
       } else {
         const updatedQuiz = await quizzesClient.updateQuiz(qid, quizData);
         dispatch(updateQuiz(updatedQuiz));
-        clearDraft();
         navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
       }
     } catch (error: any) {
@@ -297,12 +299,10 @@ export const useQuizActions = (cid: string, qid: string, quizForm: Quiz, isNewQu
       if (isNewQuiz) {
         const newQuiz = await coursesClient.createQuizForCourse(cid, quizData);
         dispatch(addQuiz(newQuiz));
-        clearDraft();
         navigate(`/Kambaz/Courses/${cid}/Quizzes`);
       } else {
         const updatedQuiz = await quizzesClient.updateQuiz(qid, quizData);
         dispatch(updateQuiz(updatedQuiz));
-        clearDraft();
         navigate(`/Kambaz/Courses/${cid}/Quizzes`);
       }
     } catch (error: any) {
