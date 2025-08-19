@@ -249,6 +249,93 @@ export default function QuizOptions({
           )}
         </div>
       </div>
+
+      {/* Additional Quiz Options */}
+      <div className="mb-3">
+        <label className="form-label">Advanced Options</label>
+        <div className="p-3 border rounded">
+          <div className="form-check mb-2">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="wd-access-code"
+              checked={!!quizForm.accessCode}
+              onChange={(e) =>
+                onFormChange('accessCode', e.target.checked ? 'quiz123' : '')
+              }
+            />
+            <label className="form-check-label" htmlFor="wd-access-code">
+              Require an access code
+            </label>
+          </div>
+
+          {/* Access code input - only visible when checkbox is checked */}
+          {quizForm.accessCode && (
+            <div className="ms-4 mb-2">
+              <label htmlFor="wd-access-code-input" className="form-label">
+                Access Code:
+              </label>
+              <input
+                type="text"
+                id="wd-access-code-input"
+                className="form-control"
+                value={quizForm.accessCode}
+                onChange={(e) => onFormChange('accessCode', e.target.value)}
+                placeholder="Enter access code"
+              />
+            </div>
+          )}
+
+          <div className="form-check mb-2">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="wd-one-question-at-a-time"
+              checked={quizForm.oneQuestionAtATime || false}
+              onChange={(e) =>
+                onFormChange('oneQuestionAtATime', e.target.checked)
+              }
+            />
+            <label
+              className="form-check-label"
+              htmlFor="wd-one-question-at-a-time"
+            >
+              One Question at a Time
+            </label>
+          </div>
+
+          <div className="form-check mb-2">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="wd-webcam-required"
+              checked={quizForm.webcamRequired || false}
+              onChange={(e) => onFormChange('webcamRequired', e.target.checked)}
+            />
+            <label className="form-check-label" htmlFor="wd-webcam-required">
+              Webcam Required
+            </label>
+          </div>
+
+          <div className="form-check mb-2">
+            <input
+              type="checkbox"
+              className="form-check-input"
+              id="wd-lock-questions-after-answering"
+              checked={quizForm.lockQuestionsAfterAnswering || false}
+              onChange={(e) =>
+                onFormChange('lockQuestionsAfterAnswering', e.target.checked)
+              }
+            />
+            <label
+              className="form-check-label"
+              htmlFor="wd-lock-questions-after-answering"
+            >
+              Lock Questions After Answering
+            </label>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
