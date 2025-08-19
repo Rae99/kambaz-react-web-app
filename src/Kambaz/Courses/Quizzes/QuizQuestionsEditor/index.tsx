@@ -52,8 +52,8 @@ export default function QuizQuestionsEditor({
     onQuestionsChange?.(newQuestions);
   };
 
-  const handleAddQuestion = async () => {
-    // Default to multiple choice question
+  const handleAddQuestion = () => {
+    // Create a temporary question for editing (don't save to database yet)
     const newQuestion: Question = {
       title: '',
       type: 'multiple-choice',
@@ -64,41 +64,15 @@ export default function QuizQuestionsEditor({
       explanation: '',
     };
 
-    const updatedQuestions = [...questions, newQuestion];
-    handleQuestionsChange(updatedQuestions);
-
-    // If we have quiz ID and quiz data, save immediately to backend
-    if (quizId && currentQuiz) {
-      try {
-        // Create updated quiz object
-        const updatedQuiz = {
-          ...currentQuiz,
-          questions: updatedQuestions,
-          updatedAt: new Date().toISOString(),
-        };
-
-        // Save to backend
-        await quizzesClient.updateQuiz(quizId, updatedQuiz);
-      } catch (error) {
-        console.error('Error adding question to backend:', error);
-        alert('Failed to save new question to backend. Please try again.');
-        // Revert local state if backend save fails
-        handleQuestionsChange(questions);
-        return;
-      }
-    }
-
     // Start editing the new question immediately
     setEditingQuestion(newQuestion);
-    setEditingIndex(updatedQuestions.length - 1);
+    setEditingIndex(questions.length); // Use questions.length as the new index
 
-    // Scroll to the new question
+    // Scroll to the new question area
     setTimeout(() => {
-      const newQuestionElement = document.getElementById(
-        `question-${updatedQuestions.length - 1}`
-      );
-      if (newQuestionElement) {
-        newQuestionElement.scrollIntoView({
+      const questionEditorElement = document.getElementById('question-editor');
+      if (questionEditorElement) {
+        questionEditorElement.scrollIntoView({
           behavior: 'smooth',
           block: 'center',
         });
@@ -153,9 +127,16 @@ export default function QuizQuestionsEditor({
 
     if (editingQuestion && currentEditingIndex >= 0) {
       try {
-        // Update local state first - ensure deep copy
-        const updatedQuestions = questions.map((q) => ({ ...q }));
-        updatedQuestions[currentEditingIndex] = { ...editingQuestion };
+        let updatedQuestions: Question[];
+
+        if (currentEditingIndex >= questions.length) {
+          // This is a new question being added
+          updatedQuestions = [...questions, { ...editingQuestion }];
+        } else {
+          // This is an existing question being edited
+          updatedQuestions = questions.map((q) => ({ ...q }));
+          updatedQuestions[currentEditingIndex] = { ...editingQuestion };
+        }
 
         handleQuestionsChange(updatedQuestions);
 
@@ -183,8 +164,12 @@ export default function QuizQuestionsEditor({
   };
 
   const handleCancelEdit = () => {
+    // Clear editing state completely
     setEditingQuestion(null);
     setEditingIndex(-1);
+
+    // No need to save anything - the question was never added to the database
+    // This fixes the bug where canceling would still add a question
   };
 
   const handleDeleteQuestion = async (index: number) => {
@@ -232,130 +217,148 @@ export default function QuizQuestionsEditor({
         onAddQuestion={handleAddQuestion}
       />
 
-      {questions.length === 0 ? (
-        <div className="text-center text-muted">
-          <p>No questions added yet. Click "Add Question" to get started.</p>
-        </div>
-      ) : (
-        <div className="questions-list">
-          {questions.map((question, index) => (
-            <div key={index} className="mb-3" id={`question-${index}`}>
-              {editingIndex === index ? (
-                // Editing mode
-                <QuestionEditor
-                  editingQuestion={editingQuestion}
-                  editingIndex={editingIndex}
-                  onQuestionChange={(updatedQuestion) =>
-                    setEditingQuestion(updatedQuestion)
-                  }
-                  onQuestionTypeChange={handleQuestionTypeChange}
-                  onSave={handleSaveQuestion}
-                  onCancel={handleCancelEdit}
-                />
-              ) : (
-                // Display mode - render question directly
-                <Card className="mb-3">
-                  <Card.Body>
-                    <div>
-                      <div className="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                          <h6 className="mb-1">
-                            Question {index + 1}: {question.text}
-                          </h6>
-                          <div className="text-muted">
-                            <small>
-                              {question.type} | {question.points} pts
-                            </small>
-                          </div>
-                        </div>
-                        <div className="d-flex gap-2">
-                          <Button
-                            variant="outline-primary"
-                            size="sm"
-                            onClick={() => handleEditQuestion(question, index)}
-                          >
-                            <FaEdit className="me-1" />
-                            Edit
-                          </Button>
-                          <Button
-                            variant="outline-danger"
-                            size="sm"
-                            onClick={() => handleDeleteQuestion(index)}
-                          >
-                            <FaTrash className="me-1" />
-                            Delete
-                          </Button>
+      <div className="questions-list">
+        {/* Render existing questions */}
+        {questions.map((question, index) => (
+          <div key={index} className="mb-3" id={`question-${index}`}>
+            {editingIndex === index ? (
+              // Editing mode
+              <QuestionEditor
+                editingQuestion={editingQuestion}
+                editingIndex={editingIndex}
+                onQuestionChange={(updatedQuestion) =>
+                  setEditingQuestion(updatedQuestion)
+                }
+                onQuestionTypeChange={handleQuestionTypeChange}
+                onSave={handleSaveQuestion}
+                onCancel={handleCancelEdit}
+              />
+            ) : (
+              // Display mode - render question directly
+              <Card className="mb-3">
+                <Card.Body>
+                  <div>
+                    <div className="d-flex justify-content-between align-items-start mb-2">
+                      <div>
+                        <h6 className="mb-1">
+                          Question {index + 1}: {question.text}
+                        </h6>
+                        <div className="text-muted">
+                          <small>
+                            {question.type} | {question.points} pts
+                          </small>
                         </div>
                       </div>
+                      <div className="d-flex gap-2">
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          onClick={() => handleEditQuestion(question, index)}
+                        >
+                          <FaEdit className="me-1" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline-danger"
+                          size="sm"
+                          onClick={() => handleDeleteQuestion(index)}
+                        >
+                          <FaTrash className="me-1" />
+                          Delete
+                        </Button>
+                      </div>
+                    </div>
 
-                      {question.type === 'multiple-choice' &&
-                        question.options && (
-                          <div className="ms-3">
-                            <small className="text-muted">Options:</small>
-                            <ul className="list-unstyled ms-3">
-                              {question.options.map((option, optIndex) => (
-                                <li key={optIndex} className="mb-1">
-                                  {option || `Option ${optIndex + 1}`}
-                                  {option === question.correctAnswer && (
-                                    <span className="text-success ms-2">
-                                      ✓ Correct
-                                    </span>
-                                  )}
-                                </li>
-                              ))}
-                            </ul>
+                    {question.type === 'multiple-choice' &&
+                      question.options && (
+                        <div className="ms-3">
+                          <small className="text-muted">Options:</small>
+                          <ul className="list-unstyled ms-3">
+                            {question.options.map((option, optIndex) => (
+                              <li key={optIndex} className="mb-1">
+                                {option || `Option ${optIndex + 1}`}
+                                {option === question.correctAnswer && (
+                                  <span className="text-success ms-2">
+                                    ✓ Correct
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                    {question.type === 'true-false' && (
+                      <div className="ms-3">
+                        <small className="text-muted">
+                          Correct Answer:{' '}
+                          <span className="text-success">
+                            {question.correctAnswer}
+                          </span>
+                        </small>
+                      </div>
+                    )}
+
+                    {question.type === 'fill-in-the-blank' && (
+                      <div className="ms-3">
+                        <small className="text-muted">
+                          Blanks: {question.blanks?.length || 0}
+                        </small>
+                        {question.blanks && question.blanks.length > 0 && (
+                          <div className="ms-3 mt-1">
+                            {question.blanks.map((blank, blankIndex) => (
+                              <div key={blank.id} className="mb-1">
+                                <small className="text-muted">
+                                  <strong>Blank {blankIndex + 1}:</strong>{' '}
+                                  {blank.options.length} options, correct:{' '}
+                                  <span className="text-success">
+                                    {blank.correctAnswer || 'Not set'}
+                                  </span>
+                                </small>
+                              </div>
+                            ))}
                           </div>
                         )}
+                      </div>
+                    )}
 
-                      {question.type === 'true-false' && (
-                        <div className="ms-3">
-                          <small className="text-muted">
-                            Correct Answer:{' '}
-                            <span className="text-success">
-                              {question.correctAnswer}
-                            </span>
-                          </small>
-                        </div>
-                      )}
+                    {question.explanation && (
+                      <div className="ms-3 mt-2">
+                        <small className="text-muted">
+                          <strong>Explanation:</strong> {question.explanation}
+                        </small>
+                      </div>
+                    )}
+                  </div>
+                </Card.Body>
+              </Card>
+            )}
+          </div>
+        ))}
 
-                      {question.type === 'fill-in-the-blank' && (
-                        <div className="ms-3">
-                          <small className="text-muted">
-                            Blanks: {question.blanks?.length || 0}
-                          </small>
-                          {question.blanks && question.blanks.length > 0 && (
-                            <div className="ms-3 mt-1">
-                              {question.blanks.map((blank, blankIndex) => (
-                                <div key={blank.id} className="mb-1">
-                                  <small className="text-muted">
-                                    <strong>Blank {blankIndex + 1}:</strong>{' '}
-                                    {blank.options.length} options, correct:{' '}
-                                    <span className="text-success">
-                                      {blank.correctAnswer || 'Not set'}
-                                    </span>
-                                  </small>
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      )}
+        {/* Render new question editor if adding a new question */}
+        {editingIndex >= questions.length && editingQuestion && (
+          <div className="mb-3" id="question-editor">
+            <QuestionEditor
+              editingQuestion={editingQuestion}
+              editingIndex={editingIndex}
+              onQuestionChange={(updatedQuestion) =>
+                setEditingQuestion(updatedQuestion)
+              }
+              onQuestionTypeChange={handleQuestionTypeChange}
+              onSave={handleSaveQuestion}
+              onCancel={handleCancelEdit}
+            />
+          </div>
+        )}
 
-                      {question.explanation && (
-                        <div className="ms-3 mt-2">
-                          <small className="text-muted">
-                            <strong>Explanation:</strong> {question.explanation}
-                          </small>
-                        </div>
-                      )}
-                    </div>
-                  </Card.Body>
-                </Card>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+        {/* Show message if no questions and not editing */}
+        {questions.length === 0 && !editingQuestion && (
+          <div className="text-center text-muted">
+            <p>No questions added yet. Click "Add Question" to get started.</p>
+          </div>
+        )}
+      </div>
 
       {/* Save/Cancel Buttons */}
       {(onSave || onSaveAndPublish || onCancel) && (
