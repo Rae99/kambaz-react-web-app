@@ -1,5 +1,4 @@
 import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
 import QuizEditorHeader from './QuizEditorHeader';
 import QuizEditorTabs from './QuizEditorTabs';
 import QuizEditorContent from './QuizEditorContent';
@@ -33,16 +32,13 @@ export default function QuizEditor() {
   const { cid, qid } = params;
 
   // Custom hooks for different concerns
-  const { quiz, isNewQuiz, fetchState, hasHydratedRef } = useQuizEditor(
-    cid!,
-    qid!
-  );
-  const { quizForm, handleFormChange } = useQuizForm(
-    quiz,
-    cid!,
-    qid!,
-    hasHydratedRef
-  );
+  // 1. useQuizEditor fetches quiz data from backend API
+  const { quiz, loading, error, isNewQuiz } = useQuizEditor(qid!);
+
+  // 2. Pass quiz to useQuizForm to create editable form state
+  const { quizForm, handleFormChange } = useQuizForm(quiz, cid!);
+
+  // 3. Pass quizForm to child components for editing interface
   const { handleSave, handleSaveAndPublish, handleCancel } = useQuizActions(
     cid!,
     qid!,
@@ -50,15 +46,8 @@ export default function QuizEditor() {
     isNewQuiz
   );
 
-  // Reset hydration flag when quiz changes (e.g., after refresh)
-  useEffect(() => {
-    if (quiz && !isNewQuiz) {
-      hasHydratedRef.current = false;
-    }
-  }, [quiz?._id, isNewQuiz, hasHydratedRef]);
-
   // Early return for loading/error states
-  const loadingState = LoadingStates({ fetchState, isNewQuiz });
+  const loadingState = LoadingStates({ loading, error, isNewQuiz });
   if (loadingState) return loadingState;
 
   return (
@@ -76,7 +65,7 @@ export default function QuizEditor() {
       <QuizEditorContent
         cid={cid!}
         qid={qid!}
-        quizForm={quizForm}
+        quizForm={quizForm} // Pass quizForm (editable state) to child components
         onFormChange={handleFormChange}
         onSave={handleSave}
         onSaveAndPublish={handleSaveAndPublish}
@@ -92,3 +81,18 @@ export { default as QuizEditorTabs } from './QuizEditorTabs';
 export { default as QuizEditorContent } from './QuizEditorContent';
 export { default as LoadingStates } from './LoadingStates';
 export * from './QuizEditorHooks';
+
+
+// 1. Key ideas
+// 	1.	quiz: the raw data fetched from the backend API.
+// 	2.	quizForm: an editable form state created from quiz.
+// 	3.	Data flow: API → quiz → quizForm → UI.
+
+// 2. Where the data comes from
+// 	•	Create Quiz: qid === 'new' → quiz = null → quizForm uses default values.
+// 	•	Edit Quiz: qid = '<real id>' → call API → quiz = backend data → quizForm is initialized from that data.
+
+// 3. Why this design
+// 	•	quiz: preserves the original data for comparison and validation.
+// 	•	quizForm: the user’s temporary editing state that can be saved or discarded.
+// 	•	Separation of concerns: original data vs. editing state.

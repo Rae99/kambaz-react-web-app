@@ -12,16 +12,18 @@
  */
 
 interface LoadingStatesProps {
-  fetchState: 'idle' | 'loading' | 'ok' | 'notfound' | 'error';
+  loading: boolean;
+  error: string | null;
   isNewQuiz: boolean;
 }
 
 export default function LoadingStates({
-  fetchState,
+  loading,
+  error,
   isNewQuiz,
 }: LoadingStatesProps) {
   // Show loading state while fetching quiz
-  if (!isNewQuiz && fetchState === 'loading') {
+  if (!isNewQuiz && loading) {
     return (
       <div className="container">
         <div className="d-flex justify-content-center">
@@ -34,12 +36,10 @@ export default function LoadingStates({
   }
 
   // Show error state
-  if (!isNewQuiz && fetchState === 'error') {
+  if (!isNewQuiz && error) {
     return (
       <div className="container">
-        <div className="alert alert-danger">
-          Error loading quiz. Please try again.
-        </div>
+        <div className="alert alert-danger">{error}</div>
       </div>
     );
   }

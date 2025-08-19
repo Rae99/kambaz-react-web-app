@@ -1,31 +1,23 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { addQuiz, updateQuiz } from '../reducer';
 import * as quizzesClient from '../client';
 import * as coursesClient from '../../client';
 import type { Quiz } from '../types';
 
 /**
- * QUIZ EDITOR CUSTOM HOOKS
+ * SIMPLIFIED QUIZ EDITOR CUSTOM HOOKS
  * 
- * This file contains three main custom hooks that separate concerns in the Quiz Editor:
- * 
- * 1. useQuizEditor - Manages quiz fetching, state, and navigation logic
- * 2. useQuizForm - Handles form state management and hydration
- * 3. useQuizActions - Manages save, publish, and cancel actions
- * 
- * Each hook is responsible for a specific aspect of the quiz editing workflow,
- * making the main component cleaner and more maintainable.
+ * Simplified version that removes complex state management and Redux dependencies
  */
 
-// Function to convert datetime-local format to ISO string
+// Helper functions for date formatting
 const formatDateForServer = (dateTimeLocal: string) => {
   if (!dateTimeLocal) return '';
   return new Date(dateTimeLocal).toISOString();
 };
 
-// Function to convert ISO string to datetime-local format
 const formatDateForInput = (isoString: string) => {
   if (!isoString) return '';
   const date = new Date(isoString);
@@ -38,117 +30,62 @@ const formatDateForInput = (isoString: string) => {
 };
 
 /**
- * useQuizEditor Hook
+ * Simplified useQuizEditor Hook
  * 
- * Manages quiz fetching, state, and navigation logic:
- * - Fetches quiz data from the server or Redux store
- * - Manages loading states (idle, loading, ok, notfound, error)
- * - Handles navigation when quiz is not found
- * - Provides quiz data and metadata for the editor
- * 
- * @param cid - Course ID
- * @param qid - Quiz ID (or 'new' for new quizzes)
- * @returns Object containing quiz data, loading state, and metadata
+ * - Fetches quiz data from backend
+ * - Manages loading state
+ * - No complex Redux store logic
  */
-export const useQuizEditor = (cid: string, qid: string) => {
-  const navigate = useNavigate();
-  const dispatch = useDispatch();
-  const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+export const useQuizEditor = (qid: string) => {
+  const [quiz, setQuiz] = useState<Quiz | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  
   const isNewQuiz = qid === 'new';
-
-  const [fetchState, setFetchState] = useState<
-    'idle' | 'loading' | 'ok' | 'notfound' | 'error'
-  >('idle');
-  const hasHydratedRef = useRef(false);
-
-  // Try to find quiz from store first, but don't rely on it for existing quizzes
-  const quizFromStore = isNewQuiz ? null : quizzes.find((q: Quiz) => q._id === qid);
   
-  // Use local state to store quiz data independently of Redux store
-  const [localQuiz, setLocalQuiz] = useState<Quiz | null>(quizFromStore || null);
-  
-  // Use local quiz if available, otherwise fall back to store
-  const quiz = localQuiz || quizFromStore;
-
-  // Fetch quiz data
   useEffect(() => {
     if (isNewQuiz) {
-      setFetchState('ok');
+      setLoading(false);
       return;
     }
-
-    // If we already have the quiz data (either from store or local state), we're good
-    if (quiz) {
-      setFetchState('ok');
-      return;
-    }
-
-    // If we don't have quiz data, fetch it from backend
-    // Scenario: The user switches pages quickly—before the first API request finishes, a second one starts. The cancelled flag ensures that only the latest request’s result gets processed.
-    let cancelled = false; // Prevents race conditions when component unmounts during API call
-    setFetchState('loading');
-    (async () => {
+    
+    const fetchQuiz = async () => {
       try {
-        const data = await quizzesClient.findQuizById(qid!);
-        if (cancelled) return; // Don't proceed if component was unmounted
+        setLoading(true);
+        const data = await quizzesClient.findQuizById(qid);
         if (data) {
-          // Store in local state first for immediate use
-          setLocalQuiz(data);
-          // Also update Redux store for consistency
-          dispatch(updateQuiz(data));
-          setFetchState('ok');
+          setQuiz(data);
         } else {
-          setFetchState('notfound');
+          setError('Quiz not found');
         }
-      } catch {
-        if (!cancelled) setFetchState('error');
+      } catch (err) {
+        setError('Failed to fetch quiz');
+      } finally {
+        setLoading(false);
       }
-    })();
-    return () => {
-      cancelled = true; // Mark as cancelled when component unmounts
     };
-  }, [isNewQuiz, qid, quiz, dispatch]);
-  // Page refresh → Component remounts, localQuiz initializes to null → useEffect detects quiz is null → Calls API to fetch data → setLocalQuiz(data) resets local state → Component re-renders, displays correct data
-
-  // Update local quiz when store changes (e.g., after other components update the quiz)
-  useEffect(() => {
-    if (quizFromStore && !localQuiz) {
-      setLocalQuiz(quizFromStore);
-    }
-  }, [quizFromStore, localQuiz]);
-
-  // Redirect logic
-  useEffect(() => {
-    if (isNewQuiz) return;
-    if (fetchState === 'notfound') {
-      navigate(`/Kambaz/Courses/${cid}/Quizzes`);
-    }
-  }, [isNewQuiz, fetchState, cid, navigate]);
-
-  return {
-    quiz,
+    
+    fetchQuiz();
+  }, [qid, isNewQuiz]);
+  
+  return { 
+    quiz, 
+    loading, 
+    error, 
     isNewQuiz,
-    fetchState,
-    hasHydratedRef,
+    // Keep hasHydratedRef for backward compatibility
+    hasHydratedRef: { current: false }
   };
 };
 
 /**
- * useQuizForm Hook
+ * Simplified useQuizForm Hook
  * 
- * Handles form state management and hydration:
- * - Initializes quiz form with default values or existing quiz data
- * - Manages form state updates and field changes
- * - Handles one-time form hydration to prevent overwriting user edits
- * - Provides form data and change handlers
- * 
- * @param quiz - Current quiz data (null for new quizzes)
- * @param cid - Course ID
- * @param _qid - Quiz ID (unused, kept for API consistency)
- * @param hasHydratedRef - Ref to track if form has been hydrated
- * @returns Object containing form state and change handlers
+ * - Simple form state management
+ * - No complex hydration logic
+ * - Direct form updates
  */
-export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHydratedRef: React.MutableRefObject<boolean>) => {
+export const useQuizForm = (quiz: Quiz | null, cid: string) => {
   const [quizForm, setQuizForm] = useState<Quiz>({
     _id: quiz?._id,
     title: quiz?.title ?? 'New Quiz',
@@ -167,32 +104,19 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
     oneQuestionAtATime: quiz?.oneQuestionAtATime ?? true,
     webcamRequired: quiz?.webcamRequired ?? false,
     lockQuestionsAfterAnswering: quiz?.lockQuestionsAfterAnswering ?? false,
-    dueDate: quiz?.dueDate
-      ? new Date(quiz.dueDate).toISOString().slice(0, 16)
-      : '',
-    availableDate: quiz?.availableDate
-      ? new Date(quiz.availableDate).toISOString().slice(0, 16)
-      : new Date().toISOString().slice(0, 16),
-    untilDate: quiz?.untilDate
-      ? new Date(quiz.untilDate).toISOString().slice(0, 16)
-      : '',
+    dueDate: quiz?.dueDate ? formatDateForInput(quiz.dueDate) : '',
+    availableDate: quiz?.availableDate ? formatDateForInput(quiz.availableDate) : new Date().toISOString().slice(0, 16),
+    untilDate: quiz?.untilDate ? formatDateForInput(quiz.untilDate) : '',
     questions: quiz?.questions ?? [],
     isPublished: quiz?.isPublished ?? false,
     createdAt: quiz?.createdAt ?? new Date().toISOString(),
     updatedAt: quiz?.updatedAt ?? new Date().toISOString(),
   });
 
-  // Hydrate form when quiz data becomes available
+  // Update form when quiz changes
   useEffect(() => {
     if (!quiz) return;
     
-    // Reset hydration flag when quiz changes (e.g., after refresh or quiz switch)
-    if (quiz._id !== quizForm._id) {
-      hasHydratedRef.current = false;
-    }
-    
-    if (hasHydratedRef.current) return;
-
     setQuizForm({
       _id: quiz._id,
       title: quiz.title ?? 'New Quiz',
@@ -219,17 +143,7 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
       createdAt: quiz.createdAt ?? new Date().toISOString(),
       updatedAt: quiz.updatedAt ?? new Date().toISOString(),
     });
-
-    hasHydratedRef.current = true;
-  }, [quiz, cid, hasHydratedRef, quizForm._id]); // Now we can use quizForm._id directly
-
-  // When does secondary hydration trigger?
-  // 1. Quiz ID changes: User switches from editing one quiz to another
-  // 2. Quiz data updates: New quiz data fetched from backend
-  // 
-  // When do we only need one hydration?
-  // 1. Initial load: Component renders for the first time
-  // 2. Data stability: Quiz data hasn't changed
+  }, [quiz, cid]);
 
   const handleFormChange = (field: keyof Quiz, value: any) => {
     setQuizForm((prev) => ({
@@ -245,19 +159,10 @@ export const useQuizForm = (quiz: Quiz | null, cid: string, _qid: string, hasHyd
 };
 
 /**
- * useQuizActions Hook
+ * Simplified useQuizActions Hook
  * 
- * Manages save, publish, and cancel actions:
- * - Handles quiz saving (create new or update existing)
- * - Manages quiz publishing workflow
- * - Handles navigation after successful actions
- * - Provides action handlers for the UI
- * 
- * @param cid - Course ID
- * @param qid - Quiz ID (or 'new' for new quizzes)
- * @param quizForm - Current form data to save
- * @param isNewQuiz - Whether this is a new quiz creation
- * @returns Object containing action handlers
+ * - Same save/publish logic
+ * - No complex state management
  */
 export const useQuizActions = (cid: string, qid: string, quizForm: Quiz, isNewQuiz: boolean) => {
   const navigate = useNavigate();
@@ -320,44 +225,3 @@ export const useQuizActions = (cid: string, qid: string, quizForm: Quiz, isNewQu
     handleCancel,
   };
 };
-
-
-// A React Hook is a function that lets function components use React features (state, lifecycle, context) without classes.
-// Hooks always start with use (e.g., useState, useEffect, or your custom useQuizEditor).
-
-// Rules of Hooks (quick):
-// 	•	Call hooks at the top level (not inside if/for)
-// 	•	Call hooks only in React components or other hooks
-// 	•	Name custom hooks with use…
-
-// When some stateful / side-effectful logic is reused across components,
-// extract it into a custom Hook.
-// - It does NOT return JSX; it returns data and functions.
-// - The name must start with `use` (e.g., useQuizEditor).
-// - Use it in components just like built-in hooks.
-
-// useRef: a persistent, mutable container { current: T } that survives re-renders.
-// “survives re-renders” means the ref’s value stays the same for that one component instance across its re-renders.
-// Mutating ref.current does NOT trigger a re-render.
-// Common uses: hold a DOM node, store a boolean flag (e.g. hasHydrated), keep timer IDs, etc.
-
-
-
-
-// Hydrate the form only once from the quiz object.
-
-// Why: the quiz in Redux can be replaced later (e.g., after a PUT response or when
-// a background detail fetch finishes). If we blindly copy quiz → form on every update,
-// we would overwrite the user's in-progress edits.
-//
-// Strategy:
-// 1) Start with hasHydratedRef.current = false.
-// 2) The first time a quiz object is available, copy quiz → form, then set
-//    hasHydratedRef.current = true.
-// 3) On later quiz updates, DO NOT re-hydrate; keep the user's local form state.
-//    (This prevents “I typed, then a fetch finished, and my edits disappeared”.)
-//
-// Optional “upgrade once”:
-// If you first load a stub quiz (no questions) and later load the full quiz (with questions),
-// allow exactly one upgrade when the new quiz is strictly more complete (e.g., questions length
-// increased). After that single upgrade, lock again to avoid wiping edits.
