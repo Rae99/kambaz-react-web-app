@@ -83,37 +83,45 @@ export default function StudentQuizInfo({
       {existingAttempts.length > 0 && (
         <Card className="mb-4">
           <Card.Body>
-            <h5 className="card-title">Previous Attempts</h5>
-            {existingAttempts.map((attempt, index) => (
-              <div
-                key={attempt._id || index}
-                className="d-flex justify-content-between align-items-center p-2 border-bottom"
-              >
-                <div>
-                  <span className="fw-bold">
-                    Attempt #{attempt.attemptNumber}
-                  </span>
-                  <span className="text-muted ms-3">
-                    {attempt.submittedAt
-                      ? new Date(attempt.submittedAt).toLocaleString()
-                      : 'Not submitted'}
-                  </span>
+            <h5 className="card-title">Last Attempt</h5>
+            <p className="text-muted mb-3">
+              You can only review your most recent attempt to maintain quiz
+              integrity.
+            </p>
+            {/* Only show the last attempt for review */}
+            {(() => {
+              const lastAttempt = existingAttempts[existingAttempts.length - 1];
+              return (
+                <div
+                  key={lastAttempt._id || 'last'}
+                  className="d-flex justify-content-between align-items-center p-2 border-bottom"
+                >
+                  <div>
+                    <span className="fw-bold">
+                      Attempt #{lastAttempt.attemptNumber}
+                    </span>
+                    <span className="text-muted ms-3">
+                      {lastAttempt.submittedAt
+                        ? new Date(lastAttempt.submittedAt).toLocaleString()
+                        : 'Not submitted'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="me-3">
+                      Score: {lastAttempt.score} / {lastAttempt.totalPoints}
+                    </span>
+                    <Button
+                      variant="outline-primary"
+                      size="sm"
+                      onClick={() => onReviewAttempt(lastAttempt)}
+                    >
+                      <FaEye className="me-1" />
+                      Review
+                    </Button>
+                  </div>
                 </div>
-                <div>
-                  <span className="me-3">
-                    Score: {attempt.score} / {attempt.totalPoints}
-                  </span>
-                  <Button
-                    variant="outline-primary"
-                    size="sm"
-                    onClick={() => onReviewAttempt(attempt)}
-                  >
-                    <FaEye className="me-1" />
-                    Review
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })()}
           </Card.Body>
         </Card>
       )}
