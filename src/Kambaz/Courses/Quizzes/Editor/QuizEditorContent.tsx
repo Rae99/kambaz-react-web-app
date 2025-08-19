@@ -42,6 +42,8 @@ export default function QuizEditorContent({
         element={
           <QuizDetailsEditor
             quizForm={quizForm}
+            quizId={qid === 'new' ? undefined : qid}
+            quiz={qid === 'new' ? undefined : quizForm} // Pass quiz data for consistency
             onFormChange={onFormChange}
             onSave={onSave}
             onSaveAndPublish={onSaveAndPublish}

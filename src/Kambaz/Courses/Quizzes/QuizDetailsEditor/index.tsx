@@ -22,6 +22,8 @@ import ActionButtons from './ActionButtons';
 
 interface QuizDetailsEditorProps {
   quizForm: Quiz;
+  quizId?: string; // Add quiz ID for consistency with QuizQuestionsEditor
+  quiz?: Quiz; // Add quiz data for consistency with QuizQuestionsEditor
   onFormChange: (field: keyof Quiz, value: any) => void;
   onSave?: () => void;
   onSaveAndPublish?: () => void;
@@ -30,6 +32,8 @@ interface QuizDetailsEditorProps {
 
 export default function QuizDetailsEditor({
   quizForm,
+  quizId: _quizId, // Added for interface consistency with QuizQuestionsEditor (currently unused)
+  quiz: _quiz, // Added for interface consistency with QuizQuestionsEditor (currently unused)
   onFormChange,
   onSave,
   onSaveAndPublish,
