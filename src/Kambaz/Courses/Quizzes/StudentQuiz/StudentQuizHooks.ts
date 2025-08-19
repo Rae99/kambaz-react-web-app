@@ -296,7 +296,42 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
         return;
       }
 
-      // Prepare answers with question context for better backend processing
+      // Calculate score locally using the same logic as Faculty Preview
+      let localScore = 0;
+      quiz?.questions.forEach((question, index) => {
+        const questionId = `question_${index}`;
+        const userAnswer = quizAttempt.answers[questionId];
+
+        if (userAnswer) {
+          if (question.type === 'fill-in-the-blank' && question.blanks) {
+            // For fill-in-the-blank, check if all blanks are answered correctly
+            if (Array.isArray(userAnswer) && userAnswer.length === question.blanks.length) {
+              const allCorrect = question.blanks.every(
+                (blank, blankIndex) => userAnswer[blankIndex] === blank.correctAnswer
+              );
+              if (allCorrect) {
+                localScore += question.points;
+              }
+            }
+          } else if (Array.isArray(question.correctAnswer)) {
+            // For multiple-choice with multiple correct answers
+            if (
+              Array.isArray(userAnswer) &&
+              userAnswer.length === question.correctAnswer.length &&
+              userAnswer.every((ans) => question.correctAnswer.includes(ans))
+            ) {
+              localScore += question.points;
+            }
+          } else {
+            // For single-answer questions (true/false, single multiple-choice)
+            if (userAnswer === question.correctAnswer) {
+              localScore += question.points;
+            }
+          }
+        }
+      });
+
+      // Prepare answers with question context for backend processing
       const answersWithContext =
         quiz?.questions?.map((question, index) => {
           const questionId = `question_${index}`;
@@ -325,8 +360,11 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
         getTimeSpent() // Pass time spent in seconds
       );
 
-      // Update local state with the submitted attempt
-      setQuizAttempt(savedAttempt);
+      // Update local state with the submitted attempt, but use our local score
+      setQuizAttempt({
+        ...savedAttempt,
+        score: localScore, // Use our local calculation instead of backend score
+      });
 
       // Navigate to review mode to show results
       setMode('review');

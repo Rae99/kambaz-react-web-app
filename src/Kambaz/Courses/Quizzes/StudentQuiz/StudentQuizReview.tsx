@@ -117,11 +117,25 @@ export default function StudentQuizReview({
               points: question.points,
             });
 
-            const isCorrect = Array.isArray(question.correctAnswer)
-              ? Array.isArray(userAnswer) &&
+            // Calculate correctness based on question type (same logic as Faculty Preview)
+            let isCorrect = false;
+            if (question.type === 'fill-in-the-blank' && question.blanks) {
+              // For fill-in-the-blank, check if all blanks are answered correctly
+              const userAnswers = (userAnswer as string[]) || [];
+              isCorrect = question.blanks.every(
+                (blank, blankIndex) =>
+                  userAnswers[blankIndex] === blank.correctAnswer
+              );
+            } else if (Array.isArray(question.correctAnswer)) {
+              // For multiple-choice with multiple correct answers
+              isCorrect =
+                Array.isArray(userAnswer) &&
                 userAnswer.length === question.correctAnswer.length &&
-                userAnswer.every((ans) => question.correctAnswer.includes(ans))
-              : userAnswer === question.correctAnswer;
+                userAnswer.every((ans) => question.correctAnswer.includes(ans));
+            } else {
+              // For single-answer questions (true/false, single multiple-choice)
+              isCorrect = userAnswer === question.correctAnswer;
+            }
 
             // Debug logging
             console.log(`Question ${index + 1}:`, {
