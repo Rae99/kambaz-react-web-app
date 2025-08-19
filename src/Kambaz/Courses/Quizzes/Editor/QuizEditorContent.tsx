@@ -55,6 +55,7 @@ export default function QuizEditorContent({
           <QuizQuestionsEditor
             questions={quizForm.questions}
             quizId={qid === 'new' ? undefined : qid}
+            quiz={qid === 'new' ? undefined : quizForm} // Pass quiz data to avoid Redux dependency
             onQuestionsChange={(questions) => {
               onFormChange('questions', questions);
             }}

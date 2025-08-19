@@ -26,6 +26,7 @@ import React from 'react'; // Added missing import
 interface QuizQuestionsEditorProps {
   questions?: Question[];
   quizId?: string;
+  quiz?: Quiz; // Add quiz prop to avoid dependency on Redux store
   onQuestionsChange?: (questions: Question[]) => void;
   onSave?: () => void;
   onSaveAndPublish?: () => void;
@@ -35,6 +36,7 @@ interface QuizQuestionsEditorProps {
 export default function QuizQuestionsEditor({
   questions = [],
   quizId,
+  quiz, // Use quiz prop instead of Redux store
   onQuestionsChange,
   onSave,
   onSaveAndPublish,
@@ -43,24 +45,40 @@ export default function QuizQuestionsEditor({
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
 
-  // Get current quiz from Redux store for immediate backend updates
+  // Use quiz prop if available, otherwise fall back to Redux store
   const { quizzes } = useSelector((state: any) => state.quizzesReducer);
+  const currentQuiz =
+    quiz ||
+    (() => {
+      if (!quizId) return null;
+      return quizzes.find((q: Quiz) => q._id === quizId);
+    })();
 
-  // Use useMemo to recalculate currentQuiz when quizzes or quizId changes
-  const currentQuiz = React.useMemo(() => {
-    if (!quizId) return null;
-    return quizzes.find((q: Quiz) => q._id === quizId);
-  }, [quizzes, quizId]);
+  console.log('QuizQuestionsEditor render:', {
+    quizId,
+    quiz: !!quiz,
+    currentQuiz: !!currentQuiz,
+    quizzesCount: quizzes.length,
+  });
 
   // If we don't have the quiz in store, try to fetch it
   React.useEffect(() => {
     if (quizId && !currentQuiz) {
       // This will trigger the parent component to fetch the quiz if needed
-      console.log('Quiz not found in store, may need to fetch:', quizId);
+      console.log('Quiz not found in store, may need to fetch:', {
+        quizId,
+        quizzesCount: quizzes.length,
+      });
     }
-  }, [quizId, currentQuiz]);
+  }, [quizId, currentQuiz, quizzes.length]);
 
-  const handleAddQuestion = () => {
+  const handleAddQuestion = async () => {
+    console.log('handleAddQuestion called:', {
+      quizId,
+      currentQuiz: !!currentQuiz,
+      questionsCount: questions.length,
+    });
+
     // Default to multiple choice question
     const newQuestion: Question = {
       title: '',
@@ -74,6 +92,41 @@ export default function QuizQuestionsEditor({
 
     const updatedQuestions = [...questions, newQuestion];
     onQuestionsChange?.(updatedQuestions);
+
+    // Only try to save to backend if we have a quiz ID and current quiz
+    // For new quizzes (quizId === 'new'), we don't save immediately
+    if (quizId && currentQuiz) {
+      try {
+        console.log('Adding new question to backend:', {
+          quizId,
+          currentQuizId: currentQuiz._id,
+        });
+
+        // Create updated quiz object with new questions
+        const updatedQuiz = {
+          ...currentQuiz,
+          questions: updatedQuestions,
+          updatedAt: new Date().toISOString(),
+        };
+
+        // Save to backend
+        await quizzesClient.updateQuiz(quizId, updatedQuiz);
+        console.log('New question added successfully to backend');
+      } catch (error) {
+        console.error('Error adding question to backend:', error);
+        // Show error message to user
+        alert('Failed to save new question to backend. Please try again.');
+        // Revert local state if backend save fails
+        onQuestionsChange?.(questions);
+        return;
+      }
+    } else {
+      console.log('Not saving to backend:', {
+        reason: quizId ? 'No currentQuiz' : 'No quizId',
+        quizId,
+        currentQuiz: !!currentQuiz,
+      });
+    }
 
     // Start editing the new question immediately
     setEditingQuestion(newQuestion);
@@ -175,6 +228,13 @@ export default function QuizQuestionsEditor({
   };
 
   const handleDeleteQuestion = async (index: number) => {
+    console.log('handleDeleteQuestion called:', {
+      index,
+      quizId,
+      currentQuiz: !!currentQuiz,
+      questionsCount: questions.length,
+    });
+
     if (window.confirm('Are you sure you want to delete this question?')) {
       try {
         // Update local state first
@@ -183,10 +243,11 @@ export default function QuizQuestionsEditor({
 
         // If we have a quiz ID and current quiz, save immediately to backend
         if (quizId && currentQuiz) {
-          console.log(
-            'Deleting question from backend, new questions count:',
-            updatedQuestions.length
-          );
+          console.log('Deleting question from backend, new questions count:', {
+            updatedQuestionsCount: updatedQuestions.length,
+            quizId,
+            currentQuizId: currentQuiz._id,
+          });
 
           // Create updated quiz object with new questions
           const updatedQuiz = {
@@ -198,6 +259,11 @@ export default function QuizQuestionsEditor({
           // Save to backend
           await quizzesClient.updateQuiz(quizId, updatedQuiz);
           console.log('Question deleted successfully from backend');
+        } else {
+          console.warn('Cannot delete from backend:', {
+            quizId,
+            currentQuiz: !!currentQuiz,
+          });
         }
 
         // Update editing state
@@ -211,6 +277,8 @@ export default function QuizQuestionsEditor({
         console.error('Error deleting question:', error);
         // Show error message to user
         alert('Failed to delete question. Please try again.');
+        // Revert local state if backend save fails
+        onQuestionsChange?.(questions);
       }
     }
   };
