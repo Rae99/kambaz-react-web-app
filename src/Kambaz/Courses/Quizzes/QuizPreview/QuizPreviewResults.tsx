@@ -90,10 +90,7 @@ export default function QuizPreviewResults({
             }
 
             return (
-              <div
-                key={question._id || index}
-                className="mb-3 p-3 border rounded"
-              >
+              <div key={index} className="mb-3 p-3 border rounded">
                 <div className="d-flex justify-content-between align-items-start mb-2">
                   <h6>
                     Question {index + 1} ({question.points} points)

@@ -170,8 +170,7 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
 
   // Helper function to check if a question is fully answered
   const isQuestionAnswered = (question: Question): boolean => {
-    const currentQuestionId =
-      question?._id || `question_${currentQuestionIndex}`;
+    const currentQuestionId = `question_${currentQuestionIndex}`;
     const answer = quizAttempt.answers[currentQuestionId];
 
     if (question.type === 'fill-in-the-blank' && question.blanks) {
@@ -190,7 +189,7 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
   const areAllQuestionsAnswered = (): boolean => {
     if (!quiz) return false;
     return quiz.questions.every((question, index) => {
-      const questionId = question._id || `question_${index}`;
+      const questionId = `question_${index}`;
       const answer = quizAttempt.answers[questionId];
 
       if (question.type === 'fill-in-the-blank' && question.blanks) {
@@ -212,8 +211,7 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
   ) => {
     // Use the same key logic as the rest of the component
     const currentQuestion = quiz?.questions[currentQuestionIndex];
-    const answerKey =
-      currentQuestion?._id || `question_${currentQuestionIndex}`;
+    const answerKey = `question_${currentQuestionIndex}`;
 
     const newAnswers = {
       ...quizAttempt.answers,
@@ -245,8 +243,7 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
   // Handle blank answer changes
   const handleBlankAnswerChange = (blankIndex: number, answer: string) => {
     const currentQuestion = quiz?.questions[currentQuestionIndex];
-    const answerKey =
-      currentQuestion?._id || `question_${currentQuestionIndex}`;
+    const answerKey = `question_${currentQuestionIndex}`;
 
     const currentAnswers = (quizAttempt.answers[answerKey] as string[]) || [];
     const newAnswers = [...currentAnswers];
@@ -305,7 +302,7 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
       // Prepare answers with question context for better backend processing
       const answersWithContext =
         quiz?.questions?.map((question, index) => {
-          const questionId = question._id || `question_${index}`;
+          const questionId = `question_${index}`;
           
           // For fill-in-the-blank questions, construct correctAnswer from blanks
           let correctAnswer = question.correctAnswer;

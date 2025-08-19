@@ -111,7 +111,6 @@ export default function StudentQuizReview({
             // Debug logging for each question
             console.log(`Question ${index + 1} debug:`, {
               questionId,
-              question_id_from_db: question._id,
               userAnswer,
               allAnswerKeys: Object.keys(quizAttempt.answers),
               correctAnswer: question.correctAnswer,
@@ -135,7 +134,7 @@ export default function StudentQuizReview({
 
             return (
               <div
-                key={question._id || index}
+                key={index}
                 className={`mb-3 p-3 border rounded ${
                   isCorrect
                     ? 'border-success bg-light'

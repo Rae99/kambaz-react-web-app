@@ -76,7 +76,7 @@ export default function QuizPreviewInterface({
                         <input
                           className="form-check-input"
                           type="radio"
-                          name={`question-${currentQuestion._id}`}
+                          name={`question-${currentQuestionIndex}`}
                           id={`option-${optionIndex}`}
                           value={option}
                           checked={
@@ -104,7 +104,7 @@ export default function QuizPreviewInterface({
                   <input
                     className="form-check-input"
                     type="radio"
-                    name={`question-${currentQuestion._id}`}
+                    name={`question-${currentQuestionIndex}`}
                     id="true-option"
                     value="true"
                     checked={
@@ -122,7 +122,7 @@ export default function QuizPreviewInterface({
                   <input
                     className="form-check-input"
                     type="radio"
-                    name={`question-${currentQuestion._id}`}
+                    name={`question-${currentQuestionIndex}`}
                     id="false-option"
                     value="false"
                     checked={
@@ -143,7 +143,10 @@ export default function QuizPreviewInterface({
               currentQuestion.blanks && (
                 <div>
                   {currentQuestion.blanks.map((blank, blankIndex) => (
-                    <div key={blank.id} className="mb-3">
+                    <div
+                      key={`${currentQuestionIndex}-${blankIndex}`}
+                      className="mb-3"
+                    >
                       <label className="form-label">
                         Blank {blankIndex + 1}:
                       </label>
@@ -213,7 +216,7 @@ export default function QuizPreviewInterface({
           <div className="d-flex flex-wrap gap-2">
             {quiz.questions.map((question: Question, index: number) => (
               <Button
-                key={question._id || index}
+                key={index}
                 variant={
                   quizAttempt.answers[index] ? 'success' : 'outline-secondary'
                 }

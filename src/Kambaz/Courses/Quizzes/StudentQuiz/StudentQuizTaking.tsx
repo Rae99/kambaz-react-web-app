@@ -57,8 +57,7 @@ export default function StudentQuizTaking({
   const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   const currentQuestion = quiz?.questions?.[currentQuestionIndex];
-  const currentQuestionId =
-    currentQuestion?._id || `question_${currentQuestionIndex}`;
+  const currentQuestionId = `question_${currentQuestionIndex}`;
   const progress = quiz?.questions?.length
     ? ((currentQuestionIndex + 1) / quiz.questions.length) * 100
     : 0;
@@ -258,10 +257,10 @@ export default function StudentQuizTaking({
           <div className="d-flex flex-wrap gap-2">
             {(quiz?.questions || []).map(
               (question: Question, index: number) => {
-                const questionId = question._id || `question_${index}`;
+                const questionId = `question_${index}`;
                 return (
                   <Button
-                    key={questionId}
+                    key={index}
                     variant={
                       quizAttempt.answers[questionId]
                         ? 'success'
