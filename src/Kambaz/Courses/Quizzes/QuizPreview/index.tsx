@@ -46,6 +46,7 @@ export default function QuizPreview() {
     handleBlankAnswerChange,
     handleNextQuestion,
     handlePreviousQuestion,
+    handleJumpToQuestion,
     handleSubmitQuiz,
   } = useQuizPreview(qid!);
 
@@ -105,6 +106,7 @@ export default function QuizPreview() {
         onBlankAnswerChange={handleBlankAnswerChange}
         onNextQuestion={handleNextQuestion}
         onPreviousQuestion={handlePreviousQuestion}
+        onJumpToQuestion={handleJumpToQuestion}
         onSubmitQuiz={handleSubmitQuiz}
         areAllQuestionsAnswered={areAllQuestionsAnswered}
       />

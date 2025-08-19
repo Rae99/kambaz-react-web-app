@@ -282,6 +282,13 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
     }
   };
 
+  // Jump to specific question
+  const handleJumpToQuestion = (questionIndex: number) => {
+    if (questionIndex >= 0 && questionIndex < (quiz?.questions.length || 0)) {
+      setCurrentQuestionIndex(questionIndex);
+    }
+  };
+
   // Submit quiz
   const handleSubmitQuiz = async () => {
     try {
@@ -430,6 +437,7 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
     handleBlankAnswerChange,
     handleNextQuestion,
     handlePreviousQuestion,
+    handleJumpToQuestion,
     handleSubmitQuiz,
     handleTakeQuiz,
     handleReviewAttempt,

@@ -125,6 +125,13 @@ export const useQuizPreview = (qid: string) => {
     }
   };
 
+  // Jump to specific question
+  const handleJumpToQuestion = (questionIndex: number) => {
+    if (questionIndex >= 0 && questionIndex < (quiz?.questions.length || 0)) {
+      setCurrentQuestionIndex(questionIndex);
+    }
+  };
+
   // Submit quiz and calculate score
   const handleSubmitQuiz = () => {
     // Calculate score based on answers
@@ -184,6 +191,7 @@ export const useQuizPreview = (qid: string) => {
     handleBlankAnswerChange,
     handleNextQuestion,
     handlePreviousQuestion,
+    handleJumpToQuestion,
     handleSubmitQuiz,
   };
 };

@@ -30,6 +30,7 @@ interface StudentQuizTakingProps {
   onBlankAnswerChange: (blankIndex: number, answer: string) => void;
   onNextQuestion: () => void;
   onPreviousQuestion: () => void;
+  onJumpToQuestion: (questionIndex: number) => void;
   onSubmitQuiz: () => void;
   areAllQuestionsAnswered: () => boolean;
   getTimeSpent: () => number;
@@ -46,6 +47,7 @@ export default function StudentQuizTaking({
   onBlankAnswerChange,
   onNextQuestion,
   onPreviousQuestion,
+  onJumpToQuestion,
   onSubmitQuiz,
   areAllQuestionsAnswered,
   getTimeSpent,
@@ -263,7 +265,8 @@ export default function StudentQuizTaking({
                         : 'outline-secondary'
                     }
                     size="sm"
-                    className="disabled"
+                    onClick={() => onJumpToQuestion(index)}
+                    disabled={currentQuestionIndex === index} // Disable current question to avoid meaningless clicks
                   >
                     {index + 1}
                   </Button>

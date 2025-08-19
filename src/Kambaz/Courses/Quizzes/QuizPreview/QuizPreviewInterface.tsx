@@ -28,6 +28,7 @@ interface QuizPreviewInterfaceProps {
   ) => void;
   onNextQuestion: () => void;
   onPreviousQuestion: () => void;
+  onJumpToQuestion: (questionIndex: number) => void;
   onSubmitQuiz: () => void;
   areAllQuestionsAnswered: () => boolean;
 }
@@ -40,6 +41,7 @@ export default function QuizPreviewInterface({
   onBlankAnswerChange,
   onNextQuestion,
   onPreviousQuestion,
+  onJumpToQuestion,
   onSubmitQuiz,
   areAllQuestionsAnswered,
 }: QuizPreviewInterfaceProps) {
@@ -221,7 +223,8 @@ export default function QuizPreviewInterface({
                   quizAttempt.answers[index] ? 'success' : 'outline-secondary'
                 }
                 size="sm"
-                className="disabled"
+                onClick={() => onJumpToQuestion(index)}
+                disabled={currentQuestionIndex === index} // Disable current question to avoid meaningless clicks
               >
                 {index + 1}
               </Button>

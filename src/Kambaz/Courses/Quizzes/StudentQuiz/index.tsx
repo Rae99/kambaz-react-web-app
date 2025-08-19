@@ -53,6 +53,7 @@ export default function StudentQuiz({ mode: initialMode }: StudentQuizProps) {
     handleBlankAnswerChange,
     handleNextQuestion,
     handlePreviousQuestion,
+    handleJumpToQuestion,
     handleSubmitQuiz,
     handleTakeQuiz,
     handleReviewAttempt,
@@ -105,6 +106,7 @@ export default function StudentQuiz({ mode: initialMode }: StudentQuizProps) {
         onBlankAnswerChange={handleBlankAnswerChange}
         onNextQuestion={handleNextQuestion}
         onPreviousQuestion={handlePreviousQuestion}
+        onJumpToQuestion={handleJumpToQuestion}
         onSubmitQuiz={handleSubmitQuiz}
         areAllQuestionsAnswered={areAllQuestionsAnswered}
         getTimeSpent={getTimeSpent}
