@@ -206,11 +206,9 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
 
   // Handle answer changes
   const handleAnswerChange = (
-    questionId: string,
     answer: string | string[]
   ) => {
     // Use the same key logic as the rest of the component
-    const currentQuestion = quiz?.questions[currentQuestionIndex];
     const answerKey = `question_${currentQuestionIndex}`;
 
     const newAnswers = {
@@ -242,7 +240,6 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
 
   // Handle blank answer changes
   const handleBlankAnswerChange = (blankIndex: number, answer: string) => {
-    const currentQuestion = quiz?.questions[currentQuestionIndex];
     const answerKey = `question_${currentQuestionIndex}`;
 
     const currentAnswers = (quizAttempt.answers[answerKey] as string[]) || [];

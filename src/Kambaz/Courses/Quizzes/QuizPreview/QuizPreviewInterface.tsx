@@ -214,7 +214,7 @@ export default function QuizPreviewInterface({
         <Card.Body>
           <h6>Quiz Progress</h6>
           <div className="d-flex flex-wrap gap-2">
-            {quiz.questions.map((question: Question, index: number) => (
+            {quiz.questions.map((_question: Question, index: number) => (
               <Button
                 key={index}
                 variant={

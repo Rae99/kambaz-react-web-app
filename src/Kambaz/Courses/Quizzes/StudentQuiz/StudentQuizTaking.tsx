@@ -26,7 +26,7 @@ interface StudentQuizTakingProps {
     attemptNumber: number;
   };
   existingAttempts: any[];
-  onAnswerChange: (questionId: string, answer: string | string[]) => void;
+  onAnswerChange: (answer: string | string[]) => void;
   onBlankAnswerChange: (blankIndex: number, answer: string) => void;
   onNextQuestion: () => void;
   onPreviousQuestion: () => void;
@@ -134,9 +134,7 @@ export default function StudentQuizTaking({
                           checked={
                             quizAttempt.answers[currentQuestionId] === option
                           }
-                          onChange={(e) =>
-                            onAnswerChange(currentQuestionId, e.target.value)
-                          }
+                          onChange={(e) => onAnswerChange(e.target.value)}
                         />
                         <label
                           className="form-check-label"
@@ -160,9 +158,7 @@ export default function StudentQuizTaking({
                     id="true-option"
                     value="true"
                     checked={quizAttempt.answers[currentQuestionId] === 'true'}
-                    onChange={(e) =>
-                      onAnswerChange(currentQuestionId, e.target.value)
-                    }
+                    onChange={(e) => onAnswerChange(e.target.value)}
                   />
                   <label className="form-check-label" htmlFor="true-option">
                     True
@@ -176,9 +172,7 @@ export default function StudentQuizTaking({
                     id="false-option"
                     value="false"
                     checked={quizAttempt.answers[currentQuestionId] === 'false'}
-                    onChange={(e) =>
-                      onAnswerChange(currentQuestionId, e.target.value)
-                    }
+                    onChange={(e) => onAnswerChange(e.target.value)}
                   />
                   <label className="form-check-label" htmlFor="false-option">
                     False
@@ -256,7 +250,7 @@ export default function StudentQuizTaking({
           <h6>Quiz Progress</h6>
           <div className="d-flex flex-wrap gap-2">
             {(quiz?.questions || []).map(
-              (question: Question, index: number) => {
+              (_question: Question, index: number) => {
                 const questionId = `question_${index}`;
                 return (
                   <Button

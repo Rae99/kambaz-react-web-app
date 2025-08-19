@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Button, Card } from 'react-bootstrap';
 import type { Question, Quiz } from '../types';
 import * as quizzesClient from '../client';
@@ -48,12 +48,6 @@ export default function QuizQuestionsEditor({
 
   // Handle questions change and automatically recalculate total points
   const handleQuestionsChange = (newQuestions: Question[]) => {
-    // Calculate new total points based on all questions
-    const newTotalPoints = newQuestions.reduce(
-      (sum, question) => sum + question.points,
-      0
-    );
-
     // Update questions
     onQuestionsChange?.(newQuestions);
   };
