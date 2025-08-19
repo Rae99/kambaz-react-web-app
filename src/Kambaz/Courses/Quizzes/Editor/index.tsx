@@ -1,14 +1,10 @@
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import {
-  QuizEditorHeader,
-  QuizEditorTabs,
-  QuizEditorContent,
-  LoadingStates,
-  useQuizEditor,
-  useQuizForm,
-  useQuizActions,
-} from './';
+import QuizEditorHeader from './QuizEditorHeader';
+import QuizEditorTabs from './QuizEditorTabs';
+import QuizEditorContent from './QuizEditorContent';
+import LoadingStates from './LoadingStates';
+import { useQuizEditor, useQuizForm, useQuizActions } from './QuizEditorHooks';
 
 /**
  * QuizEditor Main Component
