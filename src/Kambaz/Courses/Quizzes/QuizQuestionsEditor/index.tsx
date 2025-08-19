@@ -43,22 +43,20 @@ export default function QuizQuestionsEditor({
   const [editingQuestion, setEditingQuestion] = useState<Question | null>(null);
   const [editingIndex, setEditingIndex] = useState<number>(-1);
 
-  // Debug logging for questions prop changes
-  console.log('=== QuizQuestionsEditor Render ===');
-  console.log('questions prop received:', questions);
-  console.log('questions prop length:', questions.length);
-  console.log('questions prop content:', questions);
-
-  // Track questions prop changes
-  useEffect(() => {
-    console.log('=== QuizQuestionsEditor useEffect ===');
-    console.log('questions prop changed to:', questions);
-    console.log('questions prop length:', questions.length);
-    console.log('questions prop content:', questions);
-  }, [questions]);
-
   // Use quiz data directly from props, no longer dependent on Redux store
   const currentQuiz = quiz;
+
+  // Handle questions change and automatically recalculate total points
+  const handleQuestionsChange = (newQuestions: Question[]) => {
+    // Calculate new total points based on all questions
+    const newTotalPoints = newQuestions.reduce(
+      (sum, question) => sum + question.points,
+      0
+    );
+
+    // Update questions
+    onQuestionsChange?.(newQuestions);
+  };
 
   const handleAddQuestion = async () => {
     // Default to multiple choice question
@@ -73,7 +71,7 @@ export default function QuizQuestionsEditor({
     };
 
     const updatedQuestions = [...questions, newQuestion];
-    onQuestionsChange?.(updatedQuestions);
+    handleQuestionsChange(updatedQuestions);
 
     // If we have quiz ID and quiz data, save immediately to backend
     if (quizId && currentQuiz) {
@@ -91,7 +89,7 @@ export default function QuizQuestionsEditor({
         console.error('Error adding question to backend:', error);
         alert('Failed to save new question to backend. Please try again.');
         // Revert local state if backend save fails
-        onQuestionsChange?.(questions);
+        handleQuestionsChange(questions);
         return;
       }
     }
@@ -151,16 +149,8 @@ export default function QuizQuestionsEditor({
   };
 
   const handleEditQuestion = (question: Question, index: number) => {
-    console.log('=== STARTING EDIT ===');
-    console.log('Editing question at index:', index);
-    console.log('Question to edit:', question);
-    console.log('Current questions array:', questions);
-    console.log('Current editingIndex before set:', editingIndex);
-
     setEditingQuestion({ ...question });
     setEditingIndex(index);
-
-    console.log('editingIndex set to:', index);
   };
 
   const handleSaveQuestion = async () => {
@@ -169,25 +159,11 @@ export default function QuizQuestionsEditor({
 
     if (editingQuestion && currentEditingIndex >= 0) {
       try {
-        console.log('=== SAVING QUESTION DEBUG ===');
-        console.log('editingIndex from state:', editingIndex);
-        console.log('currentEditingIndex captured:', currentEditingIndex);
-        console.log('editingQuestion:', editingQuestion);
-        console.log('current questions:', questions);
-        console.log('questions array length:', questions.length);
-
         // Update local state first - ensure deep copy
         const updatedQuestions = questions.map((q) => ({ ...q }));
         updatedQuestions[currentEditingIndex] = { ...editingQuestion };
 
-        console.log('updatedQuestions after edit:', updatedQuestions);
-        console.log(
-          'Question at currentEditingIndex after update:',
-          updatedQuestions[currentEditingIndex]
-        );
-        console.log('updatedQuestions array length:', updatedQuestions.length);
-
-        onQuestionsChange?.(updatedQuestions);
+        handleQuestionsChange(updatedQuestions);
 
         // If we have quiz ID and quiz data, save immediately to backend
         if (quizId && currentQuiz) {
@@ -197,8 +173,6 @@ export default function QuizQuestionsEditor({
             questions: updatedQuestions,
             updatedAt: new Date().toISOString(),
           };
-
-          console.log('Saving to backend with quiz:', updatedQuiz);
 
           // Save to backend
           await quizzesClient.updateQuiz(quizId, updatedQuiz);
@@ -224,7 +198,7 @@ export default function QuizQuestionsEditor({
       try {
         // Update local state first
         const updatedQuestions = questions.filter((_, i) => i !== index);
-        onQuestionsChange?.(updatedQuestions);
+        handleQuestionsChange(updatedQuestions);
 
         // If we have quiz ID and quiz data, save immediately to backend
         if (quizId && currentQuiz) {
@@ -250,7 +224,7 @@ export default function QuizQuestionsEditor({
         console.error('Error deleting question:', error);
         alert('Failed to delete question. Please try again.');
         // Revert local state if backend save fails
-        onQuestionsChange?.(questions);
+        handleQuestionsChange(questions);
       }
     }
   };

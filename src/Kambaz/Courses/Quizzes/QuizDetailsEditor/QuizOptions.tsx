@@ -106,6 +106,23 @@ export default function QuizOptions({
               Allow Multiple Attempts
             </label>
           </div>
+
+          {/* Show attempts allowed input when multiple attempts is enabled */}
+          {quizForm.multipleAttempts && (
+            <div className="ms-4 mb-2">
+              <label className="form-label">How Many Attempts:</label>
+              <input
+                type="number"
+                className="form-control"
+                min="1"
+                max="10"
+                value={quizForm.attemptsAllowed || 1}
+                onChange={(e) =>
+                  onFormChange('attemptsAllowed', parseInt(e.target.value) || 1)
+                }
+              />
+            </div>
+          )}
           <div className="form-check mb-2">
             <input
               type="checkbox"

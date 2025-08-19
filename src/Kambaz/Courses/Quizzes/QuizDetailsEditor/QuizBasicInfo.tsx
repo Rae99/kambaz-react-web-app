@@ -69,20 +69,25 @@ export default function QuizBasicInfo({
           </select>
         </Col>
         <Col md={6}>
-          <label htmlFor="wd-quiz-points" className="form-label">
-            Quiz Points
-          </label>
-          <input
-            id="wd-quiz-points"
-            type="number"
-            value={quizForm.points || 0}
-            onChange={(e) =>
-              onFormChange('points', parseInt(e.target.value) || 0)
-            }
-            className="form-control"
-            min="0"
-            placeholder="Total points for this quiz"
-          />
+          <div className="mb-3">
+            <label className="form-label">Points</label>
+            <input
+              type="number"
+              className="form-control"
+              value={quizForm.points}
+              onChange={(e) =>
+                onFormChange('points', parseInt(e.target.value) || 0)
+              }
+            />
+            {/* Show calculated total points from questions */}
+            {quizForm.questions && quizForm.questions.length > 0 && (
+              <small className="text-muted">
+                Calculated from questions:{' '}
+                {quizForm.questions.reduce((sum, q) => sum + q.points, 0)}{' '}
+                points
+              </small>
+            )}
+          </div>
         </Col>
       </Row>
     </>

@@ -69,7 +69,9 @@ const StudentQuizActionSection = ({ quiz }: StudentQuizActionSectionProps) => {
             {quiz.timeLimit ? `${quiz.timeLimit} minutes` : 'unlimited time'} to
             complete this quiz •{' '}
             {quiz.multipleAttempts
-              ? 'Multiple attempts are allowed'
+              ? `Multiple attempts are allowed (max: ${
+                  quiz.attemptsAllowed || 1
+                })`
               : 'Only one attempt is allowed'}
             • Total points:{' '}
             {quiz.questions.reduce((sum, q) => sum + q.points, 0)}
@@ -98,7 +100,9 @@ const StudentQuizActionSection = ({ quiz }: StudentQuizActionSectionProps) => {
           {quiz.timeLimit ? `${quiz.timeLimit} minutes` : 'unlimited time'} to
           complete this quiz •{' '}
           {quiz.multipleAttempts
-            ? `Multiple attempts are allowed (max: ${quiz.attemptsAllowed})`
+            ? `Multiple attempts are allowed (max: ${
+                quiz.attemptsAllowed || 1
+              })`
             : 'Only one attempt is allowed'}
           • Total points: {quiz.questions.reduce((sum, q) => sum + q.points, 0)}
         </small>

@@ -54,29 +54,27 @@ export default function QuizEditorContent({
       <Route
         path="questions"
         element={
-          (() => {
-            console.log('=== QuizEditorContent Render ===');
-            console.log('quizForm:', quizForm);
-            console.log('quizForm.questions:', quizForm.questions);
-            console.log('quizForm.questions.length:', quizForm.questions?.length);
-            
-            return (
-              <QuizQuestionsEditor
-                questions={quizForm.questions}
-                quizId={qid === 'new' ? undefined : qid}
-                quiz={qid === 'new' ? undefined : quizForm} // Pass quiz data to avoid Redux dependency
-                onQuestionsChange={(questions) => {
-                  console.log('=== QuizEditorContent onQuestionsChange ===');
-                  console.log('Received questions:', questions);
-                  console.log('Current quizForm.questions:', quizForm.questions);
-                  onFormChange('questions', questions);
-                }}
-                onSave={onSave}
-                onSaveAndPublish={onSaveAndPublish}
-                onCancel={onCancel}
-              />
-            );
-          })()
+          <QuizQuestionsEditor
+            questions={quizForm.questions || []}
+            quizId={qid === 'new' ? undefined : qid}
+            quiz={qid === 'new' ? undefined : quizForm} // Pass quiz data to avoid Redux dependency
+            onQuestionsChange={(questions) => {
+              // Automatically recalculate total points when questions change
+              const newTotalPoints = questions.reduce(
+                (sum, question) => sum + question.points,
+                0
+              );
+
+              // Update both questions and total points
+              onFormChange('questions', questions);
+              if (quizForm.points !== newTotalPoints) {
+                onFormChange('points', newTotalPoints);
+              }
+            }}
+            onSave={onSave}
+            onSaveAndPublish={onSaveAndPublish}
+            onCancel={onCancel}
+          />
         }
       />
       <Route

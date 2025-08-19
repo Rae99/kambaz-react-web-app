@@ -100,15 +100,6 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
         try {
           setLoading(true);
           const quizData = await quizzesClient.findQuizById(qid);
-          console.log('Backend sent quiz data:', quizData);
-          console.log(
-            'Questions with IDs:',
-            quizData.questions?.map((q: Question, i: number) => ({
-              index: i,
-              id: q._id,
-              text: q.text?.substring(0, 50),
-            }))
-          );
 
           setQuiz(quizData);
 
@@ -224,42 +215,24 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
     const answerKey =
       currentQuestion?._id || `question_${currentQuestionIndex}`;
 
-    console.log('handleAnswerChange called:', {
-      questionId,
-      answer,
-      currentQuestionIndex,
-      currentQuestionId: currentQuestion?._id,
-      answerKey,
-      currentAnswers: quizAttempt.answers,
-    });
-
     const newAnswers = {
       ...quizAttempt.answers,
       [answerKey]: answer,
     };
-
-    console.log('New answers object:', newAnswers);
 
     setQuizAttempt((prev) => {
       const updated = {
         ...prev,
         answers: newAnswers,
       };
-      console.log('Updated quizAttempt:', updated);
       return updated;
     });
 
     // Auto-save answers as student progresses (using saveQuizProgress, not submit)
     if (qid) {
-      console.log('Auto-saving answers:', {
-        qid,
-        newAnswers,
-        timeSpent: getTimeSpent(),
-      });
       quizzesClient
         .saveQuizProgress(qid, newAnswers, getTimeSpent())
         .then((savedAttempt) => {
-          console.log('Auto-save successful:', savedAttempt);
           setQuizAttempt(savedAttempt);
         })
         .catch((error) => {
@@ -318,10 +291,6 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
   // Submit quiz
   const handleSubmitQuiz = async () => {
     try {
-      console.log('Submitting quiz with answers:', quizAttempt.answers);
-      console.log('Current attempt ID:', quizAttempt._id);
-      console.log('Current attempt state:', quizAttempt);
-
       // Check if all questions are answered
       const totalQuestions = quiz?.questions?.length || 0;
       const answeredQuestions = Object.keys(quizAttempt.answers).length;
@@ -337,16 +306,23 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
       const answersWithContext =
         quiz?.questions?.map((question, index) => {
           const questionId = question._id || `question_${index}`;
+          
+          // For fill-in-the-blank questions, construct correctAnswer from blanks
+          let correctAnswer = question.correctAnswer;
+          if (question.type === 'fill-in-the-blank' && question.blanks) {
+            correctAnswer = question.blanks.map(blank => blank.correctAnswer);
+          }
+          
           return {
             questionIndex: index,
             questionText: question.text,
             userAnswer: quizAttempt.answers[questionId] || '',
-            correctAnswer: question.correctAnswer,
+            correctAnswer: correctAnswer,
             points: question.points,
+            questionType: question.type,
+            blanks: question.blanks, // Include blanks for backend processing
           };
         }) || [];
-
-      console.log('Answers with context:', answersWithContext);
 
       // Use the new submit API for final submission
       const savedAttempt = await quizzesClient.submitQuizAttempt(
@@ -354,8 +330,6 @@ export const useStudentQuiz = (qid: string, initialMode: 'take' | 'review') => {
         answersWithContext,
         getTimeSpent() // Pass time spent in seconds
       );
-
-      console.log('Quiz submitted successfully:', savedAttempt);
 
       // Update local state with the submitted attempt
       setQuizAttempt(savedAttempt);

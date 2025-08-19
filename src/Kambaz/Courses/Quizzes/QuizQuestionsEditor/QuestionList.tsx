@@ -25,40 +25,19 @@ export default function QuestionList({
   onEditQuestion,
   onDeleteQuestion,
 }: QuestionListProps) {
-  console.log('=== QuestionList Render ===');
-  console.log('questions array:', questions);
-  console.log('questions length:', questions.length);
-
-  if (questions.length === 0) {
+  if (!questions || questions.length === 0) {
     return (
-      <Card>
-        <Card.Body className="text-center text-muted">
-          <p>No questions added yet. Click "Add Question" to get started.</p>
-        </Card.Body>
-      </Card>
+      <div className="text-center text-muted">
+        <p>No questions added yet. Click "Add Question" to get started.</p>
+      </div>
     );
   }
 
   return (
     <div className="questions-list">
-      {(() => {
-        console.log('=== QuestionList map function start ===');
-        console.log('questions array before map:', questions);
-        console.log('questions length before map:', questions.length);
-        console.log('questions array type:', typeof questions);
-        console.log('questions array constructor:', questions.constructor);
-        console.log('questions array isArray:', Array.isArray(questions));
-        return null;
-      })()}
-
-      {questions.map((question, index) => {
-        console.log(`=== Mapping question ${index} ===`);
-        console.log(`Question ${index}:`, question);
-        console.log(`Question ${index} type:`, question.type);
-        console.log(`Question ${index} text:`, question.text);
-
-        return (
-          <Card key={index} className="mb-3" id={`question-${index}`}>
+      {questions.map((question, index) => (
+        <div key={index} className="mb-3" id={`question-${index}`}>
+          <Card className="mb-3">
             <Card.Body>
               <div>
                 <div className="d-flex justify-content-between align-items-start mb-2">
@@ -76,13 +55,7 @@ export default function QuestionList({
                     <Button
                       variant="outline-primary"
                       size="sm"
-                      onClick={() => {
-                        console.log(
-                          `Edit button clicked for question at index ${index}`
-                        );
-                        console.log('Question to edit:', question);
-                        onEditQuestion(question, index);
-                      }}
+                      onClick={() => onEditQuestion(question, index)}
                     >
                       <FaEdit className="me-1" />
                       Edit
@@ -98,6 +71,7 @@ export default function QuestionList({
                   </div>
                 </div>
 
+                {/* Question type specific rendering */}
                 {question.type === 'multiple-choice' && question.options && (
                   <div className="ms-3">
                     <small className="text-muted">Options:</small>
@@ -117,10 +91,7 @@ export default function QuestionList({
                 {question.type === 'true-false' && (
                   <div className="ms-3">
                     <small className="text-muted">
-                      Correct Answer:{' '}
-                      <span className="text-success">
-                        {question.correctAnswer}
-                      </span>
+                      Correct Answer: {question.correctAnswer}
                     </small>
                   </div>
                 )}
@@ -132,10 +103,10 @@ export default function QuestionList({
                     </small>
                     {question.blanks && question.blanks.length > 0 && (
                       <div className="ms-3 mt-1">
-                        {question.blanks.map((blank, index) => (
+                        {question.blanks.map((blank, blankIndex) => (
                           <div key={blank.id} className="mb-1">
                             <small className="text-muted">
-                              <strong>Blank {index + 1}:</strong>{' '}
+                              <strong>Blank {blankIndex + 1}:</strong>{' '}
                               {blank.options.length} options, correct:{' '}
                               <span className="text-success">
                                 {blank.correctAnswer || 'Not set'}
@@ -158,8 +129,8 @@ export default function QuestionList({
               </div>
             </Card.Body>
           </Card>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }

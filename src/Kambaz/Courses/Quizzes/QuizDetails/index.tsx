@@ -123,7 +123,9 @@ export default function QuizDetails() {
   const untilDate = quiz.untilDate ? new Date(quiz.untilDate) : null;
   const availabilityStatus = getAvailabilityStatusText(quiz);
   const availabilityColourVariant = getAvailabilityColourVariant(quiz);
-  const totalPoints = quiz.points || 0; // Use quiz.points directly - keep it simple
+  // Calculate total points from questions to ensure consistency with actual question points
+  const totalPoints =
+    quiz.questions?.reduce((sum, question) => sum + question.points, 0) || 0;
 
   return (
     <div className="quiz-details">
