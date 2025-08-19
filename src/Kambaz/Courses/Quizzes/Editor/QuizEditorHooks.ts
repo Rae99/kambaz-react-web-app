@@ -73,8 +73,6 @@ export const useQuizEditor = (qid: string) => {
     loading, 
     error, 
     isNewQuiz,
-    // Keep hasHydratedRef for backward compatibility
-    hasHydratedRef: { current: false }
   };
 };
 
